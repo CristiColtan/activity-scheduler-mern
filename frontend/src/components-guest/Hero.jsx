@@ -7,7 +7,9 @@ const Hero = () => {
               <div className='container grid grid-cols-1
               sm:grid-cols-2 gap-4'>
                   <div className=' translate-y-60 lg:translate-y-0 space-y-4 pb-10'>
-                      <h1 className='text-4xl lg:text-5xl font-bold'>Simplify your day!</h1>
+                      <h1 className='text-4xl lg:text-5xl font-bold
+                      font-serif'>
+                          Simplify your day!</h1>
                       <p className='font-serif lg:text-xl lg:pr-52'>
                           Organize your tasks, collaborate with your team and never
                           miss a deadline again!

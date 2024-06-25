@@ -9,7 +9,7 @@ import Wave from "../assets/wave.gif"
 const ServiceData = [
     {
         title: "Easy to use!",
-        content: "Intuitive and friendly interface!",
+        content: "Intuitive interface!",
         description: "Navigation is straightforward and intuitive, with clearly labeled menu items and buttons. Users can easily find their way around the interface without needing to rely on instructions or help documentation.",
         icon: <FaLightbulb className='text-7xl'/>,
         delay: "300",
@@ -47,18 +47,22 @@ const Services = () => {
                                   {data.icon}
                                   {/*<h1>{data.title}</h1>*/}
                                   <br></br>
-                                  <p>{data.content}</p>
+                                  <p className='font-serif'>{data.content}</p>
                                   <br></br>
-                                  <p className='text-sm'>
+                                  <p className='text-sm font-thin'>
                                       {data.description}
-                                  </p>
+                                      </p>
                               </div>
                           ))
                       }
                   </div>
                   <img className='h-[200px] w-full object-cover
                   mix-blend-difference translate-x-4 md:translate-x-12 -translate-y-16
-                  xl:-translate-y-4 z-46 hidden sm:block' src={Wave} alt=""></img>
+                  xl:-translate-y-4 z-46 hidden sm:block relative' src={Wave} alt=""></img>
+                  <div className='sm:hidden block'>
+                      <br></br>
+                      <br></br>
+                  </div>
               </div>
           </div>
       </div>

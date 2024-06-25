@@ -30,9 +30,11 @@ const Navbar = () => {
                   </div>
                   <div className='flex gap-6 pl-4'>
                       <button className='border-2 bg-sky-900/90 text-white border-sky-900 px-3 py-1 rounded-lg
-                      text-xl font-medium  hover:bg-sky-600 transition duration-200'>Login</button>
+                      text-xl font-medium  hover:bg-sky-600 transition duration-200
+                      font-sans'>Login</button>
                       <button className='border-2 bg-sky-900/90 text-white border-sky-900 px-3 py-1 rounded-lg
-                      text-xl font-medium  hover:bg-sky-600 transition duration-200'>Register</button>
+                      text-xl font-medium  hover:bg-sky-600 transition duration-200
+                      font-sans'>Register</button>
                   </div>
               </div>
           </div>
