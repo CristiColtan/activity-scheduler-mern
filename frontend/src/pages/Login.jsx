@@ -13,7 +13,8 @@ export default function Login() {
                     <div className='pt-10 w-full md:max-w-lg 2xl:max-w-3xl flex flex-col items-center justify-center
                 gap-5 md:gap-y-10 '>
                         <span className='flex gap-1 py-1 px-3 border rounded-full text-sm md:text-xl
-                         border-blue-700 text-blue-600'>Organize your life simple and efficient!
+                         border-blue-700 text-blue-600 font-medium'>
+                            Organize your life simple and efficient!
                         </span>
                         <p className='flex flex-col gap-0 md:gap-4 text-4xl md:text-6xl 
                          font-black text-center text-blue-700'>
