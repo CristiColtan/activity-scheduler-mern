@@ -1,9 +1,22 @@
 import React from 'react'
 
+import { useNavigate } from 'react-router-dom'
+
 const Navbar = () => {
-  return (
-      <div className='fixed top-0 right-0 w-full z-50 
-      bg-blue/10 backdrop-blur-md py-8 pl-8 pr-4'>
+    const navigate = useNavigate();
+
+    const handleRegisterClick = () => {
+        navigate("/register");
+    };
+
+    const handleLoginClick = () => {
+        navigate("/login");
+    }
+
+    return (
+      <section id="1">
+        <div data-aos="fade-down" className='fixed top-0 right-0 w-full z-50 
+                bg-blue/10 backdrop-blur-md py-8 pl-8 pr-4'>
           <div className='container'>
               <div className='flex items-center justify-between'>
                   <div className='flex'>
@@ -18,27 +31,28 @@ const Navbar = () => {
                       <ul className='flex gap-6 text-xl md:text-2xl items-center py-5
                        md:py-8 font-medium font-sans pr-8'>
                           <li>
-                              <a href="#">About</a>
+                              <a href="#1">About</a>
                           </li>
                           <li>
-                              <a href="#">Features</a>
+                              <a href="#2">Features</a>
                           </li>
                           <li>
-                              <a href="#">Testimonials</a>
+                              <a href="#4">Testimonials</a>
                           </li>
                       </ul>                      
                   </div>
                   <div className='flex gap-6 pl-4'>
                       <button className='border-2 bg-sky-900/90 text-white border-sky-900 px-3 py-1 rounded-lg
                       text-xl font-medium  hover:bg-sky-600 transition duration-200
-                      font-sans'>Login</button>
+                      font-sans' onClick={handleLoginClick}>Login</button>
                       <button className='border-2 bg-sky-900/90 text-white border-sky-900 px-3 py-1 rounded-lg
                       text-xl font-medium  hover:bg-sky-600 transition duration-200
-                      font-sans'>Register</button>
+                      font-sans' onClick={handleRegisterClick}>Register</button>
                   </div>
               </div>
           </div>
-      </div>
+        </div>
+    </section>
   )
 }
 

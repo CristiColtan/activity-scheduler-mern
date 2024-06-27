@@ -5,7 +5,12 @@ import Navbar from '../components-guest/Navbar'
 import Hero from '../components-guest/Hero'
 import Services from '../components-guest/Services'
 import Banner from '../components-guest/Banner'
-import Banner2 from '../components-guest/Banner2'
+import Banner2 from '../components-guest/Banner2' 
+import Testimonials from '../components-guest/Testimonials'
+import Footer from '../components-guest/Footer'
+
+import AOS from "aos"
+import "aos/dist/aos.css"
 
 export default function Guest() {
   useEffect(() => {
@@ -15,11 +20,11 @@ export default function Guest() {
 
     const updateScrollDistance = () => {
       if (window.innerWidth < prag) {
-        console.log(window.innerWidth);
+        //console.log(window.innerWidth);
         return prag-550;
       }
       else {
-        console.log(window.innerWidth);
+        //console.log(window.innerWidth);
         return window.innerWidth / 6;
       }
         
@@ -53,7 +58,14 @@ export default function Guest() {
       window.removeEventListener('resize', handleResize);
     };
 
-  },[]);
+  }, []);
+  
+  useEffect(() => {
+    AOS.init({
+      duration: 1200,
+      easing:"ease-in-out",
+    });
+  }, []);
 
   return (
     <div>
@@ -65,7 +77,12 @@ export default function Guest() {
       </div>
       <Services></Services>
       <Banner></Banner>
+      <br></br>
       <Banner2></Banner2>
+      <br></br>
+      <br></br>
+      <Testimonials></Testimonials>
+      <Footer></Footer>
       <br></br>
     </div>
   )
