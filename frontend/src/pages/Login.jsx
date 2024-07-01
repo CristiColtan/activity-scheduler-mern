@@ -1,11 +1,19 @@
 import React from 'react'
 
+import { useNavigate } from 'react-router-dom'
+
 import "../styles/Login.css"
 
 export default function Login() {
+    const navigate = useNavigate();
+
+    const handleRegisterClick = () => {
+        navigate("/register");
+    }
+
     return (
-      <>
-      <div className='w-full min-h-screen flex items-center justify-center flex-col lg:flex-row'>
+    <>
+        <div className='w-full min-h-screen flex items-center justify-center flex-col lg:flex-row'>
             <div className='w-full md:w-auto flex gap-0 md:gap-40 flex-col md:flex-row items-center justify-center'>
                 <div className='h-full w-full lg:w-2/3 flex flex-col items-center justify-center'>
                     <div className='pt-10 w-full md:max-w-lg 2xl:max-w-3xl flex flex-col items-center justify-center gap-5 md:gap-y-10 '>
@@ -67,6 +75,12 @@ export default function Login() {
                                 hover:bg-red-500 transition duration-200'>
                                 Continue with google
                             </button>
+                            <p className='text-lg font-serif'>Don't have an account?
+                                <button className='ml-3 text-blue-700 hover:text-blue-500 transition duration-200
+                                font-medium text-lg' onClick={handleRegisterClick}>
+                                    Register
+                                </button>
+                            </p>    
                         </div>
                     </form>
                 </div>

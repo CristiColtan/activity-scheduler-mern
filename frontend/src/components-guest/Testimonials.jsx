@@ -44,7 +44,7 @@ const Testimonials = () => {
                                     text-center text-2xl py-6 px-3 w-full'>
                                         <img src={data.icon} alt="" className='h-24 w-32 mx-auto rounded-full pb-4'></img>
                                         <p className='font-serif pb-3'>{data.content}</p>
-                                        <p className='text-sm font-thin pb-3'>
+                                        <p className='text-sm font-thin pb-3 px-4'>
                                             {data.description}
                                         </p>
                                         <div className='flex '>
