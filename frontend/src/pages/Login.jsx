@@ -1,15 +1,76 @@
-import React from 'react'
-
+import React, {useState} from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom'
+
+import { signInStart, signInFailure, signInSuccess } from '../redux/user/userSlice.js';
+
+import OAuth from '../components/OAuth.jsx';
 
 import "../styles/Login.css"
 
 export default function Login() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [validated, setValidated] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [formError, setFormError] = useState(null);
+
+    const { loading, error } = useSelector((state) => state.user);
+    const [formData, setFormData] = useState({});
 
     const handleRegisterClick = () => {
         navigate("/register");
+    };
+
+    const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+    };
+
+    console.log(formData);
+    
+    const handleSubmit = async (event) => {
+        const form = event.currentTarget;
+        if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        else {
+            event.preventDefault();
+
+            try {
+                dispatch(signInStart());
+
+                const res = await fetch("http://localhost:8081/backend/auth/signin", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        
+                    },
+                    credentials: "include",
+                    body: JSON.stringify(formData),
+                });
+
+                const data = await res.json();
+                if (data.success === false) {
+                    dispatch(signInFailure(data.message));
+                    return;
+                }
+
+                dispatch(signInSuccess(data));
+                console.log(data);
+                navigate("/");
+            }
+            catch (error) {
+                dispatch(signInFailure(error.message));
+            }
+        }
+
+        setValidated(true);
+        
     }
+    console.log(error);
+    console.log(validated);
+    console.log(loading);
 
     return (
     <>
@@ -36,7 +97,8 @@ export default function Login() {
                     </div>
                 </div>
                 <div className='w-full md:w-1/3 p-4 md:p-1 flex flex-col justify-center items-center'>
-                    <form className='w-full md:w-[400px] flex flex-col gap-y-8 bg-white px-10 pt-14 pb-14 login-container'>
+                    <form onSubmit={handleSubmit} 
+                        className='w-full md:w-[400px] flex flex-col gap-y-8 bg-white px-10 pt-14 pb-14 login-container'>
                         <div>
                             <p className='text-blue-600 text-3xl font-bold font-serif text-center'>
                                 Welcome back!
@@ -48,7 +110,7 @@ export default function Login() {
                         <div className='flex flex-col gap-y-5'>
                             <div className='w-full flex flex-col gap-1'>
                                 <label htmlFor='username' className='font-medium text-base'>Username</label>
-                                <input type="text" id="username" required
+                                <input type="text" id="username" required onChange={handleChange}
                                     className='bg-transparent px-3 py-2.5 2xl:py-3
                                     border border-gray-400 placeholder-gray-500
                                   text-gray-900 outline-none text-base w-full
@@ -57,30 +119,28 @@ export default function Login() {
                             </div>
                             <div className='w-full flex flex-col gap-1'>
                                 <label htmlFor='password' className='font-medium text-base'>Password</label>
-                                <input type="password" id="password" required
+                                <input type="password" id="password" required onChange={handleChange}
                                     className='bg-transparent px-3 py-2.5 2xl:py-3
                                     border border-gray-400 placeholder-gray-500
                                   text-gray-900 outline-none text-base w-full
                                     focus:ring-2 ring-blue-300 rounded-full'>
                                 </input>
                             </div>
-                            <button className='px-3 py-2 rounded-full
+                            <button type="submit" disabled={loading}
+                                className='px-3 py-2 rounded-full
                                 w-full bg-blue-700 text-white font-sans
                                 hover:bg-blue-500 transition duration-200
                                 font-medium'>
-                                Login
+                                {loading ? "Loading..." : "Login"}
                             </button>
-                            <button className='px-3 py-2 rounded-full font-medium
-                                w-full bg-red-700 text-white font-sans
-                                hover:bg-red-500 transition duration-200'>
-                                Continue with google
-                            </button>
+                            <OAuth></OAuth>
                             <p className='text-lg font-serif'>Don't have an account?
                                 <button className='ml-3 text-blue-700 hover:text-blue-500 transition duration-200
                                 font-medium text-lg' onClick={handleRegisterClick}>
                                     Register
                                 </button>
-                            </p>    
+                            </p>
+                            {error && <p className='text-red-500 font-base font-sans'>{error}</p>}    
                         </div>
                     </form>
                 </div>

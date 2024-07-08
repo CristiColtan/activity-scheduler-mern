@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import AuthRouter from "./routes/auth.route.js";
+
 dotenv.config();
 
 mongoose
@@ -29,7 +31,7 @@ app.listen(8081, () => {
   console.log("Listening on port 8081...");
 });
 
-//define backend routes
+app.use("/backend/auth", AuthRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

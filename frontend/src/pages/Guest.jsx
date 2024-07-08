@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react'
+import { useSelector } from "react-redux"
+import { Navigate } from "react-router-dom";
 
 import bgVideo from "../assets/tasks.gif"
 import Navbar from '../components-guest/Navbar'
@@ -67,7 +69,12 @@ export default function Guest() {
     });
   }, []);
 
-  return (
+  const { currentUser } = useSelector((state) => state.user);
+
+  console.log(currentUser);
+
+  return currentUser ? (<Navigate to="/dashboard"></Navigate>) :
+  (
     <div>
       <div className='h-[610px] relative'>
         <img id="scroll" className='fixed right-0 top-0 h-[610px] w-full
@@ -85,5 +92,5 @@ export default function Guest() {
       <Footer></Footer>
       <br></br>
     </div>
-  )
+  );
 }

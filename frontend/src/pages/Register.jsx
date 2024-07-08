@@ -1,19 +1,96 @@
-import React from 'react'
+import React, {useState} from 'react'
 
 import { MdTask } from "react-icons/md";
 import { useNavigate } from 'react-router-dom'
+
+import OAuth2 from '../components/OAuth2.jsx';
 
 import "../styles/Register.css"
 
 export default function Register() {
   const navigate = useNavigate();
+  const [validated, setValidated] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({});
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
   
   const handleLoginClick = () => {
     navigate("/login");
   }
+
+  const validatePassword = (password) => {
+    const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return pattern.test(password);
+  };
+
+  console.log(formData);
   
-  //TO DO:
-  //confirm password
+  const handleSubmit = async (event) => {
+    const form = event.currentTarget;
+    if (form.checkValidity() === false) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    else {
+      event.preventDefault();
+      let isValid = true;
+      if (formData.password !== formData.confirmpas) {
+        isValid = false;
+        setError("Passwords not matching!");
+      }
+      
+      //if (!validatePassword(formData.password)) {
+      //  isValid = false;
+      //  setError("Password doesn't match the regex!");
+      //}
+
+      setValidated(isValid)
+
+      if (isValid === true) {
+        console.log("Valid!");
+        try {
+          setLoading(true);
+
+          const res = await fetch("http://localhost:8081/backend/auth/signup", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+
+          const data = await res.json();
+          if (data.success === false) {
+            setLoading(false);
+            setError(data.message);
+            return;
+          }
+
+          setLoading(false);
+          console.log(data);
+          setShowAlert(true);
+          setError(null);
+          navigate("/login");
+        } catch (error) {
+          setLoading(false);
+          console.error(error);
+          setError(error.message);
+        }
+      }
+      else {
+        console.log("Invalid!");
+      }
+
+      console.log(error);
+      console.log(validated);
+      console.log(showAlert);
+    }
+  }
 
   return (
     <div className='min-h-screen py-20 lg:py-24'>
@@ -38,51 +115,48 @@ export default function Register() {
             <p className='font-thin mb-4 lg:text-lg'>Create your account.
               It's free and only takes a minute!
             </p>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className='grid grid-cols-2 gap-5'>
-                <input type="text" placeholder='First Name'
+                <input type="text" placeholder='First Name' required onChange={handleChange} id="first_name"
                 className='border py-1 px-2 placeholder-black focus:ring-2 ring-blue-300 outline-none
                     border-black focus:placeholder-gray-500 rounded-lg'></input>
-                <input type="text" placeholder='Last Name'
+                <input type="text" placeholder='Last Name' required onChange={handleChange} id="last_name"
                 className='border py-1 px-2 placeholder-black focus:ring-2 ring-blue-300 outline-none
                     border-black focus:placeholder-gray-500 rounded-lg'></input>
               </div>
               <div className='mt-5'>
-                <input type="text" placeholder='Username'
+                <input type="text" placeholder='Username' required onChange={handleChange} id="username"
                 className='border py-1 px-2 w-full placeholder-black focus:ring-2 ring-blue-300 outline-none
                     border-black focus:placeholder-gray-500 rounded-lg'></input>
               </div>
               <div className='mt-5'>
-                <input type="text" placeholder='E-mail'
+                <input type="text" placeholder='E-mail' required onChange={handleChange} id="email"
                 className='border py-1 px-2 w-full placeholder-black focus:ring-2 ring-blue-300 outline-none
                     border-black focus:placeholder-gray-500 rounded-lg'></input>
               </div>
               <div className='mt-5'>
-                <input type="password" placeholder='Password'
+                <input type="password" placeholder='Password' required onChange={handleChange} id="password"
                 className='border py-1 px-2 w-full placeholder-black focus:ring-2 ring-blue-300 outline-none
                     border-black focus:placeholder-gray-500 rounded-lg'></input>
               </div>
               <div className='mt-5'>
-                <input type="password" placeholder='Confirm password'
+                <input type="password" placeholder='Confirm password' required onChange={handleChange} id="confirmpas"
                 className='border py-1 px-2 w-full placeholder-black focus:ring-2 ring-blue-300 outline-none
                     border-black focus:placeholder-gray-500 rounded-lg'></input>
               </div>
               <div className='mt-5'>
-                <input className='' type="checkbox"></input>
+                <input className='' type="checkbox" required></input>
                 <span className='font-thin ml-1'>I accept the
                   <a className='text-blue-700 font-bold hover:text-blue-500 transition duration-200'> Terms of Use </a> &
                   <a className='text-blue-700 font-bold hover:text-blue-500 transition duration-200'> Privacy Policy</a>{" "}terms
                 </span>
               </div>
               <div className='mt-5'>
-                <button className='w-full bg-blue-700 px-3 py-2 mb-3.5 text-white font-sans font-medium
-                hover:bg-blue-500 transition duration-200 rounded-lg'>
-                  Register
+                <button type="submit" className='w-full bg-blue-700 px-3 py-2 mb-3.5 text-white font-sans font-medium
+                hover:bg-blue-500 transition duration-200 rounded-lg' disabled={loading}>
+                  {loading ? "Loading..." : "Register"}
                 </button>
-                <button className='w-full bg-red-700 px-3 py-2 text-white font-sans font-medium
-                hover:bg-red-500 transition duration-200 rounded-lg'>
-                  Continue with google
-                </button>
+                <OAuth2></OAuth2>
               </div>
               <p className='mt-5 text-lg font-serif'>Already have an account?
                 <button className='ml-3 text-blue-700 hover:text-blue-500 transition duration-200 font-medium'
@@ -90,6 +164,7 @@ export default function Register() {
                   Login
                 </button>
               </p>
+              {error && <p className='text-red-500 font-base font-sans'>{error}</p>}
             </form>
           </div>
         </div>
