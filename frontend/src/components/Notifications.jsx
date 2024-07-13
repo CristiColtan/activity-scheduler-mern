@@ -76,8 +76,8 @@ const Notifications = () => {
   return (
     <Popover className="relative">
       <PopoverButton className="items-center inline-flex outline-none ml-1 -mr-2">
-        <div className='flex items-center w-6 h-8 justify-center text-black relative'>
-          <IoIosNotifications className='text-2xl'></IoIosNotifications>
+        <div className='group flex items-center w-6 h-8 justify-center text-black relative'>
+          <IoIosNotifications className=' text-2xl group-hover:text-gray-500'></IoIosNotifications>
             {data?.length > 0 && (
               <span className='absolute top-0 -right-1 text-xs text-white font-semibold
               w-4 h-4 rounded-full bg-red-600'>

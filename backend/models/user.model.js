@@ -35,6 +35,7 @@ const UserSchema = new mongoose.Schema(
       default: "Normal User",
     },
     tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+    team: [{ type: Schema.Types.ObjectId, ref: "User" }],
     gender: {
       type: String,
       default: "Unknown",
@@ -52,6 +53,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       default: "Yes",
+    },
+    is_team_manager: {
+      type: String,
+      required: true,
+      default: "No",
     },
   },
   {

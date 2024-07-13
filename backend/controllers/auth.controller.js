@@ -27,7 +27,6 @@ export const signup = async (req, res, next) => {
   }
 };
 
-//ascunde parola!!!
 export const signin = async (req, res, next) => {
   const { username, password } = req.body;
 
@@ -38,7 +37,16 @@ export const signin = async (req, res, next) => {
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, "Wrong credentials!"));
 
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+    const token = jwt.sign(
+      {
+        id: validUser._id,
+        is_admin: validUser.is_admin,
+        is_team_manager: validUser.is_team_manager,
+      },
+      process.env.JWT_SECRET
+    );
+    const { password: pass, ...rest } = validUser._doc; //ascundem parola din json
+
     res
       .cookie("access_token", token, {
         httpOnly: true,
@@ -46,7 +54,7 @@ export const signin = async (req, res, next) => {
         path: "/",
       })
       .status(200)
-      .json(validUser);
+      .json(rest);
   } catch (error) {
     next(error);
   }
@@ -65,7 +73,14 @@ export const signgoogle = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const token = jwt.sign(
+        {
+          id: user._id,
+          is_admin: user.is_admin,
+          is_team_manager: user.is_team_manager,
+        },
+        process.env.JWT_SECRET
+      );
       const { password: pass, ...rest } = user._doc; //ascundem parola din json
 
       res
@@ -93,7 +108,14 @@ export const signgoogle = async (req, res, next) => {
       });
 
       await newUser.save();
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      const token = jwt.sign(
+        {
+          id: newUser._id,
+          is_admin: newUser.is_admin,
+          is_team_manager: newUser.is_team_manager,
+        },
+        process.env.JWT_SECRET
+      );
       const { password: pass, ...rest } = newUser._doc;
 
       res

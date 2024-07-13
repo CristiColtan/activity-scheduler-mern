@@ -1,12 +1,11 @@
 import React from 'react'
 import clsx from "clsx"
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { MdDashboard } from "react-icons/md";
 import { BsListTask } from "react-icons/bs";
 import { MdOutlineTaskAlt } from "react-icons/md";
-import { FaTruckLoading } from "react-icons/fa";
 import { MdOutlinePendingActions } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 import { MdOutlineGroupAdd } from "react-icons/md";
@@ -60,7 +59,7 @@ const Sidebar = () => {
     const location = useLocation();
 
     const path = location.pathname.split("/")[1];
-    const sidebarLinks = currentUser.is_admin === "Yes" ? linkData : linkData.slice(0, 5);
+    const sidebarLinks = (currentUser.is_admin === "Yes" || currentUser.is_team_manager ==="Yes") ? linkData : linkData.slice(0, 5);
 
     const closeSidebar = () => {
         dispatch(setOpenSidebar(false));

@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import AuthRouter from "./routes/auth.route.js";
+import AdminRouter from "./routes/admin.route.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.listen(8081, () => {
 });
 
 app.use("/backend/auth", AuthRouter);
+app.use("/backend/admin", AdminRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

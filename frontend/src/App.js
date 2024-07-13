@@ -14,6 +14,10 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Trash from "./pages/Trash.jsx";
 import Profile from "./pages/Profile.jsx";
+import Tasks from "./pages/Tasks.jsx";
+import Completed from "./pages/Completed.jsx";
+import Team from "./pages/Team.jsx";
+import PrivateRouteAdminTM from "./components/PrivateRouteAdminTM.jsx";
 
 import { store, persistor } from "./redux/store.js";
 
@@ -30,8 +34,13 @@ function App() {
               <Route path="/register" element={<Register />}></Route>
               <Route element={<PrivateRoute />}>
                 <Route index path="/dashboard" element={<Dashboard />}></Route>
-                <Route path="/trash" element={<Trash />}></Route>
                 <Route path="/profile" element={<Profile />}></Route>
+                <Route path="/tasks" element={<Tasks />}></Route>
+                <Route path="/completed" element={<Completed />}></Route>
+                <Route element={<PrivateRouteAdminTM />}>
+                  <Route path="/team" element={<Team />}></Route>
+                  <Route path="/trash" element={<Trash />}></Route>
+                </Route>
               </Route>
             </Routes>
             <Footer />
