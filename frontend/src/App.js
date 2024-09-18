@@ -18,6 +18,9 @@ import Tasks from "./pages/Tasks.jsx";
 import Completed from "./pages/Completed.jsx";
 import Team from "./pages/Team.jsx";
 import PrivateRouteAdminTM from "./components/PrivateRouteAdminTM.jsx";
+import TaskDetails from "./pages/TaskDetails.jsx";
+import CreateTask from "./pages/CreateTask.jsx";
+import EditTask from "./pages/EditTask.jsx";
 
 import { store, persistor } from "./redux/store.js";
 
@@ -37,9 +40,12 @@ function App() {
                 <Route path="/profile" element={<Profile />}></Route>
                 <Route path="/tasks" element={<Tasks />}></Route>
                 <Route path="/completed" element={<Completed />}></Route>
+                <Route path="/task/:id" element={<TaskDetails />}></Route>
                 <Route element={<PrivateRouteAdminTM />}>
                   <Route path="/team" element={<Team />}></Route>
                   <Route path="/trash" element={<Trash />}></Route>
+                  <Route path="/create-task" element={<CreateTask />}></Route>
+                  <Route path="/edit-task/:id" element={<EditTask />}></Route>
                 </Route>
               </Route>
             </Routes>

@@ -117,7 +117,7 @@ const TeamAdmin = () => {
                       }
                   </tbody>
               </table>
-        </div>
+          </div>
       </>)
   )
 }

@@ -18,6 +18,7 @@ import { IoListOutline } from "react-icons/io5";
 import { BsListTask } from "react-icons/bs";
 
 import TaskDialog from './TaskDialog.jsx';
+import TaskAddSubTask from './TaskAddSubTask.jsx';
 
 //don t forget to change getinitials2 with getinitials
 const TaskCard = ({ task }) => {
@@ -84,7 +85,8 @@ const TaskCard = ({ task }) => {
                     <span className='text-xl'>{t_icons[task.priority]}</span>
                     <span className='text-black font-thin'>{task.priority} priority</span>
                 </div> {/* sa nu uiti de is admin */ }
-                {(currentUser.is_admin || currentUser.is_tmanager) && <TaskDialog></TaskDialog>}    
+                {(currentUser.is_admin || currentUser.is_tmanager) && <TaskDialog task={task}></TaskDialog>}
+                {/*sa nu uiti de confirmation dialog si useraction dialog! */}   
             </div>
 
             <>
@@ -145,14 +147,15 @@ const TaskCard = ({ task }) => {
                   <div className='w-full pb-2'>
                       <button onClick={() => setOpen(true)} disabled={(currentUser.is_admin || currentUser.is_tmanager) ? false : true}
                           className='w-full flex gap-4 items-center text-sm text-black font-normal disabled:cursor-not-allowed
-                          disabled:text-gray-400 hover:bg-gray-200'>
+                          disabled:text-gray-400 hover:bg-gray-200 rounded py-0.5'>
                           <IoMdAdd className='text-lg mt-0.5'/>
-                          <span>ADD SUBTASK</span>
+                          <span>ADD SUB-TASK</span>
                       </button>
                 </div>
             </div>  
         </div>
-          {/*add sub task function*/}
+      {/*add sub task function*/}
+      <TaskAddSubTask open={open} setOpen={setOpen} id={task._id} />
     </>
   )
 }

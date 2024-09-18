@@ -17,3 +17,14 @@ export const bgs = [
   "bg-red-600",
   "bg-green-600",
 ];
+
+export const bgs_transparent = {
+  high: "bg-red-200",
+  medium: "bg-yellow-200",
+  normal: "bg-blue-200",
+  low: "bg-green-200",
+};
+
+export const task_list_stage = ["TO DO", "IN PROGRESS", "COMPLETED"];
+
+export const task_list_priority = ["LOW", "NORMAL", "MEDIUM", "HIGH"];

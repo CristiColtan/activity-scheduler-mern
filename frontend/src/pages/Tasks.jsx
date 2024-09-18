@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Checkbox } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/16/solid'
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
@@ -21,7 +21,13 @@ const Tasks = () => {
     const [loading, setLoading] = useState(false);
     const [enabled, setEnabled] = useState(true);
 
+    const navigate = useNavigate();
+
     const tabs = [{ title: "Board View" , icon: <MdGridView />}]
+
+    const handleCreateTaskClick = () => {
+        navigate("/create-task");
+    };
 
   return (
     loading ? ( <div><Loading/></div>) : (
@@ -105,7 +111,7 @@ const Tasks = () => {
                       <button className='px-3 py-2 rounded-lg
                                 bg-blue-700 text-white font-sans
                                 hover:bg-blue-500 transition duration-200
-                                font-medium'>
+                                font-medium' onClick={handleCreateTaskClick}>
                                 <span>+ Create Task</span>
                         </button>
                   </div>
