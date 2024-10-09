@@ -1,6 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
+import { useSelector } from 'react-redux';
 
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 
@@ -12,39 +13,44 @@ import { MdDelete } from "react-icons/md";
 import { BsThreeDots } from "react-icons/bs";
 
 import TaskAddSubTask from './TaskAddSubTask';
+import DialogDeleteConfirmTask from './dialog/DialogDeleteConfirmTask';
 
-const TaskDialog = ({ task }) => {
+const TaskDialog = ({ task, tasks, setTasks }) => {
   const [openSubTask, setOpenSubTask] = useState(false);
+  const [openDialogDelete, setOpenDialogDelete] = useState(false);
+
+  const { currentUser, loading, error } = useSelector((state) => state.user);
 
   const navigate = useNavigate();
 
   const duplicateHandlerOnClick = () => { };
-  const deleteHandlerOnClick = () => { };
+  const deleteHandlerOnClick = () => {
+    setOpenDialogDelete(true);
+   };
+
+  const deleteHandler = () => {
+    
+  }
 
   const items = [
     {
       label: "Open Task", 
       icon: <FaRegFolderOpen className='h-5 w-5 mr-2' aria-hidden='true' />,
-      onClick: () => navigate('/task/1234'),
+      onClick: () => navigate(`/task/${task._id}`),
     },
     {
       label: "Edit Task",
       icon: <MdOutlineEdit className='h-5 w-5 mr-2' aria-hidden='true' />,
-      onClick: () => navigate('/edit-task/1234'),
+      onClick: () => navigate(`/edit-task/${task._id}`),
     },
     {
-      label: "Add Sub-Task",
-      icon: <IoMdAdd className='h-5 w-5 mr-2' aria-hidden='true' />,
-      onClick: () => setOpenSubTask(true),
-    },
-    {
-      label: <p className='text-blue-600'>Duplicate</p>,
-      icon: <FaCopy className='h-5 w-5 mr-2 text-blue-600' aria-hidden='true' />,
+      label: "Duplicate",
+      icon: <FaCopy className='h-5 w-5 mr-2' aria-hidden='true' />,
       onClick: () => duplicateHandlerOnClick(),
     },
     {
-      label: <p className='text-red-600'>Delete</p>,
-      icon: <MdDelete className='h-5 w-5 mr-2 text-red-600' aria-hidden='true' />,
+      label: "Delete",
+      icon: <MdDelete className='h-5 w-5 mr-2' aria-hidden='true' />,
       onClick: () => deleteHandlerOnClick(),
     },
   ];
@@ -68,10 +74,16 @@ const TaskDialog = ({ task }) => {
             <MenuItems className='absolute p-4 right-0 mt-2 w-52 origin-top-right divide-y divide-gray
             rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10'>
               {
-                items.map((el) => (
-                  <MenuItem key={el.label}>
+                items.map((el,index) => (
+                  <MenuItem key={el.label + index}>
                     {({ active }) => (
-                      <button onClick={el.onClick} className={clsx('flex w-full items-center rounded px-2 py-1.5 text-base hover:bg-gray-200')}>
+                      <button onClick={el.onClick}
+                        disabled={currentUser.is_admin === "No" && currentUser.is_team_manager === "No" && el.label !== "Open Task"} 
+                        className={clsx('flex w-full items-center rounded px-2 py-1.5 text-base hover:bg-gray-200', {
+                          'disabled:cursor-not-allowed disabled:text-gray-400': el.label==="Edit Task",
+                          'disabled:cursor-not-allowed disabled:text-red-400 text-red-600': el.label === "Delete",
+                          'disabled:cursor-not-allowed disabled:text-blue-400 text-blue-600': el.label ==="Duplicate"
+                        })}>
                         {el.icon}
                         <p className='font-sans mt-0.5'>{el.label}</p>
                       </button>
@@ -85,7 +97,8 @@ const TaskDialog = ({ task }) => {
         </Menu>
       </div>
       
-      <TaskAddSubTask open={openSubTask}  setOpen={setOpenSubTask}/>
+      <DialogDeleteConfirmTask open={openDialogDelete} setOpen={setOpenDialogDelete} taskData={task} tasks={tasks}
+        setTasks={setTasks} />
     </>
   )
 }

@@ -37,6 +37,9 @@ export const signin = async (req, res, next) => {
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, "Wrong credentials!"));
 
+    if (validUser.is_active === "No")
+      return next(errorHandler(401, "Your account has been deactivated!"));
+
     const token = jwt.sign(
       {
         id: validUser._id,
@@ -73,6 +76,9 @@ export const signgoogle = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
+      if (user.is_active === "No")
+        return next(errorHandler(401, "Your account has been deactivated!"));
+
       const token = jwt.sign(
         {
           id: user._id,

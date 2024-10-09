@@ -6,23 +6,28 @@ import moment from "moment"
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 
 import { summary } from "../assets/data.js";
-import { getInitials2 } from '../utils/FullnameInitials.js';
+import { getInitials2, getInitials } from '../utils/FullnameInitials.js';
 
 import { BsChevronExpand } from "react-icons/bs";
 import { MdCheck } from "react-icons/md";
 
-const TaskAddUserList = ({ setTeam, team }) => {
-    const data = summary.users;
+const TaskAddUserList = ({ setTeam, team, data}) => {
+    {/*const data = summary.users;*/ }
     const [selectedUsers, setSelectedUsers] = useState([]);
+    
+    {/*assign task only to normal users, care nu sunt nici admini si nici manageri,
+        adminul sau managerul creeaza task uri
+        functie get normal users (maybe)*/}
 
     const handleChange = (el) => {
-        setSelectedUsers(el);
+        const validUsers = el.filter(user => user && user._id);
+        setSelectedUsers(validUsers);
         setTeam(el.map((u) => u._id));
     }
 
     useEffect(() => {
         if (team.length < 1)
-            data && setSelectedUsers([data[0]]);
+            data && setSelectedUsers([]);
         else
             setSelectedUsers(team);
     }, []);
@@ -34,7 +39,14 @@ const TaskAddUserList = ({ setTeam, team }) => {
                     <ListboxButton className="relative w-full cursor-default rounded pl-3 pr-10 text-left px-3 py-1
                     2xl:py-3 border border-black sm:text-sm min-h-6">
                         <span className='block truncate'>
-                            {selectedUsers.map((user) => user.name).join(", ")}
+                            {
+                                selectedUsers.length > 0 ? 
+                                    selectedUsers
+                                        .filter(user => user)
+                                        .map((user) => user.first_name + " " + user.last_name)
+                                        .join(", ")
+                                    : "No users selected"
+                            }
                         </span>
                         <span className='pointer-events-none absolute flex items-center inset-y-0 right-3'>
                             <BsChevronExpand className='h-5 w-5' aria-hidden="true" />
@@ -51,19 +63,19 @@ const TaskAddUserList = ({ setTeam, team }) => {
                     >
                         <ListboxOptions className="z-50 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white
                         py-1 sm:text-sm shadow-lg ring-1 ring-black/5 focus:outline-none">
-                            {
+                            { data.length > 0 ? (
                                 data.map((user, index) => (
-                                    <ListboxOption key={index} value={user}
+                                    user && ( <ListboxOption key={index} value={user}
                                         className={({ active }) => clsx('relative cursor-default select-none py-2 pl-6 pr-4', active ? "bg-amber-100 text-amber-900" : "text-black")}>
                                         {({ selected }) => (
                                             <>
                                                 <div className={clsx("flex items-center gap-2 truncate", selected ? "font-medium" : "font-normal")}>
                                                     <div className='w-6 h-6 rounded-full text-white flex items-center justify-center bg-violet-600'>
                                                         <span className='text-center text-[12px]'>
-                                                            {getInitials2(user.name)}
+                                                            {getInitials(user.first_name, user.last_name)}
                                                         </span>
                                                     </div>
-                                                    <span>{user.name}</span>
+                                                    <span>{user.first_name}{" "}{user.last_name}</span>
                                                     
                                                 </div>
                                                 {selected ? (
@@ -74,7 +86,13 @@ const TaskAddUserList = ({ setTeam, team }) => {
                                             </>
                                         )}
                                     </ListboxOption>
+                                    )
                                 ))
+                            ) : (
+                                    <div className='py-2 pl-6 pr-4 text-black'>
+                                        No users available.
+                                    </div>
+                            )
                             }
                         </ListboxOptions>
                     </Transition>

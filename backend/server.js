@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 
 import AuthRouter from "./routes/auth.route.js";
 import AdminRouter from "./routes/admin.route.js";
+import TeamManagerRouter from "./routes/team-manager.route.js";
+import TaskRouter from "./routes/task.route.js";
 
 dotenv.config();
 
@@ -34,6 +36,8 @@ app.listen(8081, () => {
 
 app.use("/backend/auth", AuthRouter);
 app.use("/backend/admin", AdminRouter);
+app.use("/backend/team-manager", TeamManagerRouter);
+app.use("/backend/task", TaskRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

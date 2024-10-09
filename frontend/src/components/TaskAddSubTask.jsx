@@ -1,13 +1,66 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Dialog, DialogTitle, DialogPanel } from "@headlessui/react";
+import { useNavigate } from "react-router-dom";
 
 import MyModal from "./MyModal";
+import { TrophyIcon } from "@heroicons/react/16/solid";
 
-const TaskAddSubTask = ({ open, setOpen, id }) => {
+const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks }) => {
+  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  console.log("form:",formData);
+
+  const { currentUser } = useSelector((state) => state.user);
+
+  const handleSubmit = async (e) => {
+    try {
+      setLoading(true);
+      e.preventDefault();
+
+      const res = await fetch(`http://localhost:8081/backend/task/add-subtask/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        console.log(data.message);
+        setError(data.message);
+        setLoading(false);
+        return;
+      }
+
+      setSubTasks(data.subtasks);
+      setLoading(false);
+      setError(null);
+      setOpen(false);
+      navigate("/tasks");
+    } catch (error) {
+      console.log(error.message);
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+  }
+
   return (
     <>
       <MyModal open={open} setOpen={setOpen}>
-        <form className="px-5 py-3">
+        <form className="px-5 py-3" onSubmit={handleSubmit}>
           <DialogTitle
             as="h2"
             className="text-base font-semibold leading-6 text-black mb-4 pl-0"
@@ -16,6 +69,7 @@ const TaskAddSubTask = ({ open, setOpen, id }) => {
           </DialogTitle>
           <div className="mt-2 flex flex-col gap-6">
             <input
+              onChange={handleChange}
               type="text"
               placeholder="Sub-task Title"
               required
@@ -30,6 +84,7 @@ const TaskAddSubTask = ({ open, setOpen, id }) => {
                   Task Date:
                 </label>
                 <input
+                  onChange={handleChange}
                   type="date"
                   required
                   id="date"
@@ -40,6 +95,7 @@ const TaskAddSubTask = ({ open, setOpen, id }) => {
               <div className="w-full">
                 <label className="font-thin text-base mb-2 pl-3">Tag:</label>
                 <input
+                  onChange={handleChange}
                   type="text"
                   required
                   id="tag"
@@ -50,11 +106,14 @@ const TaskAddSubTask = ({ open, setOpen, id }) => {
             </div>
             <div className="w-full -mt-2 gap-4 flex">
               <div className="w-full">
-                {/*add functionality of uploading photos!!*/}
+                {/*blank*/}
               </div>
 
               <div className="w-full flex justify-between gap-4">
-                <button onClick={() => setOpen(false)}
+                <button onClick={(e) => {
+                  e.preventDefault();
+                  setOpen(false)
+                }}
                   className="px-3 py-2 rounded
                                 bg-white text-black font-sans w-1/2
                                 hover:bg-gray-300 transition duration-200
@@ -63,13 +122,13 @@ const TaskAddSubTask = ({ open, setOpen, id }) => {
                 >
                   Cancel
                 </button>
-                <button
+                <button type="submit" disabled={loading}
                   className="px-3 py-2 rounded w-1/2
                                 bg-blue-700 text-white font-sans
                                 hover:bg-blue-500 transition duration-200
                                 font-medium disabled:bg-blue-500"
                 >
-                  Submit
+                  {loading ? "Submitting..." : "Submit"}
                 </button>
               </div>
             </div>

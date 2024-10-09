@@ -6,9 +6,21 @@ export const priority_styles = {
 };
 
 export const task_type = {
-  todo: "bg-red-600",
+  "to do": "bg-red-600",
   "in progress": "bg-yellow-600",
   completed: "bg-green-600",
+};
+
+export const bgs_task_type = {
+  "to do": "bg-red-200",
+  "in progress": "bg-yellow-200",
+  completed: "bg-green-200",
+};
+
+export const text_task_type = {
+  "to do": "text-red-600",
+  "in progress": "text-yellow-600",
+  completed: "text-green-600",
 };
 
 export const bgs = [

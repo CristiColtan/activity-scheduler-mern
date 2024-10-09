@@ -1,11 +1,11 @@
-import React, { useState, Fragment } from 'react'
+import React, { useState, Fragment, useEffect } from 'react'
 import { useSelector } from 'react-redux';
 import clsx from 'clsx'
 
 import { priority_styles, task_type, bgs } from '../utils/tableImports.js';
 import { formatDate } from '../utils/formateDate.js'
 import { Popover, PopoverPanel, PopoverButton, Transition } from '@headlessui/react'
-import { getInitials2 } from '../utils/FullnameInitials.js';
+import { getInitials } from '../utils/FullnameInitials.js';
 
 import { MdKeyboardArrowUp } from "react-icons/md";
 import { MdKeyboardDoubleArrowUp } from "react-icons/md";
@@ -20,8 +20,7 @@ import { BsListTask } from "react-icons/bs";
 import TaskDialog from './TaskDialog.jsx';
 import TaskAddSubTask from './TaskAddSubTask.jsx';
 
-//don t forget to change getinitials2 with getinitials
-const TaskCard = ({ task }) => {
+const TaskCard = ({ task, tasks, setTasks }) => {
     const MyUserInfo = ({ user, index }) => {
       return (
         <>
@@ -30,7 +29,7 @@ const TaskCard = ({ task }) => {
                 <>
                   <PopoverButton className='group inline-flex items-center outline-none'> 
                     <span className='text-white font-medium'>
-                      {getInitials2(user.name)}
+                      {getInitials(user.first_name,user.last_name)}
                     </span>
                   </PopoverButton>
                   <Transition
@@ -47,11 +46,11 @@ const TaskCard = ({ task }) => {
                         <div className={clsx('w-14 h-14 text-white rounded-full flex items-center justify-center text-2xl mx-1',
                           bgs[index % bgs.length]
                         )}>
-                          <span className='text-white font-medium'>{getInitials2(user.name)}</span>
+                          <span className='text-white font-medium'>{getInitials(user.first_name,user.last_name)}</span>
                         </div>
 
                         <div className='flex flex-col gap-y-1 mx-1'>
-                        <p className='text-black font-serif text-base'>{user.name}</p>
+                        <p className='text-black font-serif text-base'>{user.first_name + " " + user.last_name}</p>
                         <span className='text-gray-700 font-serif'>{user.title}</span>
                         <span className='text-gray-700 font-serif'>{user.email}</span>
                         </div>
@@ -73,7 +72,15 @@ const TaskCard = ({ task }) => {
     };
 
     const { currentUser, loading, error } = useSelector((state) => state.user);
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [subTasks, setSubTasks] = useState([]);
+
+  useEffect(() => {
+    if (task.subtasks)
+      setSubTasks(task.subtasks);
+  },[task.subtasks])
+  
+  console.log("SubTasks",subTasks);
 
   return (
     <>
@@ -84,9 +91,8 @@ const TaskCard = ({ task }) => {
                 )}>
                     <span className='text-xl'>{t_icons[task.priority]}</span>
                     <span className='text-black font-thin'>{task.priority} priority</span>
-                </div> {/* sa nu uiti de is admin */ }
-                {(currentUser.is_admin || currentUser.is_tmanager) && <TaskDialog task={task}></TaskDialog>}
-                {/*sa nu uiti de confirmation dialog si useraction dialog! */}   
+                </div>
+                <TaskDialog task={task} tasks={tasks} setTasks={setTasks}></TaskDialog>  
             </div>
 
             <>
@@ -105,15 +111,15 @@ const TaskCard = ({ task }) => {
                     <div className='flex items-center gap-3 mt-1'>
                         <div className='flex gap-1 items-center font-thin text-black'>
                             <LiaCommentSolid className='text-lg' />
-                            <span className='font-thin'>{task.activities.length}</span>  
+                            <span className='font-thin'>{task.activities && Array.isArray(task.activities) ? task.activities.length : 0}</span>  
                         </div>
                         <div className='flex gap-1 items-center font-thin text-black'>
                             <IoMdAttach className='text-lg' />
-                            <span className='font-thin'>{task.assets.length}</span>  
+                            <span className='font-thin'>{task.asseturls && Array.isArray(task.asseturls) ? task.asseturls.length : 0}</span>  
                         </div>
                         <div className='flex gap-1 items-center font-thin text-black'>
                             <FaTasks className='text-lg' />
-                            <span className='font-thin'>{task.subTasks.length}</span>  
+                            <span className='font-thin'>{subTasks && Array.isArray(subTasks) ? subTasks.length : 0}</span>  
                         </div>  
                     </div>
                     <div className='flex flex-row-reverse mt-1'>
@@ -125,27 +131,27 @@ const TaskCard = ({ task }) => {
                         ))}
                     </div>
                 </div>  
-                {task.subTasks.length > 0 ? (
+                {(subTasks && subTasks.length) > 0 ? (
                     <div className='py-4 border-t border-gray-400 -mt-1'>
                         <h5 className='font-serif line-clamp-1 text-black'>
-                            {task.subTasks[0].title}      
+                            {subTasks[0].title}      
                         </h5>
                         <div className='px-4 py-1 space-x-8'>  
                             <span className='text-black font-thin'>
-                                {formatDate(new Date(task.subTasks[0].date))}
+                                {formatDate(new Date(subTasks[0].date))}
                             </span>
                             <span className='bg-blue-600/10 px-2 py-1 rounded-lg text-blue-700 font-thin hover:text-blue-400'>
-                                {task.subTasks[0].tag}      
+                                {subTasks[0].tag}      
                             </span>
                         </div>
                     </div>  
                 ) : (
-                    <div className='py-4 border-t border-gray-200'>
+                    <div className='py-4 border-t border-gray-400'>
                         <span className='text-black'>No Subtasks!</span>
                     </div>          
                   )}
                   <div className='w-full pb-2'>
-                      <button onClick={() => setOpen(true)} disabled={(currentUser.is_admin || currentUser.is_tmanager) ? false : true}
+                      <button onClick={() => setOpen(true)} disabled={currentUser.is_admin ==="No" && currentUser.is_team_manager === "No"}
                           className='w-full flex gap-4 items-center text-sm text-black font-normal disabled:cursor-not-allowed
                           disabled:text-gray-400 hover:bg-gray-200 rounded py-0.5'>
                           <IoMdAdd className='text-lg mt-0.5'/>
@@ -154,8 +160,8 @@ const TaskCard = ({ task }) => {
                 </div>
             </div>  
         </div>
-      {/*add sub task function*/}
-      <TaskAddSubTask open={open} setOpen={setOpen} id={task._id} />
+      
+      <TaskAddSubTask open={open} setOpen={setOpen} id={task._id} subTasks={subTasks} setSubTasks={setSubTasks}/>
     </>
   )
 }

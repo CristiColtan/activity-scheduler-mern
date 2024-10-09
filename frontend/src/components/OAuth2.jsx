@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import {GoogleAuthProvider, getAuth, signInWithPopup} from "firebase/auth"
 
 import {app} from "../utils/firebase.js"
-import { signInSuccess } from '../redux/user/userSlice.js'
+import { signInSuccess, signInFailure } from '../redux/user/userSlice.js'
 
 const OAuth2 = () => {
   const dispatch = useDispatch();
@@ -28,6 +28,12 @@ const OAuth2 = () => {
       })
 
       const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(signInFailure(data.message));
+        return;
+      }
+
       dispatch(signInSuccess(data));
       navigate("/");
     }
