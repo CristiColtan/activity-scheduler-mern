@@ -73,7 +73,7 @@ const DialogDeleteConfirmTask = ({ open, setOpen, taskData, tasks, setTasks }) =
                         </button>
                         <button className='px-6 py-2 rounded mr-5 font-sans font-semibold text-white bg-red-600
             hover:bg-red-400' onClick={()=>handleTrashTask(taskData._id)}>
-                            {loading ? "Deleting..." : "Delete"}
+                            {loading ? "Trashing..." : "Trash"}
                         </button>
                     </div>
                 </div>

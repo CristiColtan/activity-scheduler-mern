@@ -1,6 +1,7 @@
 import { errorHandler } from "../utils/error.js";
 
 import User from "../models/user.model.js";
+import Task from "../models/task.model.js";
 
 export const getMyTeam = async (req, res, next) => {
   try {
@@ -109,6 +110,17 @@ export const editTeamMember = async (req, res, next) => {
 
     await user.save();
     res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchAllTrashedTasks = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const tasks = await Task.find({ is_trashed: "Yes", created_by: userID });
+    res.status(200).json(tasks);
   } catch (error) {
     next(error);
   }

@@ -93,7 +93,7 @@ const TeamAdmin = () => {
         <tr className='text-black text-left'>
           <th className='py-2'>Name</th>
           <th className='py-2 hidden lg:block'>Email</th>
-          <th className='py-2'>Title</th>
+          <th className='py-2 pr-4'>Title</th>
           <th className='py-2'>Status</th>
           <th className='py-2 px-2 hidden lg:block'>Created</th>
         </tr>

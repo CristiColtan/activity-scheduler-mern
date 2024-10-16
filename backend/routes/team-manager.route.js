@@ -8,12 +8,19 @@ import {
   addToTeam,
   removeFromTeam,
   editTeamMember,
+  fetchAllTrashedTasks,
 } from "../controllers/team-manager.controller.js";
 
 const router = express.Router();
 
 router.get("/get/normal-users", verifyToken, verifyTeamManager, getNormalUsers);
 router.get("/get/my-team", verifyToken, verifyTeamManager, getMyTeam);
+router.get(
+  "/get/all-trashed-tasks",
+  verifyToken,
+  verifyTeamManager,
+  fetchAllTrashedTasks
+);
 router.post("/add/team-member", verifyToken, verifyTeamManager, addToTeam);
 router.delete(
   "/remove/team-member/:memberID",

@@ -1,5 +1,5 @@
 import React, {useState, Fragment, useEffect} from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import clsx from "clsx"
 import moment from 'moment';
 
@@ -78,7 +78,7 @@ const TeamManager = () => {
         <tr className='text-black text-left'>
           <th className='py-2'>Name</th>
           <th className='py-2 hidden lg:block'>Email</th>
-          <th className='py-2'>Title</th>
+          <th className='py-2 pr-4'>Title</th>
           <th className='py-2'>Status</th>
           <th className='py-2 px-2 hidden lg:block'>Created</th>
         </tr>

@@ -49,7 +49,7 @@ const TaskDialog = ({ task, tasks, setTasks }) => {
       onClick: () => duplicateHandlerOnClick(),
     },
     {
-      label: "Delete",
+      label: "Trash",
       icon: <MdDelete className='h-5 w-5 mr-2' aria-hidden='true' />,
       onClick: () => deleteHandlerOnClick(),
     },
@@ -81,7 +81,7 @@ const TaskDialog = ({ task, tasks, setTasks }) => {
                         disabled={currentUser.is_admin === "No" && currentUser.is_team_manager === "No" && el.label !== "Open Task"} 
                         className={clsx('flex w-full items-center rounded px-2 py-1.5 text-base hover:bg-gray-200', {
                           'disabled:cursor-not-allowed disabled:text-gray-400': el.label==="Edit Task",
-                          'disabled:cursor-not-allowed disabled:text-red-400 text-red-600': el.label === "Delete",
+                          'disabled:cursor-not-allowed disabled:text-red-400 text-red-600': el.label === "Trash",
                           'disabled:cursor-not-allowed disabled:text-blue-400 text-blue-600': el.label ==="Duplicate"
                         })}>
                         {el.icon}

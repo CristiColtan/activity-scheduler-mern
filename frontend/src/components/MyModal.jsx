@@ -3,7 +3,7 @@ import { Dialog, Transition, TransitionChild, DialogPanel } from '@headlessui/re
 
 const MyModal = ({ open, setOpen, children }) => {
     const cancelButtonRef = useRef(null);
-
+ 
   return (
       <Transition show={open} as={Fragment}>
           <Dialog as='div' className='relative z-10 w-full' initialFocus={cancelButtonRef} onClose={() => setOpen(false)}>

@@ -18,6 +18,7 @@ import {
   MdTaskAlt,
 } from "react-icons/md";
 import { RxActivityLog } from "react-icons/rx";
+import { FaTrash } from "react-icons/fa";
 
 import { priority_styles, task_type, bgs_task_type, bgs_transparent, text_task_type } from '../utils/tableImports.js';
 import {tasks} from "../assets/data.js"
@@ -156,6 +157,12 @@ const TaskDetails = () => {
                           <div className={clsx("w-4 h-4 rounded-full", task_type[Task?.stage])}>
                           </div>
                           <span className={clsx('font-serif uppercase', text_task_type[Task?.stage])}>{Task?.stage}</span>
+                        </div>
+
+                        <div className={clsx('flex gap-1 items-center font-serif px-3 py-1 rounded-full bg-gray-400', {
+                          'hidden' : Task?.is_trashed === "No" })}>
+                            <FaTrash className=''/>
+                            <span className='font-serif uppercase'>TRASHED</span>
                         </div>
                       </div>
 
@@ -297,9 +304,9 @@ const Activities = ({ activity, id, setActivities }) => {
             {
               activity && activity.length > 0 ? (
               activity.map((item, index) => (
-                <>
-                  <Card key={index} item={item} isConnected={index < activity.length - 1} />
-                </>
+                <Fragment key={index + item}>
+                  <Card  item={item} isConnected={index < activity.length - 1} />
+                </Fragment>
               ))) : (<p className='text-lg font-serif'>No activities available.</p>)
             }
           </div>

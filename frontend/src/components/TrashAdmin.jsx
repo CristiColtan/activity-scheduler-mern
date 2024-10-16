@@ -1,7 +1,7 @@
 import React, {useState, Fragment, useEffect} from 'react'
 import { useSelector } from 'react-redux';
 import clsx from "clsx"
-import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 
 import Loading from './Loading.jsx';
 import PageTitle from './PageTitle.jsx';
@@ -9,36 +9,97 @@ import PageTitle from './PageTitle.jsx';
 import { MdKeyboardArrowUp } from "react-icons/md";
 import { MdKeyboardDoubleArrowUp } from "react-icons/md";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { FaTasks } from "react-icons/fa";
 import { GoDash } from "react-icons/go";
 import { MdOutlineRestore } from "react-icons/md";
 import { FaDeleteLeft } from "react-icons/fa6";
+import { FaRegFolderOpen } from "react-icons/fa6";
 
-import {tasks} from "../assets/data.js"
+import { priority_styles, task_type } from '../utils/tableImports.js';
 
-import { priority_styles, task_type, bgs } from '../utils/tableImports.js';
+import DialogRemoveTask from './dialog/DialogRemoveTask.jsx';
+import DialogRestoreTask from './dialog/DialogRestoreTask.jsx'
+import TaskDeleteAll from './task/TaskDeleteAll.jsx';
+import TaskRestoreAll from './task/TaskRestoreAll.jsx';
 
 const TrashAdmin = () => {
     const t_icons = {
-    high: <MdKeyboardDoubleArrowUp />,
-    medium: <MdKeyboardArrowUp />,
-    normal: <GoDash />,
-    low: <MdKeyboardArrowDown />,
+        high: <MdKeyboardDoubleArrowUp />,
+        medium: <MdKeyboardArrowUp />,
+        normal: <GoDash />,
+        low: <MdKeyboardArrowDown />,
     };
     
+    const navigate = useNavigate();
+
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [trashedTasks, setTrashedTasks] = useState([]);
+
+    const [openDialogDelete, setOpenDialogDelete] = useState(false);
+    const [openDialogRestore, setOpenDialogRestore] = useState(false);
+    const [deleteTaskData, setDeleteTaskData] = useState(null);
+    const [restoreTaskData, setRestoreTaskData] = useState(null);
+
+    const [openDialogDeleteAll, setOpenDialogDeleteAll] = useState(false);
+    const [openDialogRestoreAll, setOpenDialogRestoreAll] = useState(false);
+
+    const deleteTaskHandlerOnClick = (d_t_data) => {
+        setDeleteTaskData(d_t_data);
+        setOpenDialogDelete(true);
+    }
+
+    const restoreTaskHandlerOnClick = (r_t_data) => {
+        setRestoreTaskData(r_t_data);
+        setOpenDialogRestore(true);
+    }
+
+    const { currentUser } = useSelector((state) => state.user)
+
+    console.log(trashedTasks);
+
+    const fetchTrashedTasks = async () => {
+        try {
+            setLoading(true);
+
+            const res = await fetch("http://localhost:8081/backend/admin/get/all-trashed-tasks", {
+                credentials: "include",
+            });
+
+            const data = await res.json();
+
+            if (data.success === false) {
+                console.log(data.message);
+                setError(data.message);
+                setLoading(false);
+                return;
+            }
+
+            setLoading(false);
+            setError(null);
+            setTrashedTasks(data);
+        } catch (error) {
+            console.log(error.message);
+            setError(error.message);
+            setLoading(false);
+            return;
+        }
+    }
+
+    useEffect(() => {
+        fetchTrashedTasks();
+    }, []);
 
     const MyTableHeader = () => {
-    return (
-        <thead className='border-b border-black'>
-          <tr className='text-black text-left'>
-            <th className='py-2'>Task Title</th>
-            <th className='py-2'>Priority</th>      
-            <th className='py-2'>Stage</th>
-            <th className='py-2 px-2 hidden lg:block'>Modified on</th>
-          </tr>
-        </thead>
-      )    
+        return (
+            <thead className='border-b border-black'>
+                <tr className='text-black text-left'>
+                    <th className='py-2'>Task Title</th>
+                    <th className='py-2'>Priority</th>
+                    <th className='py-2'>Stage</th>
+                    <th className='py-2 px-2 hidden lg:block'>Modified on</th>
+                </tr>
+            </thead>
+        )
     }
 
     const MyTableRow = ({ task }) => {
@@ -73,13 +134,17 @@ const TrashAdmin = () => {
 
                 <td className='p-2'>
                     <div className='flex justify-end gap-3'>
-                        <button>
+                        <button onClick={() => restoreTaskHandlerOnClick(task)}>
                             <MdOutlineRestore
-                                className='text-2xl text-blue-700 hover:text-blue-500' />    
+                                className='text-2xl text-blue-700 hover:text-blue-500' />
                         </button>
-                        <button>
+                        <button onClick={() => deleteTaskHandlerOnClick(task)}>
                             <FaDeleteLeft
-                            className='text-xl text-red-700 hover:text-red-500' />
+                                className='text-xl text-red-700 hover:text-red-500' />
+                        </button>
+                        <button className='hidden lg:block ml-1' onClick={() => navigate(`/task/${task._id}`)}>
+                            <FaRegFolderOpen
+                                className='text-xl text-yellow-600 hover:text-yellow-500' />
                         </button>
                     </div>
                 </td>
@@ -94,10 +159,16 @@ const TrashAdmin = () => {
                     <div className='flex items-center justify-between'>
                         <PageTitle title="Admin" />
                         <div className='inline-flex gap-4 md:gap-6 items-center'>
-                            <button className='text-blue-700 hover:text-blue-500 inline-flex items-center gap-1'>
+                            <button className='text-blue-700 hover:text-blue-500 inline-flex items-center gap-1
+                            disabled:cursor-not-allowed disabled:text-blue-500'
+                                onClick={() => setOpenDialogRestoreAll(true)}
+                                disabled={!trashedTasks || trashedTasks.length < 1}>
                                 {<MdOutlineRestore className='text-xl ' />} Restore All
                             </button>
-                            <button className='text-red-700 hover:text-red-500 inline-flex items-center gap-1'>
+                            <button className='text-red-700 hover:text-red-500 inline-flex items-center gap-1
+                            disabled:cursor-not-allowed disabled:text-red-500'
+                                onClick={() => setOpenDialogDeleteAll(true)}
+                                disabled={!trashedTasks || trashedTasks.length < 1}>
                                 {<FaDeleteLeft className='text-xl ' />} Delete All
                             </button>
                         </div>
@@ -108,13 +179,33 @@ const TrashAdmin = () => {
                         <MyTableHeader />
                         <tbody>
                             {
-                                tasks.map((task, index) => (
-                                    <MyTableRow task={task} key={index} />
-                                ))
+                                trashedTasks && trashedTasks.length > 0 ? (
+                                    trashedTasks.map((task, index) => (
+                                        <MyTableRow task={task} key={index + task._id} />
+                                    ))
+                                ) : (
+                                    <>
+                                        <tr>
+                                            <td colSpan="5" className="text-center py-4">
+                                                Trash is empty.
+                                            </td>
+                                        </tr>
+                                    </>
+                                )
+                                
                             }
                         </tbody>
                     </table>
                 </div>
+                <div>{error && <p className="text-red-500">{error}</p>}</div>
+                <DialogRemoveTask open={openDialogDelete} setOpen={setOpenDialogDelete} taskData={deleteTaskData}
+                    trashedTasks={trashedTasks} setTrashedTasks={setTrashedTasks} />
+                <DialogRestoreTask open={openDialogRestore} setOpen={setOpenDialogRestore} taskData={restoreTaskData}
+                    trashedTasks={trashedTasks} setTrashedTasks={setTrashedTasks} />
+                <TaskDeleteAll open={openDialogDeleteAll} setOpen={setOpenDialogDeleteAll} trashedTasks={trashedTasks}
+                    setTrashedTasks={setTrashedTasks} />
+                <TaskRestoreAll open={openDialogRestoreAll} setOpen={setOpenDialogRestoreAll} trashedTasks={trashedTasks}
+                    setTrashedTasks={setTrashedTasks} />
             </>
         )
     )

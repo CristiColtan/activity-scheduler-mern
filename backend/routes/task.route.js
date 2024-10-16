@@ -10,6 +10,10 @@ import {
   fetchAllTasks,
   addSubTask,
   trashTask,
+  deleteTask,
+  restoreTask,
+  deleteAllTasks,
+  restoreAllTasks,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -25,5 +29,29 @@ router.put(
   addSubTask
 );
 router.put("/trash-task/:id", verifyToken, verifyAdminOrTeamManager, trashTask);
+router.put(
+  "/restore-task/:id",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  restoreTask
+);
+router.put(
+  "/restore-all-tasks",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  restoreAllTasks
+);
+router.delete(
+  "/delete-task/:id",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  deleteTask
+);
+router.delete(
+  "/delete-all-tasks",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  deleteAllTasks
+);
 
 export default router;

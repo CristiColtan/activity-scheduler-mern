@@ -205,3 +205,123 @@ export const trashTask = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteTask = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    const isCreator = task.created_by.toString() === userID;
+    if (!isCreator && currentUser.is_admin === "No") {
+      return next(
+        errorHandler(403, "You are not allowed to delete this task!")
+      );
+    }
+
+    await Task.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Success!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteAllTasks = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const { tasks } = req.body;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    for (let task of tasks) {
+      const found_task = await Task.findById(task._id);
+
+      if (!found_task)
+        return next(errorHandler(404, `Task with ID ${task._id} not found!`));
+
+      const isCreator = found_task.created_by.toString() === userID;
+      if (!isCreator && currentUser.is_admin === "No") {
+        return next(
+          errorHandler(
+            403,
+            `You are not allowed to delete task with ID ${found_task._id}`
+          )
+        );
+      }
+
+      await Task.findByIdAndDelete(found_task._id);
+    }
+
+    res.status(200).json({ message: "Success!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const restoreTask = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    const isCreator = task.created_by.toString() === userID;
+    if (!isCreator && currentUser.is_admin === "No") {
+      return next(
+        errorHandler(403, "You are not allowed to restore this task!")
+      );
+    }
+
+    task.is_trashed = "No";
+    await task.save();
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const restoreAllTasks = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const { tasks } = req.body;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    for (let task of tasks) {
+      const found_task = await Task.findById(task._id);
+
+      if (!found_task)
+        return next(errorHandler(404, `Task with ID ${task._id} not found!`));
+
+      const isCreator = found_task.created_by.toString() === userID;
+      if (!isCreator && currentUser.is_admin === "No") {
+        return next(
+          errorHandler(
+            403,
+            `You are not allowed to delete task with ID ${found_task._id}`
+          )
+        );
+      }
+
+      found_task.is_trashed = "No";
+      await found_task.save();
+    }
+    res.status(200).json({ message: "Success!" });
+  } catch (error) {
+    next(error);
+  }
+};
