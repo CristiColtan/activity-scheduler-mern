@@ -13,7 +13,7 @@ import { MdDelete } from "react-icons/md";
 import { BsThreeDots } from "react-icons/bs";
 
 import TaskAddSubTask from './TaskAddSubTask';
-import DialogDeleteConfirmTask from './dialog/DialogDeleteConfirmTask';
+import DialogDeleteConfirmTask from './dialog/DialogTrashConfirmTask';
 
 const TaskDialog = ({ task, tasks, setTasks }) => {
   const [openSubTask, setOpenSubTask] = useState(false);
