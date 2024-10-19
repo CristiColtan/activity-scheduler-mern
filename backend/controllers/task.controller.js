@@ -176,7 +176,7 @@ export const fetchAllTasks = async (req, res, next) => {
 
     res.status(200).json(tasks);
   } catch (error) {
-    next(erorr);
+    next(error);
   }
 };
 
@@ -321,6 +321,117 @@ export const restoreAllTasks = async (req, res, next) => {
       await found_task.save();
     }
     res.status(200).json({ message: "Success!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchAllCompletedTasks = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    let tasks;
+
+    if (currentUser.is_admin === "Yes") {
+      tasks = await Task.find({ is_trashed: "No", stage: "completed" })
+        .populate("team")
+        .populate("created_by");
+    } else if (currentUser.is_team_manager === "Yes") {
+      tasks = await Task.find({
+        is_trashed: "No",
+        created_by: userID,
+        stage: "completed",
+      })
+        .populate("team")
+        .populate("created_by");
+    } else {
+      tasks = await Task.find({
+        is_trashed: "No",
+        team: userID,
+        stage: "completed",
+      })
+        .populate("team")
+        .populate("created_by");
+    }
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchAllInProgressTasks = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    let tasks;
+
+    if (currentUser.is_admin === "Yes") {
+      tasks = await Task.find({ is_trashed: "No", stage: "in progress" })
+        .populate("team")
+        .populate("created_by");
+    } else if (currentUser.is_team_manager === "Yes") {
+      tasks = await Task.find({
+        is_trashed: "No",
+        created_by: userID,
+        stage: "in progress",
+      })
+        .populate("team")
+        .populate("created_by");
+    } else {
+      tasks = await Task.find({
+        is_trashed: "No",
+        team: userID,
+        stage: "in progress",
+      })
+        .populate("team")
+        .populate("created_by");
+    }
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchAllToDoTasks = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    let tasks;
+
+    if (currentUser.is_admin === "Yes") {
+      tasks = await Task.find({ is_trashed: "No", stage: "to do" })
+        .populate("team")
+        .populate("created_by");
+    } else if (currentUser.is_team_manager === "Yes") {
+      tasks = await Task.find({
+        is_trashed: "No",
+        created_by: userID,
+        stage: "to do",
+      })
+        .populate("team")
+        .populate("created_by");
+    } else {
+      tasks = await Task.find({
+        is_trashed: "No",
+        team: userID,
+        stage: "to do",
+      })
+        .populate("team")
+        .populate("created_by");
+    }
+
+    res.status(200).json(tasks);
   } catch (error) {
     next(error);
   }

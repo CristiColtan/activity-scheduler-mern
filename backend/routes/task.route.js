@@ -14,6 +14,9 @@ import {
   restoreTask,
   deleteAllTasks,
   restoreAllTasks,
+  fetchAllCompletedTasks,
+  fetchAllInProgressTasks,
+  fetchAllToDoTasks,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -22,6 +25,9 @@ router.post("/create", verifyToken, verifyAdminOrTeamManager, createTask);
 router.get("/get/:id", verifyToken, getTask);
 router.put("/add-activity/:id", verifyToken, addActivity);
 router.get("/get-all-tasks", verifyToken, fetchAllTasks);
+router.get("/get-all-completed-tasks", verifyToken, fetchAllCompletedTasks);
+router.get("/get-all-in-progress-tasks", verifyToken, fetchAllInProgressTasks);
+router.get("/get-all-to-do-tasks", verifyToken, fetchAllToDoTasks);
 router.put(
   "/add-subtask/:id",
   verifyToken,
