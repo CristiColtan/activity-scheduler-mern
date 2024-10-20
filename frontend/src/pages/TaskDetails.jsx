@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { CgDetailsMore } from "react-icons/cg";
 import { GoDash } from "react-icons/go";
-import { FaBug, FaTasks, FaThumbsUp, FaUser } from "react-icons/fa";
+import { FaBug, FaThumbsUp, FaUser } from "react-icons/fa";
 import { GrInProgress } from "react-icons/gr";
 import {
   MdKeyboardArrowDown,
@@ -21,7 +21,6 @@ import { RxActivityLog } from "react-icons/rx";
 import { FaTrash } from "react-icons/fa";
 
 import { priority_styles, task_type, bgs_task_type, bgs_transparent, text_task_type } from '../utils/tableImports.js';
-import {tasks} from "../assets/data.js"
 
 import PageTitle from '../components/PageTitle.jsx';
 import Loading from "../components/Loading.jsx"
@@ -166,8 +165,9 @@ const TaskDetails = () => {
                         </div>
                       </div>
 
-                      <p className='font-thin'>Created at: {new Date(Task?.date).toDateString()} by
+                      <p className='font-thin'><span className='font-semibold'>Created at:</span> {new Date(Task?.createdAt).toDateString()} by
                         {" " + Task?.created_by?.first_name + " " + Task?.created_by?.last_name}</p>
+                      <p className='font-thin -translate-y-5'><span className='font-semibold'>Deadline:</span> {new Date(Task?.date).toDateString()}</p>
 
                       <div className='flex items-center gap-8 px-4 py-2 border-y border-gray-500'>
                         <div className='space-x-2'>

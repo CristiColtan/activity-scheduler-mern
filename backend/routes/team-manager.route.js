@@ -9,6 +9,7 @@ import {
   removeFromTeam,
   editTeamMember,
   fetchAllTrashedTasks,
+  fetchDashboardStatistics,
 } from "../controllers/team-manager.controller.js";
 
 const router = express.Router();
@@ -20,6 +21,12 @@ router.get(
   verifyToken,
   verifyTeamManager,
   fetchAllTrashedTasks
+);
+router.get(
+  "/get/dashboard-statistics",
+  verifyToken,
+  verifyTeamManager,
+  fetchDashboardStatistics
 );
 router.post("/add/team-member", verifyToken, verifyTeamManager, addToTeam);
 router.delete(

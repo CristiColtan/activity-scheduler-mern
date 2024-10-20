@@ -9,6 +9,7 @@ import {
   makeAccountActiveOrInactive,
   getAllUsers,
   fetchAllTrashedTasks,
+  fetchDashboardStatistics,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { verifyAdmin } from "../utils/verifyAdmin.js";
@@ -18,6 +19,12 @@ const router = express.Router();
 router.get("/get/team-managers", verifyToken, verifyAdmin, getTeamManagers);
 router.get("/get/normal-users", verifyToken, verifyAdmin, getNormalUsers);
 router.get("/get/all-users", verifyToken, verifyAdmin, getAllUsers);
+router.get(
+  "/get-dashboard-statistics",
+  verifyToken,
+  verifyAdmin,
+  fetchDashboardStatistics
+);
 router.get(
   "/get/all-trashed-tasks",
   verifyToken,
