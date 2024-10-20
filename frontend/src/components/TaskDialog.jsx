@@ -14,19 +14,24 @@ import { BsThreeDots } from "react-icons/bs";
 
 import TaskAddSubTask from './TaskAddSubTask';
 import DialogDeleteConfirmTask from './dialog/DialogTrashConfirmTask';
+import DialogDuplicateTask from './dialog/DialogDuplicateTask';
 
 const TaskDialog = ({ task, tasks, setTasks }) => {
   const [openSubTask, setOpenSubTask] = useState(false);
   const [openDialogDelete, setOpenDialogDelete] = useState(false);
+  const [openDialogDuplicate, setOpenDialogDuplicate] = useState(false);
 
   const { currentUser, loading, error } = useSelector((state) => state.user);
 
   const navigate = useNavigate();
 
-  const duplicateHandlerOnClick = () => { };
+  const duplicateHandlerOnClick = () => {
+    setOpenDialogDuplicate(true);
+  };
+  
   const deleteHandlerOnClick = () => {
     setOpenDialogDelete(true);
-   };
+  };
 
   const deleteHandler = () => {
     
@@ -34,7 +39,7 @@ const TaskDialog = ({ task, tasks, setTasks }) => {
 
   const items = [
     {
-      label: "Open Task", 
+      label: "Open Task",
       icon: <FaRegFolderOpen className='h-5 w-5 mr-2' aria-hidden='true' />,
       onClick: () => navigate(`/task/${task._id}`),
     },
@@ -60,7 +65,7 @@ const TaskDialog = ({ task, tasks, setTasks }) => {
       <div>
         <Menu as='div' className='relative inlin-block text-left'>
           <MenuButton className='inline-flex w-full justify-center rounded px-4 py-1 font-serif'>
-            <BsThreeDots/>
+            <BsThreeDots />
           </MenuButton>
 
           <Transition as={Fragment}
@@ -74,15 +79,15 @@ const TaskDialog = ({ task, tasks, setTasks }) => {
             <MenuItems className='absolute p-4 right-0 mt-2 w-52 origin-top-right divide-y divide-gray
             rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10'>
               {
-                items.map((el,index) => (
+                items.map((el, index) => (
                   <MenuItem key={el.label + index}>
                     {({ active }) => (
                       <button onClick={el.onClick}
-                        disabled={currentUser.is_admin === "No" && currentUser.is_team_manager === "No" && el.label !== "Open Task"} 
+                        disabled={currentUser.is_admin === "No" && currentUser.is_team_manager === "No" && el.label !== "Open Task"}
                         className={clsx('flex w-full items-center rounded px-2 py-1.5 text-base hover:bg-gray-200', {
-                          'disabled:cursor-not-allowed disabled:text-gray-400': el.label==="Edit Task",
+                          'disabled:cursor-not-allowed disabled:text-gray-400': el.label === "Edit Task",
                           'disabled:cursor-not-allowed disabled:text-red-400 text-red-600': el.label === "Trash",
-                          'disabled:cursor-not-allowed disabled:text-blue-400 text-blue-600': el.label ==="Duplicate"
+                          'disabled:cursor-not-allowed disabled:text-blue-400 text-blue-600': el.label === "Duplicate"
                         })}>
                         {el.icon}
                         <p className='font-sans mt-0.5'>{el.label}</p>
@@ -98,6 +103,8 @@ const TaskDialog = ({ task, tasks, setTasks }) => {
       </div>
       
       <DialogDeleteConfirmTask open={openDialogDelete} setOpen={setOpenDialogDelete} taskData={task} tasks={tasks}
+        setTasks={setTasks} />
+      <DialogDuplicateTask open={openDialogDuplicate} setOpen={setOpenDialogDuplicate} taskData={task} tasks={tasks}
         setTasks={setTasks} />
     </>
   )

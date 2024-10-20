@@ -436,3 +436,40 @@ export const fetchAllToDoTasks = async (req, res, next) => {
     next(error);
   }
 };
+
+export const duplicateTask = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    const isCreator = task.created_by.toString() === userID;
+    if (!isCreator && currentUser.is_admin === "No") {
+      return next(
+        errorHandler(403, "You are not allowed to duplicate this task!")
+      );
+    }
+
+    const taskData = task.toObject();
+    delete taskData._id;
+
+    const duplicatedTask = await Task.create({
+      ...taskData,
+      title: "Copy of - " + task.title,
+    });
+
+    const duplicatedDuplicatedTask = await Task.findById(duplicatedTask._id)
+      .populate("team")
+      .populate("created_by");
+
+    res.status(200).json(duplicatedDuplicatedTask);
+  } catch (error) {
+    next(error);
+  }
+};

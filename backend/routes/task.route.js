@@ -17,6 +17,7 @@ import {
   fetchAllCompletedTasks,
   fetchAllInProgressTasks,
   fetchAllToDoTasks,
+  duplicateTask,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -28,6 +29,12 @@ router.get("/get-all-tasks", verifyToken, fetchAllTasks);
 router.get("/get-all-completed-tasks", verifyToken, fetchAllCompletedTasks);
 router.get("/get-all-in-progress-tasks", verifyToken, fetchAllInProgressTasks);
 router.get("/get-all-to-do-tasks", verifyToken, fetchAllToDoTasks);
+router.post(
+  "/duplicate-task/:id",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  duplicateTask
+);
 router.put(
   "/add-subtask/:id",
   verifyToken,

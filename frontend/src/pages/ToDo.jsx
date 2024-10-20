@@ -77,7 +77,7 @@ const ToDo = () => {
 
                 <div className='w-full py-0 mb-2'>
                     <div className=' rounded gap-4 flex justify-between'>
-                        <TaskTitle label="To Do" classes={task_type.completed} />
+                        <TaskTitle label="To Do" classes={task_type["to do"]} />
                     </div>
                 </div>
         
