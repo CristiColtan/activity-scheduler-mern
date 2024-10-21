@@ -367,7 +367,12 @@ export default function Dashboard() {
 
           {error && <p className='text-red-500 text-4xl'>{error}</p>}
         </div>
-      ) : (<p className='font-sans mt-10 text-2xl flex justify-center'>No data available</p>)
+      ) : (
+        <>
+          <p className='font-sans mt-10 text-2xl flex justify-center'>No data available.</p>
+          <p className='font-sans mt-10 text-2xl flex justify-center'>Cookie expired.</p>
+        </>
+      )
     )
   )
 }
