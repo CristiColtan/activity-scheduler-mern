@@ -51,6 +51,66 @@ export const createTask = async (req, res, next) => {
   }
 };
 
+export const updateTask = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(req.params.id).populate("team");
+
+    if (!task) {
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    const isCreator = task.created_by._id.toString() === userID;
+    if (!isCreator && currentUser.is_admin === "No") {
+      return next(errorHandler(403, "You are not allowed to edit this task!"));
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json(updatedTask);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTaskEdit = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(req.params.id).populate("team");
+
+    if (!task) {
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    const isCreator = task.created_by._id.toString() === userID;
+    const isTeamMember = task.team.some(
+      (member) => member._id.toString() === userID
+    );
+
+    console.log(isCreator, isTeamMember);
+
+    if (!isCreator && !isTeamMember && currentUser.is_admin === "No") {
+      return next(
+        errorHandler(403, "You are not allowed to see task's details!")
+      );
+    }
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getTask = async (req, res, next) => {
   try {
     const userID = req.user.id;

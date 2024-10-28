@@ -18,23 +18,34 @@ import {
   fetchAllInProgressTasks,
   fetchAllToDoTasks,
   duplicateTask,
+  updateTask,
+  getTaskEdit,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
 
 router.post("/create", verifyToken, verifyAdminOrTeamManager, createTask);
+
 router.get("/get/:id", verifyToken, getTask);
-router.put("/add-activity/:id", verifyToken, addActivity);
 router.get("/get-all-tasks", verifyToken, fetchAllTasks);
 router.get("/get-all-completed-tasks", verifyToken, fetchAllCompletedTasks);
 router.get("/get-all-in-progress-tasks", verifyToken, fetchAllInProgressTasks);
 router.get("/get-all-to-do-tasks", verifyToken, fetchAllToDoTasks);
+router.get(
+  "/get-task-edit/:id",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  getTaskEdit
+);
+
 router.post(
   "/duplicate-task/:id",
   verifyToken,
   verifyAdminOrTeamManager,
   duplicateTask
 );
+router.put("/add-activity/:id", verifyToken, addActivity);
+router.put("/update/:id", verifyToken, verifyAdminOrTeamManager, updateTask);
 router.put(
   "/add-subtask/:id",
   verifyToken,
@@ -54,6 +65,7 @@ router.put(
   verifyAdminOrTeamManager,
   restoreAllTasks
 );
+
 router.delete(
   "/delete-task/:id",
   verifyToken,

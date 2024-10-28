@@ -5,14 +5,12 @@ import moment from "moment"
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 
-import { summary } from "../assets/data.js";
-import { getInitials2, getInitials } from '../utils/FullnameInitials.js';
+import { getInitials } from '../utils/FullnameInitials.js';
 
 import { BsChevronExpand } from "react-icons/bs";
 import { MdCheck } from "react-icons/md";
 
 const TaskAddUserList = ({ setTeam, team, data}) => {
-    {/*const data = summary.users;*/ }
     const [selectedUsers, setSelectedUsers] = useState([]);
     
     {/*assign task only to normal users, care nu sunt nici admini si nici manageri,
@@ -24,6 +22,8 @@ const TaskAddUserList = ({ setTeam, team, data}) => {
         setSelectedUsers(validUsers);
         setTeam(el.map((u) => u._id));
     }
+
+    console.log("tlength: ", team.length);
 
     useEffect(() => {
         if (team.length < 1)
