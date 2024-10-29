@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
 import { useSelector } from 'react-redux';
-import { Dialog, DialogTitle } from "@headlessui/react"
 import { useNavigate, useParams } from 'react-router-dom';
 
 import PageTitle from '../components/PageTitle.jsx'
 import TaskAddUserListEdit2 from '../components/TaskAddUserListEdit2.jsx';
-import TaskAddUserListEdit from '../components/TaskAddUserListEdit.jsx'
-import TaskAddUserList from '../components/TaskAddUserList.jsx'
 import TaskSelectList from '../components/TaskSelectList.jsx'
 import Loading from '../components/Loading.jsx';
 
@@ -16,9 +12,8 @@ import { task_list_priority } from "../utils/tableImports.js"
 
 import { IoMdImages } from "react-icons/io";
 
-import { getDownloadURL, getStorage, getStream, ref, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import {app} from "../utils/firebase.js"
-
 
 const EditTask = () => {
   const [files, setFiles] = useState([]);
@@ -27,7 +22,6 @@ const EditTask = () => {
   const [priority, setPriority] = useState(task_list_priority[1] || []);
   const [allUsers, setAllUsers] = useState([]);
   const [oldTeam, setOldTeam] = useState([]);
-  const [newTeam, setNewTeam] = useState([]);
   const [team2, setTeam2] = useState([]);
   const [updatedTeam, setUpdatedTeam] = useState([]);
 
@@ -36,7 +30,7 @@ const EditTask = () => {
   
   const navigate = useNavigate();
   const params = useParams();
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser } = useSelector((state) => state.user);
 
   const [Error, setError] = useState(null);
   const [imageUploadError, setImageUploadError] = useState(null);
@@ -118,8 +112,6 @@ const EditTask = () => {
     fetchTask();
     fetchUsers();
   }, []);
-
-  //console.log("users to be selected:", allUsers);
 
   const handleImageSubmit = (e) => {
     if (files.length > 0 && files.length + formData.asseturls.length < 7) {
@@ -235,8 +227,8 @@ const EditTask = () => {
               className='border py-1 px-2 placeholder-black focus:ring-2 ring-blue-300 outline-none
                     border-black focus:placeholder-gray-500 rounded min-w-[300px] md:min-w-[250px] mb-5'>
             </input>
+
             <label htmlFor='username' className='font-thin text-base mb-2'>Assign Task to:</label>
-            {/*<TaskAddUserListEdit setTeam={setNewTeam} team={newTeam} data={allUsers} />*/}
             <TaskAddUserListEdit2 updatedTeam={updatedTeam} setUpdatedTeam={setUpdatedTeam} team={team2} data={allUsers} />
             <div className='flex items-center'>
               <p className='font-thin text-base mt-2 mr-1'>Old team:</p>
@@ -251,7 +243,9 @@ const EditTask = () => {
                 ) : (
                   <span className='mt-2'>-</span>
                 )}
-              </></div>
+              </>
+            </div>
+
             <div className='flex gap-4 mt-5'>
               <div className='w-full'>{/*left*/}
                 <label className='font-thin text-base mb-2'>Task Stage:</label>

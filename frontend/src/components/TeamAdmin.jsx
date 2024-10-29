@@ -1,4 +1,4 @@
-import React, {useState, Fragment, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import { useSelector } from 'react-redux';
 import clsx from "clsx"
 import moment from 'moment';
@@ -32,26 +32,14 @@ const TeamAdmin = () => {
     setOpenDialogDelete(true);
   }
   
-  const userDeleteHandler = () => {
-      
-  }
-  
   const userActionHandlerOnClick = (u_data) => {
     setUserData(u_data);
     setOpenDialogStatusAction(true);
-  }
-    
-  const userActionHandler = () => {
-
   }
   
   const editUserHandlerOnClick = (e_u_data) => {
     setEditUserData(e_u_data);
     setOpenEditUser(true);
-  }
-
-  const editUserHandler = () => {
-      
   }
   
   const fetchAdminTeamManagers = async () => {
@@ -85,7 +73,7 @@ const TeamAdmin = () => {
       fetchAdminTeamManagers();
     if (openDialogDelete === false)
       fetchAdminTeamManagers();
-  },[openAddTeamManager, openDialogDelete, openEditUser, openDialogStatusAction])
+  }, [openAddTeamManager, openDialogDelete, openEditUser, openDialogStatusAction])
 
   const MyTableHeaderUsers = () => {
     return (
@@ -129,7 +117,6 @@ const TeamAdmin = () => {
             "bg-blue-200 hover:bg-blue-400" : "bg-yellow-200 hover:bg-yellow-400")}
             onClick={() => userActionHandlerOnClick(user)}>
             {(user.is_active === "Yes") ? "Active" : "Disabled"}
-            {/*Aici sa verific cu dialoguseraction daca activez sau inactivez contul */}
           </button>
         </td>
 
@@ -188,11 +175,10 @@ const TeamAdmin = () => {
         </div>
 
         <div>
-            {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-red-500">{error}</p>}
         </div>
 
-        <DialogStatusAction open={openDialogStatusAction} setOpen={setOpenDialogStatusAction} onClick={userActionHandler}
-          userData={userData} />
+        <DialogStatusAction open={openDialogStatusAction} setOpen={setOpenDialogStatusAction} userData={userData} />
         <DialogDeleteConfirmTeamManager open={openDialogDelete} setOpen={setOpenDialogDelete} userData={deleteUserData} />
         <AddTeamManager open={openAddTeamManager} setOpen={setOpenAddTeamManager} />
         <EditUser open={openEditUser} setOpen={setOpenEditUser} data={editUserData} />

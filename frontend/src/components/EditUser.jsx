@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux';
-import { Dialog, DialogTitle } from "@headlessui/react"
+import { DialogTitle } from "@headlessui/react"
 import { useNavigate } from 'react-router-dom';
 
 import MyModal from './MyModal'
@@ -23,7 +22,7 @@ const EditUser = ({ open, setOpen, data }) => {
 
     console.log(formData);
 
-    const { currentUser, error } = useSelector((state) => state.user);
+    const { currentUser } = useSelector((state) => state.user);
 
     const handleEditUser = async (userID) => {
         try {
@@ -99,7 +98,7 @@ const EditUser = ({ open, setOpen, data }) => {
 
                 <div className="w-full -mt-2 gap-4 flex">
                     <div className="w-full">
-                        {/*add functionality of uploading photos!!*/}
+                        {/*blank*/}
                     </div>
 
                     <div className="w-full flex justify-between gap-4">
@@ -117,7 +116,7 @@ const EditUser = ({ open, setOpen, data }) => {
                                 bg-blue-700 text-white font-sans
                                 hover:bg-blue-500 transition duration-200
                                 font-medium disabled:bg-blue-500"
-                            onClick={()=> handleEditUser(data._id)}
+                            onClick={() => handleEditUser(data._id)}
                         >
                             {loading ? "Submitting" : "Submit"}
                         </button>

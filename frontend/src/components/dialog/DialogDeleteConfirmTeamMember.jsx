@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
-import { Dialog, DialogTitle } from '@headlessui/react'
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react'
+import { DialogTitle } from '@headlessui/react'
 import { useNavigate } from 'react-router-dom';
 
 import { FaQuestion } from "react-icons/fa";
 
 import MyModal from '../MyModal.jsx'
 
-const DialogDeleteConfirmTeamMember = ({ open, setOpen, onClick = () => { }, userData }) => {
-    const { currentUser, error } = useSelector((state) => state.user);
+const DialogDeleteConfirmTeamMember = ({ open, setOpen, userData }) => {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
@@ -24,7 +21,7 @@ const DialogDeleteConfirmTeamMember = ({ open, setOpen, onClick = () => { }, use
 
             const res = await fetch(`http://localhost:8081/backend/team-manager/remove/team-member/${userID}`,
                 {
-                    method:"DELETE",
+                    method: "DELETE",
                     credentials: "include",
                 }
             )
@@ -61,7 +58,7 @@ const DialogDeleteConfirmTeamMember = ({ open, setOpen, onClick = () => { }, use
                             Cancel
                         </button>
                         <button className='px-6 py-2 rounded mr-5 font-sans font-semibold text-white bg-red-600
-            hover:bg-red-400' onClick={()=>handleRemoveFromTeam(userData._id)}>
+            hover:bg-red-400' onClick={() => handleRemoveFromTeam(userData._id)}>
                             {loading ? "Deleting..." : "Delete"}
                         </button>
                     </div>

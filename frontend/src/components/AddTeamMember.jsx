@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
 import { useSelector } from 'react-redux';
-import { Dialog, DialogTitle } from "@headlessui/react"
+import { DialogTitle } from "@headlessui/react"
 import { useNavigate } from 'react-router-dom';
 
 import MyModal from './MyModal'
@@ -12,10 +11,9 @@ const AddTeamMember = ({ open, setOpen }) => {
     const [normalUsers, setNormalUsers] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
 
-    const [errorAddTeamMember, setErrorAddTeamMember] = useState(null);
     const navigate = useNavigate();
 
-    const { currentUser, error } = useSelector((state) => state.user);
+    const { currentUser } = useSelector((state) => state.user);
 
     const fetchNormalUsers = async () => {
         try {
@@ -39,7 +37,7 @@ const AddTeamMember = ({ open, setOpen }) => {
     }
 
     useEffect(() => {
-        if(open)
+        if (open)
             fetchNormalUsers();
     }, [open]);
 
@@ -51,7 +49,6 @@ const AddTeamMember = ({ open, setOpen }) => {
     const handleAddTeamMember = async () => {
         try {
             setLoading(true);
-            //console.log("Team members before sent:", teamMembers);
 
             const res = await fetch("http://localhost:8081/backend/team-manager/add/team-member", {
                 method: "POST",
@@ -99,7 +96,7 @@ const AddTeamMember = ({ open, setOpen }) => {
 
                 <div className="w-full -mt-2 gap-4 flex">
                     <div className="w-full">
-                        {/*add functionality of uploading photos!!*/}
+                        {/*blank*/}
                     </div>
 
                     <div className="w-full flex justify-between gap-4">

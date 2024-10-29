@@ -10,11 +10,11 @@ const Trash = () => {
   return (
     <>
       {currentUser.is_team_manager === "Yes" && <div>
-        <TrashManager/>
+        <TrashManager />
       </div>}
       {currentUser.is_admin === "Yes" && <div>
-        <TrashAdmin/>
-      </div> }
+        <TrashAdmin />
+      </div>}
     </>
 
   )

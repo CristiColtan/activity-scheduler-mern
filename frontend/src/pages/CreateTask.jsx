@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
 import { useSelector } from 'react-redux';
-import { Dialog, DialogTitle } from "@headlessui/react"
 import { useNavigate } from 'react-router-dom';
 
 import PageTitle from '../components/PageTitle'
@@ -13,7 +11,7 @@ import { task_list_priority } from "../utils/tableImports.js"
 
 import { IoMdImages } from "react-icons/io";
 
-import { getDownloadURL, getStorage, getStream, ref, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import {app} from "../utils/firebase.js"
 
 const CreateTask = () => {
@@ -27,22 +25,22 @@ const CreateTask = () => {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-    const { currentUser, error } = useSelector((state) => state.user);
+    const { currentUser } = useSelector((state) => state.user);
 
     const [Error, setError] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
 
     const [formData, setFormData] = useState({
-        title: "",                
-        date: "",                 
-        priority: "normal",       
-        stage: "todo",            
-        activities: [],           
-        subtasks: [],             
-        asseturls: [],             
-        team: [],                  
-        is_trashed: "No",        
-        created_by: null           
+        title: "",
+        date: "",
+        priority: "normal",
+        stage: "todo",
+        activities: [],
+        subtasks: [],
+        asseturls: [],
+        team: [],
+        is_trashed: "No",
+        created_by: null
     });
 
     console.log(formData);
@@ -79,7 +77,7 @@ const CreateTask = () => {
     }
 
     useEffect(() => {
-            fetchUsers();
+        fetchUsers();
     }, []);
 
     console.log(files);
@@ -94,7 +92,7 @@ const CreateTask = () => {
             setImageUploadError(null);
 
             const promises = [];
-            for (let i = 0; i < files.length; i++){
+            for (let i = 0; i < files.length; i++) {
                 promises.push(storeImage(files[i]));
             }
 
@@ -109,7 +107,7 @@ const CreateTask = () => {
                 .catch((err) => {
                     setImageUploadError(err + "Image upload failed! (2MB MAX/image)");
                     setUploading(false);
-            })
+                })
         } else {
             setImageUploadError("You can upload maximum 6 assets!");
             setUploading(false);
@@ -125,7 +123,7 @@ const CreateTask = () => {
 
             uploadTask.on("state_changed", (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log(`Upload is ${progress}% done`);   
+                console.log(`Upload is ${progress}% done`);
             }, (error) => {
                 reject(error);
             }, () => {
@@ -140,7 +138,6 @@ const CreateTask = () => {
         setFormData({ ...formData, asseturls: formData.asseturls.filter((_, i) => i !== index), });
     }
 
-    //to do!!
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -159,7 +156,7 @@ const CreateTask = () => {
             const res = await fetch("http://localhost:8081/backend/task/create", {
                 method: "POST",
                 headers: {
-                    "Content-Type":"application/json",
+                    "Content-Type": "application/json",
                 },
                 credentials: "include",
                 body: JSON.stringify(formData),
@@ -173,7 +170,7 @@ const CreateTask = () => {
             console.log(error.message);
             setError(error);
             setLoading(false);
-            return; 
+            return;
         }
     }
 
@@ -192,15 +189,15 @@ const CreateTask = () => {
                     <div className='flex gap-4 mt-5'>
                         <div className='w-full'>{/*left*/}
                             <label className='font-thin text-base mb-2'>Task Stage:</label>
-                            <TaskSelectList lists={task_list_stage} selected={stage} setSelected={setStage}/>
+                            <TaskSelectList lists={task_list_stage} selected={stage} setSelected={setStage} />
                         </div>
                         <div className='w-full'>{/*right*/}
                             <label className='font-thin text-base mb-2'>Priority:</label>
-                            <TaskSelectList lists={task_list_priority} selected={priority} setSelected={setPriority}/>
+                            <TaskSelectList lists={task_list_priority} selected={priority} setSelected={setPriority} />
                         </div>
                     </div>
                     <div className='flex gap-4 mt-5'>
-                        <div className='w-full'> 
+                        <div className='w-full'>
                             <label className='font-thin text-base mb-2'>Task Date:</label>
                             <input type="date" required id='date' onChange={handleChange}
                                 className='border py-1 px-2 placeholder-black focus:ring-2 ring-blue-300 outline-none
@@ -210,8 +207,8 @@ const CreateTask = () => {
                         <div className='w-full flex items-center justify-center'>
                             <label className='flex items-center gap-1 text-base cursor-pointer hover:text-blue-500 mt-1'>
                                 <input type='file' multiple id='imgUpload' className='hidden' accept='image/*'
-                                onChange={(e)=>setFiles(e.target.files)}></input>
-                                <IoMdImages className='text-lg'/>
+                                    onChange={(e) => setFiles(e.target.files)}></input>
+                                <IoMdImages className='text-lg' />
                                 <span className='pl-2'>Add Assets</span>
                             </label>
                         </div>
@@ -222,20 +219,20 @@ const CreateTask = () => {
                         </div>
                         <div className='w-full flex justify-between gap-4'>
                             <button disabled={uploading}
-                            className='px-3 py-2 rounded
+                                className='px-3 py-2 rounded
                                 bg-blue-700 text-white font-sans w-1/2
                                 hover:bg-blue-500 transition duration-200
                                 font-medium disabled:bg-blue-500'
-                            onClick={handleImageSubmit}>
-                            {uploading ? "Uploading..." : "Upload"}
+                                onClick={handleImageSubmit}>
+                                {uploading ? "Uploading..." : "Upload"}
                             </button>
                             <button disabled={uploading || loading}
-                            className='px-3 py-2 rounded w-1/2
+                                className='px-3 py-2 rounded w-1/2
                                 bg-blue-700 text-white font-sans
                                 hover:bg-blue-500 transition duration-200
                                 font-medium disabled:bg-blue-500'
-                            onClick={handleSubmit}>
-                            {loading ? "Submitting..." : "Submit"}
+                                onClick={handleSubmit}>
+                                {loading ? "Submitting..." : "Submit"}
                             </button>
                         </div>
                     </div>
@@ -250,7 +247,7 @@ const CreateTask = () => {
                             <button className='px-6 py-2 rounded 
                                 bg-red-500 text-white font-sans
                                 hover:bg-red-300 transition duration-200
-                                font-medium' onClick={()=>handleRemoveImage(index)}>
+                                font-medium' onClick={() => handleRemoveImage(index)}>
                                 Delete
                             </button>
                         </div>

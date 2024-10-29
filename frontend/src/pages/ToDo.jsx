@@ -1,6 +1,4 @@
-import React, {useEffect, useState} from 'react'
-import { useNavigate, useParams} from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react'
 
 import { MdGridView } from "react-icons/md";
 
@@ -15,13 +13,7 @@ const ToDo = () => {
     const [error, setError] = useState(null);
     const [Tasks, setTasks] = useState([]);
   
-    const navigate = useNavigate();
-
     const tabs = [{ title: "Board View", icon: <MdGridView /> }]
-
-    const { currentUser } = useSelector((state) => state.user);
-
-    console.log("Tasks: ", Tasks);
     
     const fetchToDoTasks = async () => {
         try {

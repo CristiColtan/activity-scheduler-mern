@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
-import { useSelector } from 'react-redux';
-import { Dialog, DialogTitle } from '@headlessui/react'
+import React, { useState } from 'react'
+import { DialogTitle } from '@headlessui/react'
 import { useNavigate } from 'react-router-dom';
 
 import { FaExclamation } from "react-icons/fa";
 
 import MyModal from '../MyModal';
 
-const DialogStatusAction = ({ open, setOpen, onClick = () => { }, userData }) => {
+const DialogStatusAction = ({ open, setOpen, userData }) => {
     const [loading, setLoading] = useState(false);
-    const { currentUser, error } = useSelector((state) => state.user);
     const navigate = useNavigate();
 
-     const handleCancel = () => {
+    const handleCancel = () => {
         setOpen(false);
     }
     

@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { FaUser } from "react-icons/fa";
-import { FaUserLock } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
@@ -14,8 +13,8 @@ import { signOutUserFailure, signOutUserStart, signOutUserSuccess } from '../red
 
 const UserAvatar = () => {
     const [open, setOpen] = useState(false);
-    const [openPassword, setOpenPassword] = useState(false);
-    const { currentUser, loading, error } = useSelector((state) => state.user);
+
+    const { currentUser } = useSelector((state) => state.user);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -37,9 +36,8 @@ const UserAvatar = () => {
             dispatch(signOutUserFailure(error.message));
         }
     }
-    //functie de handle profile navigate+setopen
 
-  return (
+    return (
         <div>
             <Menu as="div" className="relative inline-block text-left">
                 <div>
@@ -60,30 +58,30 @@ const UserAvatar = () => {
                 >
                     <MenuItems className="absolute right-0 mt-2 w-56 origin-top-right divide-gray-100
                         rounded-md bg-white shadow-2xl ring-1 ring-gray-900/5 focus:outline-none">
-                      <div className='p-4'>
-                          <MenuItem className="hover:bg-gray-100">
-                              {({ active }) => (
-                                  <button onClick={() => {
-                                      setOpen(true);
-                                      navigate('/profile');
-                                  }
-                                  } className='text-black group flex w-full
+                        <div className='p-4'>
+                            <MenuItem className="hover:bg-gray-100">
+                                {({ active }) => (
+                                    <button onClick={() => {
+                                        setOpen(true);
+                                        navigate('/profile');
+                                    }
+                                    } className='text-black group flex w-full
                                     items-center rounded-md px-2 py-2 font-sans font-normal'>
-                                      <FaUser className='mr-2' aria-hidden='true'></FaUser>
-                                      Profile
-                                  </button>
-                              )}
-                          </MenuItem>
-                          <MenuItem className="hover:bg-gray-100">
-                              {({ active }) => (
-                                  <button onClick={handleSignOut} className='text-red-700 group flex w-full
+                                        <FaUser className='mr-2' aria-hidden='true'></FaUser>
+                                        Profile
+                                    </button>
+                                )}
+                            </MenuItem>
+                            <MenuItem className="hover:bg-gray-100">
+                                {({ active }) => (
+                                    <button onClick={handleSignOut} className='text-red-700 group flex w-full
                                     items-center rounded-md px-2 py-2 font-sans font-normal'>
-                                      <MdLogout className='mr-2' aria-hidden='true'></MdLogout>
-                                      Sign Out
-                                  </button>
-                              )}
-                          </MenuItem>
-                      </div>
+                                        <MdLogout className='mr-2' aria-hidden='true'></MdLogout>
+                                        Sign Out
+                                    </button>
+                                )}
+                            </MenuItem>
+                        </div>
                     </MenuItems>
 
                 </Transition>

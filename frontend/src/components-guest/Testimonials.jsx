@@ -32,38 +32,38 @@ const Testimonials = () => {
                         <h1 className='text-2xl lg:text-4xl mx-auto font-serif font-medium translate-y-4'>
                             Read what others have to say!
                         </h1>
-                    <div className='flex flex-col max-w-5xl mx-auto'>
-                        <div className='bg-white p-8 rounded-xl'>
-                            <div className='grid grid-cols-1 pt-6 gap-6 relative z-48 pl-8 pr-8 md:pt-0 sm:grid-cols-2'>
-                                {TestimonialData.map((data, index) => (
-                                    <div data-aos={index === 1 ? "fade-right":"fade-left"}
-                                    data-aos-delay={data.delay} 
-                                    className=' min-h-[180px] lg:w-[400px] mx-auto
+                        <div className='flex flex-col max-w-5xl mx-auto'>
+                            <div className='bg-white p-8 rounded-xl'>
+                                <div className='grid grid-cols-1 pt-6 gap-6 relative z-48 pl-8 pr-8 md:pt-0 sm:grid-cols-2'>
+                                    {TestimonialData.map((data, index) => (
+                                        <div data-aos={index === 1 ? "fade-right" : "fade-left"}
+                                            data-aos-delay={data.delay}
+                                            className=' min-h-[180px] lg:w-[400px] mx-auto
                                     flex flex-col items-center text-white
                                     rounded-xl bg-sky-900/85 backdrop-blur-sm
                                     text-center text-2xl py-6 px-3 w-full'>
-                                        <img src={data.icon} alt="" className='h-24 w-32 mx-auto rounded-full pb-4'></img>
-                                        <p className='font-serif pb-3'>{data.content}</p>
-                                        <p className='text-sm font-thin pb-3 px-4'>
-                                            {data.description}
-                                        </p>
-                                        <div className='flex '>
-                                            <RiStarSFill></RiStarSFill>
-                                            <RiStarSFill></RiStarSFill> 
-                                            <RiStarSFill></RiStarSFill>
-                                            <RiStarSFill></RiStarSFill> 
-                                            <RiStarSFill></RiStarSFill>  
+                                            <img src={data.icon} alt="" className='h-24 w-32 mx-auto rounded-full pb-4'></img>
+                                            <p className='font-serif pb-3'>{data.content}</p>
+                                            <p className='text-sm font-thin pb-3 px-4'>
+                                                {data.description}
+                                            </p>
+                                            <div className='flex '>
+                                                <RiStarSFill></RiStarSFill>
+                                                <RiStarSFill></RiStarSFill>
+                                                <RiStarSFill></RiStarSFill>
+                                                <RiStarSFill></RiStarSFill>
+                                                <RiStarSFill></RiStarSFill>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}   
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-  )
+        </section>
+    )
 }
 
 export default Testimonials

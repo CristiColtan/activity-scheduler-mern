@@ -9,9 +9,10 @@ import {
 
 const router = express.Router();
 
+router.get("/signout", signout);
+
 router.post("/signup", signup);
 router.post("/signin", signin);
-router.get("/signout", signout);
 router.post("/signgoogle", signgoogle);
 
 export default router;

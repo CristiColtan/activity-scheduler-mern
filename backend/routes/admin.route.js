@@ -31,6 +31,7 @@ router.get(
   verifyAdmin,
   fetchAllTrashedTasks
 );
+
 router.post("/add/team-manager", verifyToken, verifyAdmin, addTeamManager);
 router.post(
   "/remove/team-manager",
@@ -38,6 +39,7 @@ router.post(
   verifyAdmin,
   removeTeamManager
 );
+
 router.put(
   "/edit/team-manager/:memberID",
   verifyToken,
@@ -50,4 +52,5 @@ router.put(
   verifyAdmin,
   makeAccountActiveOrInactive
 );
+
 export default router;

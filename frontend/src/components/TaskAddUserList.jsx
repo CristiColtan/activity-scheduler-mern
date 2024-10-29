@@ -1,7 +1,5 @@
 import React, { useState, Fragment, useEffect } from 'react'
-import { useSelector } from 'react-redux';
 import clsx from 'clsx'
-import moment from "moment"
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 
@@ -10,20 +8,17 @@ import { getInitials } from '../utils/FullnameInitials.js';
 import { BsChevronExpand } from "react-icons/bs";
 import { MdCheck } from "react-icons/md";
 
-const TaskAddUserList = ({ setTeam, team, data}) => {
+const TaskAddUserList = ({ setTeam, team, data }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     
     {/*assign task only to normal users, care nu sunt nici admini si nici manageri,
-        adminul sau managerul creeaza task uri
-        functie get normal users (maybe)*/}
+        adminul sau managerul creeaza task uri functie get normal users (maybe)*/}
 
     const handleChange = (el) => {
         const validUsers = el.filter(user => user && user._id);
         setSelectedUsers(validUsers);
         setTeam(el.map((u) => u._id));
     }
-
-    console.log("tlength: ", team.length);
 
     useEffect(() => {
         if (team.length < 1)
@@ -40,7 +35,7 @@ const TaskAddUserList = ({ setTeam, team, data}) => {
                     2xl:py-3 border border-black sm:text-sm min-h-6">
                         <span className='block truncate'>
                             {
-                                selectedUsers.length > 0 ? 
+                                selectedUsers.length > 0 ?
                                     selectedUsers
                                         .filter(user => user)
                                         .map((user) => user.first_name + " " + user.last_name)
@@ -63,9 +58,9 @@ const TaskAddUserList = ({ setTeam, team, data}) => {
                     >
                         <ListboxOptions className="z-50 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white
                         py-1 sm:text-sm shadow-lg ring-1 ring-black/5 focus:outline-none">
-                            { data.length > 0 ? (
+                            {data.length > 0 ? (
                                 data.map((user, index) => (
-                                    user && ( <ListboxOption key={index} value={user}
+                                    user && (<ListboxOption key={index} value={user}
                                         className={({ active }) => clsx('relative cursor-default select-none py-2 pl-6 pr-4', active ? "bg-amber-100 text-amber-900" : "text-black")}>
                                         {({ selected }) => (
                                             <>
@@ -80,7 +75,7 @@ const TaskAddUserList = ({ setTeam, team, data}) => {
                                                 </div>
                                                 {selected ? (
                                                     <span className='absolute inset-y-0 right-10 flex items-center text-green-600'>
-                                                       <MdCheck className='h-5 w-5' aria-hidden='true'/> 
+                                                        <MdCheck className='h-5 w-5' aria-hidden='true' />
                                                     </span>
                                                 ) : null}
                                             </>
@@ -89,9 +84,9 @@ const TaskAddUserList = ({ setTeam, team, data}) => {
                                     )
                                 ))
                             ) : (
-                                    <div className='py-2 pl-6 pr-4 text-black'>
-                                        No users available.
-                                    </div>
+                                <div className='py-2 pl-6 pr-4 text-black'>
+                                    No users available.
+                                </div>
                             )
                             }
                         </ListboxOptions>

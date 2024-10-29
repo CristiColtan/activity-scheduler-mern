@@ -1,6 +1,4 @@
 import React, {useEffect, useState} from 'react'
-import { useNavigate, useParams} from 'react-router-dom';
-import { useSelector } from 'react-redux';
 
 import { MdGridView } from "react-icons/md";
 
@@ -14,14 +12,8 @@ const InProgress = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [Tasks, setTasks] = useState([]);
-  
-    const navigate = useNavigate();
 
     const tabs = [{ title: "Board View", icon: <MdGridView /> }]
-
-    const { currentUser } = useSelector((state) => state.user);
-
-    console.log("Tasks: ", Tasks);
 
     const fetchInProgressTasks = async () => {
         try {

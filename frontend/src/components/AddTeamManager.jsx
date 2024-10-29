@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
 import { useSelector } from 'react-redux';
-import { Dialog, DialogTitle } from "@headlessui/react"
+import { DialogTitle } from "@headlessui/react"
 import { useNavigate } from 'react-router-dom';
 
 import MyModal from './MyModal'
@@ -12,7 +11,7 @@ const AddTeamManager = ({ open, setOpen }) => {
     const [normalUsers, setNormalUsers] = useState([]);
     const [teamManagers, setTeamManagers] = useState([]);
 
-    const { currentUser, error } = useSelector((state) => state.user);
+    const { currentUser } = useSelector((state) => state.user);
     const navigate = useNavigate();
 
     const fetchNormalUsers = async () => {
@@ -37,7 +36,7 @@ const AddTeamManager = ({ open, setOpen }) => {
     }
 
     useEffect(() => {
-        if(open)
+        if (open)
             fetchNormalUsers();
     }, [open]);
 

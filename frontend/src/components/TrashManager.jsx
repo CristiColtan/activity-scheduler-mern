@@ -1,7 +1,6 @@
-import React, {useState, Fragment, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import { useSelector } from 'react-redux';
 import clsx from "clsx"
-import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 
 import Loading from './Loading.jsx';
@@ -10,13 +9,12 @@ import PageTitle from './PageTitle.jsx';
 import { MdKeyboardArrowUp } from "react-icons/md";
 import { MdKeyboardDoubleArrowUp } from "react-icons/md";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { FaTasks } from "react-icons/fa";
 import { GoDash } from "react-icons/go";
 import { MdOutlineRestore } from "react-icons/md";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { FaRegFolderOpen } from "react-icons/fa6";
 
-import { priority_styles, task_type, bgs } from '../utils/tableImports.js';
+import { priority_styles, task_type } from '../utils/tableImports.js';
 
 import DialogRemoveTask from './dialog/DialogRemoveTask.jsx';
 import DialogRestoreTask from './dialog/DialogRestoreTask.jsx'

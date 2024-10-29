@@ -1,10 +1,8 @@
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import Select, { Props, components, DropdownIndicatorProps } from "react-select"
+import Select from "react-select"
 
 import { getInitials } from '../utils/FullnameInitials';
-
-import { MdCheck } from 'react-icons/md';
 
 const controlStyles = {
   base: "border rounded-lg bg-white hover:cursor-pointer",
@@ -36,7 +34,7 @@ const optionStyles = {
 const noOptionsMessageStyles =
   "text-gray-500 p-2 bg-gray-50 border border-dashed border-gray-200 rounded-sm";
 
-const TaskAddUserListEdit2 = ({updatedTeam, setUpdatedTeam, team, data }) => {
+const TaskAddUserListEdit2 = ({ updatedTeam, setUpdatedTeam, team, data }) => {
 
     const [selectedUsers, setSelectedUsers] = useState([]);
 
@@ -68,9 +66,6 @@ const TaskAddUserListEdit2 = ({updatedTeam, setUpdatedTeam, team, data }) => {
         value: member._id,
     }));
 
-    console.log("selected:", selectedUsers);
-    console.log("data:", simplifiedData);
-    console.log("team:", simplifiedTeam);
     useEffect(() => {
         setSelectedUsers(simplifiedTeam);
     }, [data, team]);
@@ -83,50 +78,50 @@ const TaskAddUserListEdit2 = ({updatedTeam, setUpdatedTeam, team, data }) => {
         <>
             <Select options={simplifiedData} isMulti={true} closeMenuOnSelect={false} hideSelectedOptions={false}
                 onChange={(choice) => setSelectedUsers(choice)} value={selectedUsers} unstyled styles={{
-                input: (base) => ({
-                    ...base,
-                    "input:focus": {
-                        boxShadow: "none",
-                    },
-                }),
-                multiValueLabel: (base) => ({
-                    ...base,
-                    whiteSpace: "normal",
-                    overflow: "visible",
-                }),
-                control: (base) => ({
-                    ...base,
-                    transition: "none",
-                }),
-            }}
-            classNames={{
-                control: ({ isFocused }) =>
-                    clsx(
-                        isFocused ? controlStyles.focus : controlStyles.nonFocus,
-                        controlStyles.base,
-                    ),
-                placeholder: () => placeholderStyles,
-                input: () => selectInputStyles,
-                valueContainer: () => valueContainerStyles,
-                singleValue: () => singleValueStyles,
-                multiValue: () => multiValueStyles,
-                multiValueLabel: () => multiValueLabelStyles,
-                indicatorsContainer: () => indicatorsContainerStyles,
-                indicatorSeparator: () => indicatorSeparatorStyles,
-                menu: () => menuStyles,
-                groupHeading: () => groupHeadingStyles,
-                option: ({ isFocused, isSelected }) =>
-                    clsx(
-                        isFocused && optionStyles.focus,
-                        isSelected && optionStyles.selected,
-                        optionStyles.base,
-                    ),
-                noOptionsMessage: () => noOptionsMessageStyles,
-            }}
-            formatOptionLabel={(option) => (
+                    input: (base) => ({
+                        ...base,
+                        "input:focus": {
+                            boxShadow: "none",
+                        },
+                    }),
+                    multiValueLabel: (base) => ({
+                        ...base,
+                        whiteSpace: "normal",
+                        overflow: "visible",
+                    }),
+                    control: (base) => ({
+                        ...base,
+                        transition: "none",
+                    }),
+                }}
+                classNames={{
+                    control: ({ isFocused }) =>
+                        clsx(
+                            isFocused ? controlStyles.focus : controlStyles.nonFocus,
+                            controlStyles.base,
+                        ),
+                    placeholder: () => placeholderStyles,
+                    input: () => selectInputStyles,
+                    valueContainer: () => valueContainerStyles,
+                    singleValue: () => singleValueStyles,
+                    multiValue: () => multiValueStyles,
+                    multiValueLabel: () => multiValueLabelStyles,
+                    indicatorsContainer: () => indicatorsContainerStyles,
+                    indicatorSeparator: () => indicatorSeparatorStyles,
+                    menu: () => menuStyles,
+                    groupHeading: () => groupHeadingStyles,
+                    option: ({ isFocused, isSelected }) =>
+                        clsx(
+                            isFocused && optionStyles.focus,
+                            isSelected && optionStyles.selected,
+                            optionStyles.base,
+                        ),
+                    noOptionsMessage: () => noOptionsMessageStyles,
+                }}
+                formatOptionLabel={(option) => (
                     <div className="flex items-center w-full justify-between">
-                    {option.label} {/* Afișează doar labelul fără simbolul de bifare */}
-                    {/*<MdCheck className='text-green-600 ml-2 text-lg'/>*/}
+                        {option.label}
+                
                     </div>
                 )}
                 placeholder="Select users..."

@@ -1,13 +1,13 @@
 import React, { useRef } from 'react'
 import clsx from "clsx"
-import { useState, Fragment } from 'react'
+import { Fragment } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-
-import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
+import { Transition } from '@headlessui/react'
 
 import { IoMdClose } from "react-icons/io";
 
-import { setOpenSidebar } from '../redux/user/userSlice';
+import { setOpenSidebar } from '../redux/user/userSlice.js';
+
 import Sidebar from './Sidebar';
 
 const MobileSidebar = () => {
@@ -19,18 +19,18 @@ const MobileSidebar = () => {
         dispatch(setOpenSidebar(false));
     }
 
-    return(
+    return (
         <>
-          <Transition
-            show={sidebarOpen}
-            as={Fragment}
-            enter='transition ease-out duration-100'
-                    enterFrom='transform opacity-0 scale-95'
-                    enterTo='transform opacity-100 scale-100'
-                    leave='transition ease-in duration-75'
-                    leaveFrom='transform opacity-100 scale-100'
-                    leaveTo='transform opacity-0 scale-95'
-          >
+            <Transition
+                show={sidebarOpen}
+                as={Fragment}
+                enter='transition ease-out duration-100'
+                enterFrom='transform opacity-0 scale-95'
+                enterTo='transform opacity-100 scale-100'
+                leave='transition ease-in duration-75'
+                leaveFrom='transform opacity-100 scale-100'
+                leaveTo='transform opacity-0 scale-95'
+            >
                 {(ref) => (
                     <div ref={(node) => (mobileMenuRef.current = node)}
                         className={clsx('md:hidden w-full h-full bg-[#f2f2f2] transition-all duration-700 transform',
@@ -47,11 +47,11 @@ const MobileSidebar = () => {
                             <div className='-mt-11'>
                                 <Sidebar></Sidebar>
                             </div>
-                        </div>    
+                        </div>
                     </div>
-            )}
+                )}
               
-          </Transition>
+            </Transition>
         </>
     )
 }

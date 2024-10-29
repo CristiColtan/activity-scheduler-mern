@@ -7,21 +7,18 @@ import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/r
 
 import { FaRegFolderOpen } from "react-icons/fa6";
 import { MdOutlineEdit } from "react-icons/md";
-import { IoMdAdd } from "react-icons/io";
 import { FaCopy } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import { BsThreeDots } from "react-icons/bs";
 
-import TaskAddSubTask from './TaskAddSubTask';
 import DialogDeleteConfirmTask from './dialog/DialogTrashConfirmTask';
 import DialogDuplicateTask from './dialog/DialogDuplicateTask';
 
 const TaskDialog = ({ task, tasks, setTasks }) => {
-  const [openSubTask, setOpenSubTask] = useState(false);
   const [openDialogDelete, setOpenDialogDelete] = useState(false);
   const [openDialogDuplicate, setOpenDialogDuplicate] = useState(false);
 
-  const { currentUser, loading, error } = useSelector((state) => state.user);
+  const { currentUser } = useSelector((state) => state.user);
 
   const navigate = useNavigate();
 
@@ -32,10 +29,6 @@ const TaskDialog = ({ task, tasks, setTasks }) => {
   const deleteHandlerOnClick = () => {
     setOpenDialogDelete(true);
   };
-
-  const deleteHandler = () => {
-    
-  }
 
   const items = [
     {

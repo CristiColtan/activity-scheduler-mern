@@ -59,18 +59,18 @@ const Sidebar = () => {
     const location = useLocation();
 
     const path = location.pathname.split("/")[1];
-    const sidebarLinks = (currentUser.is_admin === "Yes" || currentUser.is_team_manager ==="Yes") ? linkData : linkData.slice(0, 5);
+    const sidebarLinks = (currentUser.is_admin === "Yes" || currentUser.is_team_manager === "Yes") ? linkData : linkData.slice(0, 5);
 
     const closeSidebar = () => {
         dispatch(setOpenSidebar(false));
     };
 
-    const NavLink = ({el}) => {
+    const NavLink = ({ el }) => {
         return (
             <Link to={el.link} onClick={closeSidebar}
                 className={
                     clsx("w-full lg:w-3/4 flex gap-2 px-3 py-2 rounded-full items-center text-black text-base hover:bg-[#2564ed2d]",
-                    path === el.link.split("/")[0] ? "bg-blue-700 text-white hover:bg-blue-700" : "")
+                        path === el.link.split("/")[0] ? "bg-blue-700 text-white hover:bg-blue-700" : "")
                 }>
                 {el.icon}
                 <span className='font-medium'>{el.label}</span>
@@ -92,7 +92,7 @@ const Sidebar = () => {
                         <NavLink el={link} key={link.label}></NavLink>
                     ))
                 }
-            </div> 
+            </div>
             <div className=''>
                 <button className='w-full flex gap-2 p-2 items-center text-lg text-black'>
                     <IoIosSettings className='text-xl' />

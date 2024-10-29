@@ -1,30 +1,22 @@
 import React, {useEffect, useState} from 'react'
-import { useNavigate, useParams} from 'react-router-dom';
-import { Checkbox } from '@headlessui/react'
-import { CheckIcon } from '@heroicons/react/16/solid'
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-import { FaList } from "react-icons/fa";
 import { MdGridView } from "react-icons/md";
-import { MdAdd } from "react-icons/md";
 
 import Loading from '../components/Loading.jsx';
 
-import { priority_styles, task_type, bgs } from '../utils/tableImports.js';
-import { tasks } from '../assets/data.js';
+import { task_type } from '../utils/tableImports.js';
+
 import TaskTitle from '../components/TaskTitle.jsx';
 import BoardView from '../components/BoardView.jsx';
 
 const Tasks = () => {
-    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [enabled, setEnabled] = useState(true);
     const [error, setError] = useState(null);
 
     const [Tasks, setTasks] = useState([]);
 
-    const params = useParams();
     const navigate = useNavigate();
 
     const tabs = [{ title: "Board View", icon: <MdGridView /> }]
@@ -34,8 +26,6 @@ const Tasks = () => {
     };
 
     const { currentUser } = useSelector((state) => state.user);
-
-    console.log(Tasks);
 
     const fetchTasks = async () => {
         try {
@@ -68,7 +58,7 @@ const Tasks = () => {
 
     useEffect(() => {
         fetchTasks();
-    },[])
+    }, [])
 
     return (
         loading ? (<div><Loading /></div>) : (
@@ -167,7 +157,7 @@ const Tasks = () => {
                 {
                     (Tasks && Tasks.length > 0) ?
                         <BoardView tasks={Tasks} setTasks={setTasks} />
-                    :
+                        :
                         <p className='font-sans mt-10 text-2xl flex justify-center'>No tasks available</p>
                 }
             </div>

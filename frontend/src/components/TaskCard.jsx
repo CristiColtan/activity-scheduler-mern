@@ -14,8 +14,6 @@ import { FaTasks } from "react-icons/fa";
 import { GoDash } from "react-icons/go";
 import { LiaCommentSolid } from "react-icons/lia";
 import { IoMdAdd, IoMdAttach } from "react-icons/io";
-import { IoListOutline } from "react-icons/io5";
-import { BsListTask } from "react-icons/bs";
 
 import TaskDialog from './TaskDialog.jsx';
 import TaskAddSubTask from './TaskAddSubTask.jsx';
@@ -71,7 +69,7 @@ const TaskCard = ({ task, tasks, setTasks }) => {
     low: <MdKeyboardArrowDown />,
   };
 
-  const { currentUser, loading, error } = useSelector((state) => state.user);
+  const { currentUser } = useSelector((state) => state.user);
   const [open, setOpen] = useState(false);
   const [subTasks, setSubTasks] = useState([]);
 
@@ -79,8 +77,6 @@ const TaskCard = ({ task, tasks, setTasks }) => {
     if (task.subtasks)
       setSubTasks(task.subtasks);
   }, [task.subtasks])
-  
-  console.log("SubTasks", subTasks);
 
   return (
     <>

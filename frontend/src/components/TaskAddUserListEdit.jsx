@@ -30,8 +30,8 @@ const TaskAddUserList = ({ setTeam, team, data }) => {
                     <ListboxButton className="relative w-full cursor-default rounded pl-3 pr-10 text-left px-3 py-1
                     2xl:py-3 border border-black sm:text-sm min-h-6">
                         <span className="block truncate">
-                            {selectedUsers.length > 0 ? 
-                                selectedUsers.map(user => `${user.first_name} ${user.last_name}`).join(", ") : 
+                            {selectedUsers.length > 0 ?
+                                selectedUsers.map(user => `${user.first_name} ${user.last_name}`).join(", ") :
                                 "No users selected"
                             }
                         </span>
@@ -82,6 +82,6 @@ const TaskAddUserList = ({ setTeam, team, data }) => {
             </Listbox>
         </div>
     );
-};
+}
 
 export default TaskAddUserList;

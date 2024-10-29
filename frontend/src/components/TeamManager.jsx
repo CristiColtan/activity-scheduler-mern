@@ -1,4 +1,4 @@
-import React, {useState, Fragment, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import { useSelector } from 'react-redux';
 import clsx from "clsx"
 import moment from 'moment';
@@ -27,18 +27,10 @@ const TeamManager = () => {
     setDeleteUserData(d_u_data);
     setOpenDialogDelete(true);
   }
-  
-  const userDeleteHandler = () => {
-      
-  }
 
   const editUserHandlerOnClick = (e_u_data) => {
     setEditUserData(e_u_data);
     setOpenEditUser(true);
-  }
-
-  const editUserHandler = () => {
-      
   }
 
   const fetchMyTeam = async () => {
@@ -68,7 +60,7 @@ const TeamManager = () => {
       fetchMyTeam();
     if (openDialogDelete === false)
       fetchMyTeam();
-    if(openAddTeamMember === false)
+    if (openAddTeamMember === false)
       fetchMyTeam();
   }, [openAddTeamMember, openDialogDelete, openEditUser]);
 
@@ -172,11 +164,10 @@ const TeamManager = () => {
         </div>
         
         <div>
-            {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-red-500">{error}</p>}
         </div>
         
-        <DialogDeleteConfirmTeamMember open={openDialogDelete} setOpen={setOpenDialogDelete}
-          userData={deleteUserData} />
+        <DialogDeleteConfirmTeamMember open={openDialogDelete} setOpen={setOpenDialogDelete} userData={deleteUserData} />
         <AddTeamMember open={openAddTeamMember} setOpen={setOpenAddTeamMember} />
         <EditUser open={openEditUser} setOpen={setOpenEditUser} data={editUserData} />
       </>

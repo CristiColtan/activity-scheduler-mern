@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
+import { Tab, TabGroup, TabList, TabPanels } from '@headlessui/react'
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(" ");
@@ -30,4 +30,4 @@ export default function Tabs({ tabs, setSelected, children }) {
             </TabGroup>
         </div>
     )
-} 
+}

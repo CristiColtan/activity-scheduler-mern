@@ -1,4 +1,5 @@
 import "./App.css";
+
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Toaster from "sonner";
 import { Provider } from "react-redux";
@@ -6,9 +7,6 @@ import { PersistGate } from "redux-persist/integration/react";
 
 import Login from "./pages/Login";
 import Guest from "./pages/Guest";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import Menu from "./components/Menu";
 import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -53,7 +51,7 @@ function App() {
                 </Route>
               </Route>
             </Routes>
-            <Footer />
+            {/* <Footer /> */}
           </BrowserRouter>
         </PersistGate>
       </Provider>

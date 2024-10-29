@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { Dialog, DialogTitle, DialogPanel } from "@headlessui/react";
+import React, { useState } from "react";
+import { DialogTitle } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 
 import MyModal from "./MyModal";
-import { TrophyIcon } from "@heroicons/react/16/solid";
 
 const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks }) => {
   const [formData, setFormData] = useState({});
@@ -14,12 +12,10 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks }) => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  console.log("form:",formData);
-
-  const { currentUser } = useSelector((state) => state.user);
+  console.log("form:", formData);
 
   const handleSubmit = async (e) => {
     try {
@@ -137,6 +133,6 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks }) => {
       </MyModal>
     </>
   );
-};
+}
 
 export default TaskAddSubTask;

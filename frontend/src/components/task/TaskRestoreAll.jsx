@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import clsx from 'clsx'
-import { Dialog, DialogTitle } from '@headlessui/react'
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'
+import { DialogTitle } from '@headlessui/react'
 
 import { FaQuestion } from "react-icons/fa";
 
 import MyModal from '../MyModal.jsx'
 
 const TaskRestoreAll = ({ open, setOpen, trashedTasks, setTrashedTasks }) => {
-  const { currentUser } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   

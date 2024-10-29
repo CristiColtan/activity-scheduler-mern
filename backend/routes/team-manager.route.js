@@ -28,13 +28,16 @@ router.get(
   verifyTeamManager,
   fetchDashboardStatistics
 );
+
 router.post("/add/team-member", verifyToken, verifyTeamManager, addToTeam);
+
 router.delete(
   "/remove/team-member/:memberID",
   verifyToken,
   verifyTeamManager,
   removeFromTeam
 );
+
 router.put(
   "/edit/team-member/:memberID",
   verifyToken,

@@ -152,16 +152,17 @@ const TaskDetails = () => {
                           <span className='font-thin uppercase'>{Task?.priority} priority</span>
                         </div>
 
-                        <div className={clsx('flex items-center gap-1.5 rounded-full px-3 py-1',bgs_task_type[Task?.stage])}>
+                        <div className={clsx('flex items-center gap-1.5 rounded-full px-3 py-1', bgs_task_type[Task?.stage])}>
                           <div className={clsx("w-4 h-4 rounded-full", task_type[Task?.stage])}>
                           </div>
                           <span className={clsx('font-serif uppercase', text_task_type[Task?.stage])}>{Task?.stage}</span>
                         </div>
 
                         <div className={clsx('flex gap-1 items-center font-serif px-3 py-1 rounded-full bg-gray-400', {
-                          'hidden' : Task?.is_trashed === "No" })}>
-                            <FaTrash className=''/>
-                            <span className='font-serif uppercase'>TRASHED</span>
+                          'hidden': Task?.is_trashed === "No"
+                        })}>
+                          <FaTrash className='' />
+                          <span className='font-serif uppercase'>TRASHED</span>
                         </div>
                       </div>
 
@@ -231,22 +232,21 @@ const TaskDetails = () => {
                       <div className='w-full grid grid-cols-2 gap-4'>
                         {
                           Task.asseturls && Task.asseturls.length > 0 ? (
-                          Task.asseturls.map((asset, index) => (
-                          <img key={index} src={asset} alt={Task?.title}
-                            className='w-full rounded h-28 md:h-36 2xl:h-52 cursor-pointer transition-all duration-700 hover:scale-125 hover:z-50'></img>
-                        ))) : (<p className='text-lg font-serif py-2'>No assets available.</p>)}
+                            Task.asseturls.map((asset, index) => (
+                              <img key={index} src={asset} alt={Task?.title}
+                                className='w-full rounded h-28 md:h-36 2xl:h-52 cursor-pointer transition-all duration-700 hover:scale-125 hover:z-50'></img>
+                            ))) : (<p className='text-lg font-serif py-2'>No assets available.</p>)}
                       </div>
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                    <Activities activity={activities} id={params.id} setActivities={setActivities} />
+                  <Activities activity={activities} id={params.id} setActivities={setActivities} />
                 </>
               )}
             </Tabs>
           </>)}
-          {/* add task */}
         </>)}
     </div>
   )
@@ -268,10 +268,10 @@ const Activities = ({ activity, id, setActivities }) => {
       const res = await fetch(`http://localhost:8081/backend/task/add-activity/${params.id}`, {
         method: "PUT",
         headers: {
-          "Content-Type" : "application/json",
+          "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({type: select.toLowerCase(), description: text, date: new Date()}),
+        body: JSON.stringify({ type: select.toLowerCase(), description: text, date: new Date() }),
       });
 
       const data = await res.json();
@@ -293,7 +293,7 @@ const Activities = ({ activity, id, setActivities }) => {
       setIsLoading(false);
       return;
     }
-   };
+  };
 
   return (
     <>
@@ -303,11 +303,11 @@ const Activities = ({ activity, id, setActivities }) => {
           <div className='w-full mt-5'>
             {
               activity && activity.length > 0 ? (
-              activity.map((item, index) => (
-                <Fragment key={index + item}>
-                  <Card  item={item} isConnected={index < activity.length - 1} />
-                </Fragment>
-              ))) : (<p className='text-lg font-serif'>No activities available.</p>)
+                activity.map((item, index) => (
+                  <Fragment key={index + item}>
+                    <Card item={item} isConnected={index < activity.length - 1} />
+                  </Fragment>
+                ))) : (<p className='text-lg font-serif'>No activities available.</p>)
             }
           </div>
         </div>
