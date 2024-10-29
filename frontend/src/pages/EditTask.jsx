@@ -5,6 +5,7 @@ import { Dialog, DialogTitle } from "@headlessui/react"
 import { useNavigate, useParams } from 'react-router-dom';
 
 import PageTitle from '../components/PageTitle.jsx'
+import TaskAddUserListEdit2 from '../components/TaskAddUserListEdit2.jsx';
 import TaskAddUserListEdit from '../components/TaskAddUserListEdit.jsx'
 import TaskAddUserList from '../components/TaskAddUserList.jsx'
 import TaskSelectList from '../components/TaskSelectList.jsx'
@@ -27,6 +28,8 @@ const EditTask = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [oldTeam, setOldTeam] = useState([]);
   const [newTeam, setNewTeam] = useState([]);
+  const [team2, setTeam2] = useState([]);
+  const [updatedTeam, setUpdatedTeam] = useState([]);
 
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -69,6 +72,7 @@ const EditTask = () => {
         }
 
         setFormData(data);
+        setTeam2(data.team);
         setTeam(data.team.map(user => user._id));
         setOldTeam(data.team);
         setStage(data.stage.toUpperCase());
@@ -177,10 +181,10 @@ const EditTask = () => {
     e.preventDefault();
 
     try {
-      if (newTeam.length < 1)
+      if (updatedTeam.length < 1)
         formData.team = team;
       else
-        formData.team = newTeam;
+        formData.team = updatedTeam;
 
       if (formData.team.length < 1)
         return setError("You must assign at least one member!");
@@ -218,6 +222,7 @@ const EditTask = () => {
     }
   }
 
+
   return (
     loading ? (<div><Loading /></div>) : (
       <div className='w-full bg-white h-fit px-2 md:px-6 py-2 shadow-lg rounded mb-8'>
@@ -231,7 +236,8 @@ const EditTask = () => {
                     border-black focus:placeholder-gray-500 rounded min-w-[300px] md:min-w-[250px] mb-5'>
             </input>
             <label htmlFor='username' className='font-thin text-base mb-2'>Assign Task to:</label>
-            <TaskAddUserListEdit setTeam={setNewTeam} team={newTeam} data={allUsers} />
+            {/*<TaskAddUserListEdit setTeam={setNewTeam} team={newTeam} data={allUsers} />*/}
+            <TaskAddUserListEdit2 updatedTeam={updatedTeam} setUpdatedTeam={setUpdatedTeam} team={team2} data={allUsers} />
             <div className='flex items-center'>
               <p className='font-thin text-base mt-2 mr-1'>Old team:</p>
               <>

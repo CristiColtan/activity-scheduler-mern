@@ -21,11 +21,11 @@ import { RxActivityLog } from "react-icons/rx";
 import { FaTrash } from "react-icons/fa";
 
 import { priority_styles, task_type, bgs_task_type, bgs_transparent, text_task_type } from '../utils/tableImports.js';
+import { getInitials } from '../utils/FullnameInitials.js';
 
 import PageTitle from '../components/PageTitle.jsx';
 import Loading from "../components/Loading.jsx"
 import Tabs from "../components/Tabs.jsx"
-import { getInitials } from '../utils/FullnameInitials.js';
 
 const t_icons = {
     high: <MdKeyboardDoubleArrowUp />,
