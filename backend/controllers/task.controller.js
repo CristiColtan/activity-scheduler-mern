@@ -58,7 +58,10 @@ export const updateTask = async (req, res, next) => {
     const currentUser = await User.findById(userID);
     if (!currentUser) return next(errorHandler(404, "User not found!"));
 
-    const task = await Task.findById(req.params.id).populate("team");
+    const task = await Task.findById(req.params.id).populate({
+      path: "team",
+      select: "-password",
+    });
 
     if (!task) {
       return next(errorHandler(404, "Task not found!"));
@@ -86,7 +89,10 @@ export const getTaskEdit = async (req, res, next) => {
     const currentUser = await User.findById(userID);
     if (!currentUser) return next(errorHandler(404, "User not found!"));
 
-    const task = await Task.findById(req.params.id).populate("team");
+    const task = await Task.findById(req.params.id).populate({
+      path: "team",
+      select: "-password",
+    });
 
     if (!task) {
       return next(errorHandler(404, "Task not found!"));
@@ -119,9 +125,15 @@ export const getTask = async (req, res, next) => {
     if (!currentUser) return next(errorHandler(404, "User not found!"));
 
     const task = await Task.findById(req.params.id)
-      .populate("team")
-      .populate("activities.by")
-      .populate("created_by");
+      .populate({
+        path: "team",
+        select: "-password",
+      })
+      .populate({
+        path: "activities.by",
+        select: "-password",
+      })
+      .populate({ path: "created_by", select: "-password" });
 
     if (!task) {
       return next(errorHandler(404, "Task not found!"));
@@ -173,9 +185,10 @@ export const addActivity = async (req, res, next) => {
 
     await task.save();
 
-    const updatedTask = await Task.findById(req.params.id).populate(
-      "activities.by"
-    );
+    const updatedTask = await Task.findById(req.params.id).populate({
+      path: "activities.by",
+      select: "-password",
+    });
 
     res.status(200).json(updatedTask);
   } catch (error) {
@@ -222,16 +235,25 @@ export const fetchAllTasks = async (req, res, next) => {
 
     if (currentUser.is_admin === "Yes") {
       tasks = await Task.find({ is_trashed: "No" })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else if (currentUser.is_team_manager === "Yes") {
       tasks = await Task.find({ is_trashed: "No", created_by: userID })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else {
       tasks = await Task.find({ is_trashed: "No", team: userID })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     }
 
     res.status(200).json(tasks);
@@ -397,24 +419,33 @@ export const fetchAllCompletedTasks = async (req, res, next) => {
 
     if (currentUser.is_admin === "Yes") {
       tasks = await Task.find({ is_trashed: "No", stage: "completed" })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else if (currentUser.is_team_manager === "Yes") {
       tasks = await Task.find({
         is_trashed: "No",
         created_by: userID,
         stage: "completed",
       })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else {
       tasks = await Task.find({
         is_trashed: "No",
         team: userID,
         stage: "completed",
       })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     }
 
     res.status(200).json(tasks);
@@ -434,24 +465,33 @@ export const fetchAllInProgressTasks = async (req, res, next) => {
 
     if (currentUser.is_admin === "Yes") {
       tasks = await Task.find({ is_trashed: "No", stage: "in progress" })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else if (currentUser.is_team_manager === "Yes") {
       tasks = await Task.find({
         is_trashed: "No",
         created_by: userID,
         stage: "in progress",
       })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else {
       tasks = await Task.find({
         is_trashed: "No",
         team: userID,
         stage: "in progress",
       })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     }
 
     res.status(200).json(tasks);
@@ -471,24 +511,33 @@ export const fetchAllToDoTasks = async (req, res, next) => {
 
     if (currentUser.is_admin === "Yes") {
       tasks = await Task.find({ is_trashed: "No", stage: "to do" })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else if (currentUser.is_team_manager === "Yes") {
       tasks = await Task.find({
         is_trashed: "No",
         created_by: userID,
         stage: "to do",
       })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     } else {
       tasks = await Task.find({
         is_trashed: "No",
         team: userID,
         stage: "to do",
       })
-        .populate("team")
-        .populate("created_by");
+        .populate({
+          path: "team",
+          select: "-password",
+        })
+        .populate({ path: "created_by", select: "-password" });
     }
 
     res.status(200).json(tasks);
@@ -525,8 +574,11 @@ export const duplicateTask = async (req, res, next) => {
     });
 
     const duplicatedDuplicatedTask = await Task.findById(duplicatedTask._id)
-      .populate("team")
-      .populate("created_by");
+      .populate({
+        path: "team",
+        select: "-password",
+      })
+      .populate({ path: "created_by", select: "-password" });
 
     res.status(200).json(duplicatedDuplicatedTask);
   } catch (error) {

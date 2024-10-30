@@ -17,6 +17,8 @@ const TeamAdmin = () => {
   const { currentUser, error } = useSelector((state) => state.user);
   const [adminTeamManagers, setAdminTeamManagers] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  console.log("Team managers: ", adminTeamManagers);
   
   const [openDialogDelete, setOpenDialogDelete] = useState(false);
   const [openAddTeamManager, setOpenAddTeamManager] = useState(false);

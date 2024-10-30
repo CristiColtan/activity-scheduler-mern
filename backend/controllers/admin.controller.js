@@ -5,7 +5,10 @@ import Task from "../models/task.model.js";
 
 export const getTeamManagers = async (req, res, next) => {
   try {
-    const users = await User.find({ is_team_manager: "Yes" });
+    const users = await User.find({ is_team_manager: "Yes" }).select(
+      "-password"
+    );
+
     res.status(200).json(users);
   } catch (error) {
     next(error);
@@ -14,7 +17,11 @@ export const getTeamManagers = async (req, res, next) => {
 
 export const getNormalUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ is_admin: "No", is_team_manager: "No" });
+    const users = await User.find({
+      is_admin: "No",
+      is_team_manager: "No",
+    }).select("-password");
+
     res.status(200).json(users);
   } catch (error) {
     next(error);
@@ -23,7 +30,8 @@ export const getNormalUsers = async (req, res, next) => {
 
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ is_admin: "No" });
+    const users = await User.find({ is_admin: "No" }).select("-password");
+
     res.status(200).json(users);
   } catch (error) {
     next(error);
@@ -96,7 +104,7 @@ export const editTeamManager = async (req, res, next) => {
     const { memberID } = req.params;
     const { title, role } = req.body;
 
-    const user = await User.findById(memberID);
+    const user = await User.findById(memberID).select("-password");
     if (!user) return next(errorHandler(404, "User not found!"));
 
     if (title) user.title = title;
@@ -152,8 +160,11 @@ export const fetchDashboardStatistics = async (req, res, next) => {
     if (currentUser.is_admin !== "Yes")
       return next(errorHandler(403, "You are not an admin!"));
 
-    const allTasks = await Task.find({ is_trashed: "No" }).populate("team");
-    const allUsers = await User.find({ is_active: "Yes" });
+    const allTasks = await Task.find({ is_trashed: "No" }).populate({
+      path: "team",
+      select: "-password",
+    });
+    const allUsers = await User.find({ is_active: "Yes" }).select("-password");
 
     const tasksData = allTasks.reduce((result, task) => {
       const stage = task.stage;

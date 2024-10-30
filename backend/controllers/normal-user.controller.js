@@ -3,6 +3,27 @@ import { errorHandler } from "../utils/error.js";
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
 
+export const updateProfile = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (userID !== req.params.id)
+      return next(errorHandler(401, "You can only update your own account!"));
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    const { password: pass, ...userWithoutPassword } = updatedUser._doc;
+
+    res.status(200).json(userWithoutPassword);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const fetchDashboardStatistics = async (req, res, next) => {
   try {
     const userID = req.user.id;
@@ -12,7 +33,10 @@ export const fetchDashboardStatistics = async (req, res, next) => {
     const allTasks = await Task.find({
       is_trashed: "No",
       team: userID,
-    }).populate("team");
+    }).populate({
+      path: "team",
+      select: "-password",
+    });
 
     const allUsers = [];
 

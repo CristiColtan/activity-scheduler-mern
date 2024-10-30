@@ -5,7 +5,10 @@ import Task from "../models/task.model.js";
 
 export const getMyTeam = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).populate("team");
+    const user = await User.findById(req.user.id).populate({
+      path: "team",
+      select: "-password",
+    });
 
     if (!user) return next(errorHandler(404, "User not found!"));
 
@@ -18,10 +21,16 @@ export const getMyTeam = async (req, res, next) => {
 export const getNormalUsers = async (req, res, next) => {
   try {
     const userID = req.user.id;
-    const currentUser = await User.findById(userID).populate("team");
+    const currentUser = await User.findById(userID).populate({
+      path: "team",
+      select: "-password",
+    });
     if (!currentUser) return next(errorHandler(404, "User not found!"));
 
-    const users = await User.find({ is_admin: "No", is_team_manager: "No" });
+    const users = await User.find({
+      is_admin: "No",
+      is_team_manager: "No",
+    }).select("-password");
 
     const filteredUsers = users.filter(
       (user) =>
@@ -64,7 +73,10 @@ export const addToTeam = async (req, res, next) => {
     currentUser.team.push(...newMembers);
     await currentUser.save();
 
-    const updatedUser = await User.findById(userID).populate("team");
+    const updatedUser = await User.findById(userID).populate({
+      path: "team",
+      select: "-password",
+    });
     res.status(200).json(updatedUser.team);
   } catch (error) {
     next(error);
@@ -90,7 +102,10 @@ export const removeFromTeam = async (req, res, next) => {
 
     await currentUser.save();
 
-    const updatedUser = await User.findById(userID).populate("team");
+    const updatedUser = await User.findById(userID).populate({
+      path: "team",
+      select: "-password",
+    });
     res.status(200).json(updatedUser.team);
   } catch (error) {
     next(error);
@@ -101,8 +116,19 @@ export const editTeamMember = async (req, res, next) => {
   try {
     const { memberID } = req.params;
     const { title, role } = req.body;
+    const managerID = req.user.id;
 
-    const user = await User.findById(memberID);
+    const manager = await User.findById(managerID);
+    if (!manager || manager.is_team_manager !== "Yes")
+      return next(
+        errorHandler(403, "You are not allowed to edit team members!")
+      );
+
+    if (!manager.team.includes(memberID)) {
+      return next(errorHandler(403, "This user is not part of your team!"));
+    }
+
+    const user = await User.findById(memberID).select("-password");
     if (!user) return next(errorHandler(404, "User not found!"));
 
     if (title) user.title = title;
@@ -138,8 +164,14 @@ export const fetchDashboardStatistics = async (req, res, next) => {
     const allTasks = await Task.find({
       is_trashed: "No",
       created_by: userID,
-    }).populate("team");
-    const allUserss = await User.findById(userID).populate("team");
+    }).populate({
+      path: "team",
+      select: "-password",
+    });
+    const allUserss = await User.findById(userID).populate({
+      path: "team",
+      select: "-password",
+    });
     const allUsers = allUserss.team;
 
     const tasksData = allTasks.reduce((result, task) => {
