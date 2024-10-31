@@ -1,81 +1,68 @@
 import React, {useState, useEffect} from 'react'
-import { useSelector } from 'react-redux';
 import clsx from "clsx"
 import moment from 'moment';
 
-import Loading from './Loading.jsx';
-import PageTitle from './PageTitle.jsx';
+import Loading from '../Loading.jsx';
+import AdminPagetitle from './AdminPageTitle.jsx';
 
-import { getInitials } from '../utils/FullnameInitials.js';
+import { getInitials } from '../../utils/FullnameInitials.js';
+import AdminDialogStatusAction from './AdminDialogStatusAction.jsx';
+import AdminDialogEditUser from './AdminDialogEditUser.jsx';
 
-import DialogStatusAction from './dialog/DialogStatusAction.jsx';
-import DialogDeleteConfirmTeamManager from './dialog/DialogDeleteConfirmTeamManager.jsx';
-import AddTeamManager from './AddTeamManager.jsx';
-import EditUser from './EditUser.jsx';
 
-const TeamAdmin = () => {
-  const { currentUser, error } = useSelector((state) => state.user);
-  const [adminTeamManagers, setAdminTeamManagers] = useState([]);
+const AdminUsers = () => {
+  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  console.log("Team managers: ", adminTeamManagers);
-  
-  const [openDialogDelete, setOpenDialogDelete] = useState(false);
-  const [openAddTeamManager, setOpenAddTeamManager] = useState(false);
-  const [openEditUser, setOpenEditUser] = useState(false);
   const [openDialogStatusAction, setOpenDialogStatusAction] = useState(false);
-  
-  const [userData, setUserData] = useState(null);
-  const [deleteUserData, setDeleteUserData] = useState(null);
-  const [editUserData, setEditUserData] = useState(null);
+  const [openDialogEditUser, setOpenDialogEditUser] = useState(false);
 
-  const userDeleteHandlerOnClick = (d_u_data) => {
-    setDeleteUserData(d_u_data);
-    setOpenDialogDelete(true);
-  }
-  
-  const userActionHandlerOnClick = (u_data) => {
-    setUserData(u_data);
+  const [userDataStatusAction, setUserDataStatusAction] = useState(null);
+  const [userDataEdit, setUserDataEdit] = useState(null);
+
+  const userStatusActionHandlerOnClick = (s_a_data) => {
+    setUserDataStatusAction(s_a_data);
     setOpenDialogStatusAction(true);
   }
-  
-  const editUserHandlerOnClick = (e_u_data) => {
-    setEditUserData(e_u_data);
-    setOpenEditUser(true);
+
+  const userEditHandlerOnClick = (e_data) => {
+    setUserDataEdit(e_data);
+    setOpenDialogEditUser(true);
   }
-  
-  const fetchAdminTeamManagers = async () => {
+
+  console.log("AdminUsers-AllUsers:", allUsers);
+
+  const fetchAllUsers = async () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:8081/backend/admin/get/team-managers", {
+      const res = await fetch("http://localhost:8081/backend/admin/get/all-users", {
         credentials: "include",
       });
 
       const data = await res.json();
-      setAdminTeamManagers(data);
+      if (data.success === false) {
+        console.log(data.message);
+        setError(data.message);
+        setLoading(false);
+        return;
+      }
+
+      setAllUsers(data);
+      setLoading(false);
+      setError(null);
     } catch (error) {
       console.log(error.message);
+      setError(error.message)
       setLoading(false);
       return;
     }
-    setLoading(false);
   }
 
   useEffect(() => {
-    fetchAdminTeamManagers();
+    fetchAllUsers();
   }, []);
-
-  useEffect(() => {
-    if (openDialogStatusAction === false)
-      fetchAdminTeamManagers();
-    if (openEditUser === false)
-      fetchAdminTeamManagers();
-    if (openAddTeamManager === false)
-      fetchAdminTeamManagers();
-    if (openDialogDelete === false)
-      fetchAdminTeamManagers();
-  }, [openAddTeamManager, openDialogDelete, openEditUser, openDialogStatusAction])
 
   const MyTableHeaderUsers = () => {
     return (
@@ -117,7 +104,7 @@ const TeamAdmin = () => {
         <td className='py-2'>
           <button className={clsx('w-fit px-3 py-1 rounded-full font-serif', (user.is_active === "Yes") ?
             "bg-blue-200 hover:bg-blue-400" : "bg-yellow-200 hover:bg-yellow-400")}
-            onClick={() => userActionHandlerOnClick(user)}>
+            onClick={() => userStatusActionHandlerOnClick(user)}>
             {(user.is_active === "Yes") ? "Active" : "Disabled"}
           </button>
         </td>
@@ -129,44 +116,38 @@ const TeamAdmin = () => {
         <td className='p-2 '>
           <div className='flex justify-end gap-4'>
             <button className='font-medium text-blue-700 hover:text-blue-500'
-              onClick={() => editUserHandlerOnClick(user)}>Edit</button>
-            <button className='font-medium text-red-700 hover:text-red-500 hidden md:block'
-              onClick={() => userDeleteHandlerOnClick(user)}>Delete</button>
+              onClick={() => userEditHandlerOnClick(user)}>Edit</button>
+            
           </div>
         </td>
       </tr>
     )
   }
-  
+
   return (
     loading ? (<div><Loading /></div>) : (
       <>
         <div className='w-full bg-white rounded shadow-lg mb-8'>
           <div className='flex items-center justify-between px-2 py-2'>
-            <PageTitle title="Team Managers" />
-            <button className='px-3 py-2 rounded-lg
-                                bg-blue-700 text-white font-sans
-                                hover:bg-blue-500 transition duration-200
-                                font-medium' onClick={() => setOpenAddTeamManager(true)}>
-              <span>+ Add new Team Manager</span>
-            </button>
+            <AdminPagetitle title="All Users" />
           </div>
         </div>
+
         <div className='w-full bg-white h-fit px-2 md:px-6 py-4 shadow-lg rounded'>
           <table className='w-full mb-5'>
             <MyTableHeaderUsers />
             <tbody>
               {
-                adminTeamManagers && adminTeamManagers.length > 0 ?
+                allUsers && allUsers.length > 0 ?
                   (
-                    adminTeamManagers.map((user, index) => (
+                    allUsers.map((user, index) => (
                       <MyTableRowUsers key={index + user._id} user={user} />
                     ))
                   ) : (
                     <>
                       <tr>
                         <td colSpan="5" className="text-center py-4">
-                          No team managers found.
+                          No users found.
                         </td>
                       </tr>
                     </>
@@ -180,13 +161,21 @@ const TeamAdmin = () => {
           {error && <p className="text-red-500">{error}</p>}
         </div>
 
-        <DialogStatusAction open={openDialogStatusAction} setOpen={setOpenDialogStatusAction} userData={userData} />
-        <DialogDeleteConfirmTeamManager open={openDialogDelete} setOpen={setOpenDialogDelete} userData={deleteUserData} />
-        <AddTeamManager open={openAddTeamManager} setOpen={setOpenAddTeamManager} />
-        <EditUser open={openEditUser} setOpen={setOpenEditUser} data={editUserData} />
+        <AdminDialogStatusAction open={openDialogStatusAction}
+          setOpen={setOpenDialogStatusAction}
+          userData={userDataStatusAction}
+          allUsers={allUsers}
+          setAllUsers={setAllUsers}
+        />
+        <AdminDialogEditUser open={openDialogEditUser}
+          setOpen={setOpenDialogEditUser}
+          userData={userDataEdit}
+          allUsers={allUsers}
+          setAllUsers={setAllUsers}
+        />
       </>
     )
   )
 }
 
-export default TeamAdmin
+export default AdminUsers

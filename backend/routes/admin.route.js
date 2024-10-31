@@ -10,6 +10,8 @@ import {
   getAllUsers,
   fetchAllTrashedTasks,
   fetchDashboardStatistics,
+  switchStatusFetchUsers,
+  editUser,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { verifyAdmin } from "../utils/verifyAdmin.js";
@@ -40,6 +42,7 @@ router.post(
   removeTeamManager
 );
 
+router.put("/edit/user-fetch-users/:id", verifyToken, verifyAdmin, editUser);
 router.put(
   "/edit/team-manager/:memberID",
   verifyToken,
@@ -51,6 +54,12 @@ router.put(
   verifyToken,
   verifyAdmin,
   makeAccountActiveOrInactive
+);
+router.put(
+  "/switch-status-fetch-users",
+  verifyToken,
+  verifyAdmin,
+  switchStatusFetchUsers
 );
 
 export default router;

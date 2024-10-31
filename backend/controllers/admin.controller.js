@@ -99,6 +99,30 @@ export const removeTeamManager = async (req, res, next) => {
   }
 };
 
+export const editUser = async (req, res, next) => {
+  try {
+    const memberID = req.params.id;
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You're not an admin!"));
+
+    const updatedUser = await User.findByIdAndUpdate(memberID, req.body, {
+      new: true,
+    });
+
+    const updatedUserList = await User.find({ is_admin: "No" }).select(
+      "-password"
+    );
+    res.status(200).json(updatedUserList);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const editTeamManager = async (req, res, next) => {
   try {
     const { memberID } = req.params;
@@ -112,6 +136,35 @@ export const editTeamManager = async (req, res, next) => {
 
     await user.save();
     res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const switchStatusFetchUsers = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const { memberID } = req.body;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const member = await User.findById(memberID);
+    if (!member)
+      return next(errorHandler(404, `Member with ID ${member} not found!`));
+
+    if (member.is_active === "Yes") member.is_active = "No";
+    else if (member.is_active === "No") member.is_active = "Yes";
+
+    await member.save();
+
+    const updatedUserList = await User.find({ is_admin: "No" }).select(
+      "-password"
+    );
+    res.status(200).json(updatedUserList);
   } catch (error) {
     next(error);
   }

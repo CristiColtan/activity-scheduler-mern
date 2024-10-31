@@ -24,7 +24,7 @@ export default function TabsProfile  ({ tabs, setSelected, children }) {
                         ))
                     }
                 </TabList>
-                <TabPanels className="w-full pl-3 mt-5 ml-5 mr-2">
+                <TabPanels className="w-full pl-3 mt-5 md:ml-4 mr-2">
                     {children}
                  </TabPanels>
              </div>

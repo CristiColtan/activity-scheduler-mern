@@ -1,9 +1,6 @@
-import React, { useState, Fragment, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import clsx from 'clsx'
-import moment from "moment"
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 
 import PageTitle from '../components/PageTitle.jsx';
 import Loading from "../components/Loading.jsx";
@@ -460,10 +457,10 @@ const Profile = () => {
                         )}
                       {
                         selected === 2 && (
-                        <>
-                          <p className='font-serif text-2xl'>Security</p>
+                          <>
+                            <p className='font-serif text-2xl'>Security</p>
                             <p className='font-thin border-b-2 mb-4'>Change your security settings, set up secure
-                          authentication, or delete your account.
+                              authentication, or delete your account.
                             </p>
                           
                             <div className='flex items-center justify-center border-t-2 flex-col mr-2'>
@@ -475,7 +472,7 @@ const Profile = () => {
 
                                 <div className='space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center'>
                                   <span className='font-serif md:text-base text-sm'>Reset your password regularly to keep your account
-                              secure</span>
+                                    secure</span>
                                 </div>
 
                                 <div className='space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center'>
@@ -541,7 +538,7 @@ const Profile = () => {
                                 </div>
 
                                 <div className='space-y-6 p-4 bg-white shadow-lg text-center'>
-                                <span className='font-serif md:text-base text-sm'>
+                                  <span className='font-serif md:text-base text-sm'>
                                     Permanently delete this account.
                                   </span>
                                 </div>
@@ -557,14 +554,14 @@ const Profile = () => {
                       
                               </div>
                             </div>
-                        </>
+                          </>
                         )}
                       {
                         selected === 3 && (
                           <>
                             <p className='font-serif text-2xl'>Privacy</p>
                             <p className='font-thin border-b-2 mb-4'>Exercise your privacy rights and control how your data
-                          is used.
+                              is used.
                             </p>
                           
                             <div className='flex items-center justify-center border-t-2 flex-col mr-2'>
@@ -577,8 +574,8 @@ const Profile = () => {
                                 <div className='space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center'>
                                   <span className='font-serif md:text-base text-sm'>
                                     Select "Manage" to change your privacy
-                              settings and exercise your rights using our
-                              request form.</span>
+                                    settings and exercise your rights using our
+                                    request form.</span>
                                 </div>
 
                                 <div className='space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center'>
@@ -599,7 +596,7 @@ const Profile = () => {
                           <>
                             <p className='font-serif text-2xl'>E-mail notifications</p>
                             <p className='font-thin border-b-2 mb-4'>Decide what you wantto be notified about, and
-                          unsubscribe from what you don't.
+                              unsubscribe from what you don't.
                             </p>
                           
                             <div className='flex items-center justify-center border-t-2 flex-col mr-2'>
@@ -611,11 +608,9 @@ const Profile = () => {
 
                                 <div className='space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center'>
                                   
-                                  <span >
-                                    <span className='font-thin'>{currentUser.email}</span>
-                                    <br></br>
-                                    <span className='font-serif md:text-base text-sm'>This is the email address we send you notifications.</span>
-                                  </span>
+                                  
+                                  <span className='font-serif md:text-base text-sm'>This is the email address we send you notifications.</span>
+                                  
                                 </div>
 
                                 <div className='space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center'>
@@ -627,9 +622,14 @@ const Profile = () => {
                                 </div>
                       
                               </div>
+
+                              
+                            </div>
+                            <div className='space-y-6 p-4 bg-white  flex items-center justify-center text-center -translate-y-5'>
+                              <span className='font-thin'> {currentUser.email}</span>
                             </div>
                           </>
-                      )}
+                        )}
                     </TabsProfile>
                     <div className='w-full flex flex-col md:flex-row gap-5 2xl:gap-8 overflow-y-auto'>
                       {/*left */}
