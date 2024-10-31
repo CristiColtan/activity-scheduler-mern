@@ -20,9 +20,11 @@ import TaskDetails from "./pages/TaskDetails.jsx";
 import CreateTask from "./pages/CreateTask.jsx";
 import EditTask from "./pages/EditTask.jsx";
 import InProgress from "./pages/InProgress.jsx";
+import ToDo from "./pages/ToDo.jsx";
+import PrivateRouteAdmin from "./components/routes/PrivateRouteAdmin.jsx";
+import Settings from "./pages/Settings.jsx";
 
 import { store, persistor } from "./redux/store.js";
-import ToDo from "./pages/ToDo.jsx";
 
 function App() {
   return (
@@ -48,6 +50,9 @@ function App() {
                   <Route path="/trash" element={<Trash />}></Route>
                   <Route path="/create-task" element={<CreateTask />}></Route>
                   <Route path="/edit-task/:id" element={<EditTask />}></Route>
+                  <Route element={<PrivateRouteAdmin />}>
+                    <Route path="/settings" element={<Settings />}></Route>
+                  </Route>
                 </Route>
               </Route>
             </Routes>

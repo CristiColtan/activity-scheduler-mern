@@ -1,7 +1,7 @@
 import React from 'react'
 import clsx from "clsx"
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { MdDashboard } from "react-icons/md";
 import { BsListTask } from "react-icons/bs";
@@ -57,6 +57,7 @@ const Sidebar = () => {
 
     const dispatch = useDispatch();
     const location = useLocation();
+    const navigate = useNavigate();
 
     const path = location.pathname.split("/")[1];
     const sidebarLinks = (currentUser.is_admin === "Yes" || currentUser.is_team_manager === "Yes") ? linkData : linkData.slice(0, 5);
@@ -94,7 +95,8 @@ const Sidebar = () => {
                 }
             </div>
             <div className=''>
-                <button className='w-full flex gap-2 p-2 items-center text-lg text-black'>
+                <button className={clsx('w-full flex gap-2 p-2 items-center text-lg text-black')}
+                    onClick={() => { navigate("/settings") }}>
                     <IoIosSettings className='text-xl' />
                     <span className='font-medium'>Settings</span>
                 </button>
