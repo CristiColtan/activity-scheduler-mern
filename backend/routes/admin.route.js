@@ -12,6 +12,10 @@ import {
   fetchDashboardStatistics,
   switchStatusFetchUsers,
   editUser,
+  fetchAllTasksPopulated,
+  deleteAsset,
+  deleteActivity,
+  editActivity,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { verifyAdmin } from "../utils/verifyAdmin.js";
@@ -33,6 +37,12 @@ router.get(
   verifyAdmin,
   fetchAllTrashedTasks
 );
+router.get(
+  "/get/all-tasks-populated",
+  verifyToken,
+  verifyAdmin,
+  fetchAllTasksPopulated
+);
 
 router.post("/add/team-manager", verifyToken, verifyAdmin, addTeamManager);
 router.post(
@@ -42,6 +52,9 @@ router.post(
   removeTeamManager
 );
 
+router.put("/delete/asset", verifyToken, verifyAdmin, deleteAsset);
+router.put("/delete/activity", verifyToken, verifyAdmin, deleteActivity);
+router.put("/edit/activity", verifyToken, verifyAdmin, editActivity);
 router.put("/edit/user-fetch-users/:id", verifyToken, verifyAdmin, editUser);
 router.put(
   "/edit/team-manager/:memberID",

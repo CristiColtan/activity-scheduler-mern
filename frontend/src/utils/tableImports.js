@@ -40,3 +40,12 @@ export const bgs_transparent = {
 export const task_list_stage = ["TO DO", "IN PROGRESS", "COMPLETED"];
 
 export const task_list_priority = ["LOW", "NORMAL", "MEDIUM", "HIGH"];
+
+export const task_activity_list_type = [
+  "ASSIGNED",
+  "COMMENTED",
+  "COMPLETED",
+  "STARTED",
+  "IN PROGRESS",
+  "BUG",
+];

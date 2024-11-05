@@ -33,7 +33,8 @@ const AdminDialogStatusAction = ({ open, setOpen, userData, allUsers, setAllUser
                 setLoading(false);
                 return;
             }
-            setAllUsers(data);
+
+            setAllUsers((prevUsers) => prevUsers.map((user)=>(user._id === data._id ? data : user)));
             setLoading(false);
             handleCancel();
             

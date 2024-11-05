@@ -14,7 +14,9 @@ import { FaUsers } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
 import { FaTeamspeak } from "react-icons/fa";
+
 import AdminUsers from '../components/admin/AdminUsers.jsx';
+import AdminTasks from '../components/admin/AdminTasks.jsx';
 
 const tabs = [{
   title: "Users",
@@ -65,7 +67,7 @@ const Settings = () => {
                       )}
                       {selected === 1 && (
                         <>
-                          2
+                          <AdminTasks />
                         </>
                       )}
                       {selected === 2 && (

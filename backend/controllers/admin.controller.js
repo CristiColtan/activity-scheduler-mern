@@ -112,12 +112,9 @@ export const editUser = async (req, res, next) => {
 
     const updatedUser = await User.findByIdAndUpdate(memberID, req.body, {
       new: true,
-    });
+    }).select("-password");
 
-    const updatedUserList = await User.find({ is_admin: "No" }).select(
-      "-password"
-    );
-    res.status(200).json(updatedUserList);
+    res.status(200).json(updatedUser);
   } catch (error) {
     next(error);
   }
@@ -161,10 +158,7 @@ export const switchStatusFetchUsers = async (req, res, next) => {
 
     await member.save();
 
-    const updatedUserList = await User.find({ is_admin: "No" }).select(
-      "-password"
-    );
-    res.status(200).json(updatedUserList);
+    res.status(200).json(member);
   } catch (error) {
     next(error);
   }
@@ -190,6 +184,29 @@ export const makeAccountActiveOrInactive = async (req, res, next) => {
 
     await member.save();
     res.status(200).json({ message: "Success!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchAllTasksPopulated = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const populateOptions = [
+      { path: "team", select: "-password" },
+      { path: "created_by", select: "-password" },
+      { path: "activities.by", select: "-password" },
+    ];
+
+    const tasks = await Task.find().populate(populateOptions);
+
+    res.status(200).json(tasks);
   } catch (error) {
     next(error);
   }
@@ -276,6 +293,89 @@ export const fetchDashboardStatistics = async (req, res, next) => {
     };
 
     res.status(200).json(summary);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteAsset = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { taskID, assetIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const task = await Task.findById(taskID);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (assetIndex < 0 || assetIndex >= task.asseturls.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    task.asseturls.splice(assetIndex, 1);
+    await task.save();
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteActivity = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { taskID, activityIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const task = await Task.findById(taskID);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (activityIndex < 0 || activityIndex >= task.activities.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    task.activities.splice(activityIndex, 1);
+    await task.save();
+
+    res.status(200).json(task);
+  } catch (error) {}
+};
+
+export const editActivity = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { formData, taskID, activityIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const task = await Task.findById(taskID);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (activityIndex < 0 || activityIndex >= task.activities.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    task.activities[activityIndex].type = formData.type;
+
+    if (formData.description)
+      task.activities[activityIndex].description = formData.description;
+
+    await task.save();
+
+    res.status(200).json(task);
   } catch (error) {
     next(error);
   }

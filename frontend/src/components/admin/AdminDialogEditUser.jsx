@@ -49,7 +49,7 @@ const AdminDialogEditUser = ({ open, setOpen, userData, allUsers, setAllUsers })
         return;
       }
 
-      setAllUsers(data);
+      setAllUsers((prevUsers) => prevUsers.map((user)=>(user._id === data._id ? data : user)));
       setLoading(false);
       handleCancel();
       setFormData({});
