@@ -19,6 +19,7 @@ import { FaBug, FaThumbsUp, FaUser } from "react-icons/fa";
 import { MdOutlineMessage, MdOutlineDoneAll } from "react-icons/md"
 import { GrInProgress } from "react-icons/gr";
 import { CiEdit } from "react-icons/ci";
+import { MdTaskAlt } from 'react-icons/md'
 
 import { toggleExpand } from '../../redux/expand/expandSlice.js'
 
@@ -155,7 +156,7 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
     const expandedRows = useSelector((state) => state.expand.expandedRows);
     const isExpanded = expandedRows.includes(task._id);
 
-    const handleOpenEditOnClick = ( a_data, taskid, aindex ) => {
+    const handleOpenEditOnClick = (a_data, taskid, aindex) => {
       setActivityData(a_data);
       setTaskId(taskid);
       setActIndex(aindex);
@@ -350,8 +351,53 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
                       </>
                     )}
                   </>)}
-                {selected === 2 && (<> {/* do subtasks */}
-                  3</>)}
+                {selected === 2 && (
+                  <>
+                    {task.subtasks && task.subtasks.length > 0 ? (
+                      <>
+                        {
+                          task.subtasks.map((subtask, index) => (
+                            <div className='w-full grid grid-cols-2'>
+                              <div key={index} className='flex gap-6 border-gray-500 py-3'>
+                                <div className='w-10 h-10 rounded-full flex items-center justify-center bg-violet-100
+                                translate-y-1'>
+                                  <MdTaskAlt className='text-violet-600' size={24} />
+                                </div>
+
+                                <div className=''>
+                                  <div className='flex gap-4 items-center'>
+                                    <span className='font-thin'>{new Date(subtask?.date).toDateString()}</span>
+                                    <span className='px-2 py-0.5 text-center text-sm rounded-full bg-violet-100 text-violet-700 font-semibold'>
+                                      {subtask?.tag}
+                                    </span>
+                                  </div>
+                                  <p className='font-serif'>{subtask?.title}</p>
+                                </div>
+                              </div>
+                              <div className='flex items-center'>
+                                <button className='px-2 py-2 rounded 
+                                text-red-500 font-sans
+                                hover:text-red-300 transition duration-200
+                                font-medium -translate-y-1.5'
+                                >
+                                  {<CiCircleRemove className='text-xl mr-3' size={36} />}
+                                </button>
+                                <button className='px-2 py-2 rounded 
+                                text-blue-500 font-sans
+                                hover:text-blue-300 transition duration-200
+                                font-medium -translate-y-1.5'
+                                >
+                                  {<CiEdit className='text-xl' size={36} />}
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        }
+                      </>
+                    ) : (
+                      <p>No subtasks available.</p>
+                    )}
+                  </>)}
               </AdminTabs>
             </td>
           </tr>
