@@ -5,7 +5,6 @@ const initialState = {
   error: null,
   loading: false,
   sidebarOpen: false,
-  selectedAdminTasksTab: 0,
 };
 
 const userSlice = createSlice({
@@ -51,9 +50,6 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
-    setSelectedTab: (state, action) => {
-      state.selectedAdminTasksTab = action.payload;
-    },
   },
 });
 
@@ -68,7 +64,6 @@ export const {
   updateUserStart,
   updateUserFailure,
   updateUserSuccess,
-  setSelectedTab,
 } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -16,6 +16,8 @@ import {
   deleteAsset,
   deleteActivity,
   editActivity,
+  deleteSubtask,
+  editSubtask,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { verifyAdmin } from "../utils/verifyAdmin.js";
@@ -54,7 +56,9 @@ router.post(
 
 router.put("/delete/asset", verifyToken, verifyAdmin, deleteAsset);
 router.put("/delete/activity", verifyToken, verifyAdmin, deleteActivity);
+router.put("/delete/subtask", verifyToken, verifyAdmin, deleteSubtask);
 router.put("/edit/activity", verifyToken, verifyAdmin, editActivity);
+router.put("/edit/subtask", verifyToken, verifyAdmin, editSubtask);
 router.put("/edit/user-fetch-users/:id", verifyToken, verifyAdmin, editUser);
 router.put(
   "/edit/team-manager/:memberID",

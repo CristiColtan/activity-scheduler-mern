@@ -22,6 +22,7 @@ import { CiEdit } from "react-icons/ci";
 import { MdTaskAlt } from 'react-icons/md'
 
 import { toggleExpand } from '../../redux/expand/expandSlice.js'
+import { setSelectedTabForTask } from '../../redux/expand/taskTabsSlice.js'
 
 import { priority_styles, task_type, bgs } from '../../utils/tableImports.js';
 import { getInitials } from '../../utils/FullnameInitials.js'
@@ -29,6 +30,7 @@ import { getInitials } from '../../utils/FullnameInitials.js'
 import Loading from '../Loading.jsx'
 import AdminTabs from './AdminTabs.jsx'
 import AdminDialogEditActivity from './AdminDialogEditActivity.jsx'
+import AdminDialogEditSubtask from './AdminDialogEditSubtask.jsx'
 
 const t_icons = {
       high: <MdKeyboardDoubleArrowUp />,
@@ -44,6 +46,12 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
   const [activityData, setActivityData] = useState(null);
   const [taskId, setTaskId] = useState(null);
   const [actIndex, setActIndex] = useState(null);
+
+  const [openEditSubtask, setOpenEditSubtask] = useState(false);
+  const [subtaskData, setSubtaskData] = useState(null);
+  const [subtaskIndex, setSubtaskIndex] = useState(null);
+  const [taskIdSubtask, settaskIdSubtask] = useState(null);
+
 
   const MyUserInfo = ({ user, index }) => {
     return (
@@ -147,10 +155,33 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
     }
   }
 
+  const handleDeleteSubtaskOnClick = async (taskID, subtaskIndex) => {
+    try {
+      const res = await fetch("http://localhost:8081/backend/admin/delete/subtask", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ taskID: taskID, subtaskIndex: subtaskIndex }),
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+      setTasks((prevTasks) => prevTasks.map((task) => (task._id === data._id ? { ...task, subtasks: task.subtasks.filter((_, index) => index !== subtaskIndex) } : task)));
+    } catch (error) {
+      console.error(error.message);
+      return;
+    }
+  }
+
   const MyTableRow = ({ task }) => {
     const [expand, setExpand] = useState(false);
     const [Selected, setSelected] = useState(0);
-    const selected = useSelector((state) => state.user.selectedAdminTasksTab);
+    const selected = useSelector((state) => state.taskTabs.selectedTabs[task._id] || 0);
 
     const dispatch = useDispatch();
     const expandedRows = useSelector((state) => state.expand.expandedRows);
@@ -163,6 +194,14 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
       setOpenEdit(true);
     }
 
+    const handleOpenEditSubtaskOnClick = (s_data, taskid, sindex) => {
+      setSubtaskData(s_data);
+      settaskIdSubtask(taskid);
+      setSubtaskIndex(sindex);
+      setOpenEditSubtask(true);
+    }
+
+
     const switchOnClick = () => {
       setExpand((prevExpand) => !prevExpand);
       if (!expand)
@@ -172,6 +211,10 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
     const handleToggle = () => {
       dispatch(toggleExpand(task._id));
     };
+
+    const handleTabChange = (tabIndex) => {
+      dispatch(setSelectedTabForTask({ taskID: task._id, tabIndex }));
+    }
 
     const activitiy_types = {
       commented: (
@@ -241,7 +284,7 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
           <td className='py-2'>
             <div className='flex'>
               {task.team.map((m, index) => (
-                <div key={index} className={clsx("w-7 h-7 rounded-full text-white items-center justify-center text-sm flex -mr-1",
+                <div key={m._id} className={clsx("w-7 h-7 rounded-full text-white items-center justify-center text-sm flex -mr-1",
                   bgs[index % bgs.length]
                 )}>
                   <MyUserInfo user={m} index={index} />
@@ -271,14 +314,14 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
         {isExpanded && (
           <tr className='text-black border-b border-black table-row'>
             <td colSpan="5">
-              <AdminTabs tabs={tabs} setSelected={setSelected}>
+              <AdminTabs tabs={tabs} selectedd={selected} setSelected={handleTabChange}>
                 {selected === 0 && (
                   <>
                     {task.asseturls && task.asseturls.length > 0 ? (
                       <>
                         {
-                          task.asseturls.map((url, index) => (
-                            <div key={index} className='w-full flex items-center  gap-10 mb-5'>
+                          task.asseturls?.map((url, index) => (
+                            <div key={url + index} className='w-full flex items-center  gap-10 mb-5'>
                               <img src={url} alt='Asset image'
                                 className='rounded h-24 md:h-32 2xl:h-48 cursor-pointer
                                 transition-all duration-500 hover:scale-110 hover:z-50 border-black border-2'>
@@ -302,8 +345,8 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
                     {task.activities && task.activities.length > 0 ? (
                       <>
                         {
-                          task.activities.map((item, index) => (
-                            <div key={index} className='w-full grid grid-cols-2'>
+                          task.activities?.map((item, index) => (
+                            <div key={item?.type + index + item?.description} className='w-full grid grid-cols-2'>
                               <div className='flex space-x-4'>
                                 <div className='flex flex-col items-center flex-shrink-0'>
                                   <div className='w-10 h-10 flex items-center justify-center translate-y-5'>
@@ -356,9 +399,9 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
                     {task.subtasks && task.subtasks.length > 0 ? (
                       <>
                         {
-                          task.subtasks.map((subtask, index) => (
-                            <div className='w-full grid grid-cols-2'>
-                              <div key={index} className='flex gap-6 border-gray-500 py-3'>
+                          task.subtasks?.map((subtask, index) => (
+                            <div key={subtask?.title + subtask?.description + index} className='w-full grid grid-cols-2'>
+                              <div className='flex gap-6 border-gray-500 py-3'>
                                 <div className='w-10 h-10 rounded-full flex items-center justify-center bg-violet-100
                                 translate-y-1'>
                                   <MdTaskAlt className='text-violet-600' size={24} />
@@ -367,7 +410,8 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
                                 <div className=''>
                                   <div className='flex gap-4 items-center'>
                                     <span className='font-thin'>{new Date(subtask?.date).toDateString()}</span>
-                                    <span className='px-2 py-0.5 text-center text-sm rounded-full bg-violet-100 text-violet-700 font-semibold'>
+                                    <span className='px-2 py-0.5 text-center text-sm rounded-full bg-violet-100 text-violet-700 font-semibold
+                                    hidden md:block'>
                                       {subtask?.tag}
                                     </span>
                                   </div>
@@ -379,6 +423,7 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
                                 text-red-500 font-sans
                                 hover:text-red-300 transition duration-200
                                 font-medium -translate-y-1.5'
+                                  onClick={() => handleDeleteSubtaskOnClick(task._id, index)}
                                 >
                                   {<CiCircleRemove className='text-xl mr-3' size={36} />}
                                 </button>
@@ -386,6 +431,7 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
                                 text-blue-500 font-sans
                                 hover:text-blue-300 transition duration-200
                                 font-medium -translate-y-1.5'
+                                  onClick={()=>handleOpenEditSubtaskOnClick(subtask, task._id, index)}
                                 >
                                   {<CiEdit className='text-xl' size={36} />}
                                 </button>
@@ -415,7 +461,7 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
             {
               (tasks && tasks.length > 0) ? (
                 tasks.map((task, id) => (
-                  <MyTableRow key={id} task={task} />
+                  <MyTableRow key={task._id + id + "a"} task={task} />
                 ))) :
                 (<>
                   <tr>
@@ -435,6 +481,14 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
         taskID={taskId}
         activityIndex={actIndex}
         activityData={activityData}
+      />
+      <AdminDialogEditSubtask open={openEditSubtask}
+        setOpen={setOpenEditSubtask}
+        allTasks={tasks}
+        setAllTasks={setTasks}
+        taskID={taskIdSubtask}
+        subtaskIndex={subtaskIndex}
+        subtaskData={subtaskData}
       />
     </>
   )

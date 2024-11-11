@@ -347,7 +347,36 @@ export const deleteActivity = async (req, res, next) => {
     await task.save();
 
     res.status(200).json(task);
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSubtask = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { taskID, subtaskIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const task = await Task.findById(taskID);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (subtaskIndex < 0 || subtaskIndex >= task.subtasks.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    task.subtasks.splice(subtaskIndex, 1);
+    await task.save();
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const editActivity = async (req, res, next) => {
@@ -372,6 +401,36 @@ export const editActivity = async (req, res, next) => {
 
     if (formData.description)
       task.activities[activityIndex].description = formData.description;
+
+    await task.save();
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editSubtask = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { formData, taskID, subtaskIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const task = await Task.findById(taskID);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (subtaskIndex < 0 || subtaskIndex >= task.subtasks.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    if (formData.title) task.subtasks[subtaskIndex].title = formData.title;
+    if (formData.tag) task.subtasks[subtaskIndex].tag = formData.tag;
+    if (formData.date) task.subtasks[subtaskIndex].date = formData.date;
 
     await task.save();
 
