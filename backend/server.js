@@ -9,6 +9,7 @@ import AdminRouter from "./routes/admin.route.js";
 import TeamManagerRouter from "./routes/team-manager.route.js";
 import TaskRouter from "./routes/task.route.js";
 import NormalUserRouter from "./routes/normal-user.route.js";
+import NotificationRouter from "./routes/notification.route.js";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use("/backend/admin", AdminRouter);
 app.use("/backend/team-manager", TeamManagerRouter);
 app.use("/backend/task", TaskRouter);
 app.use("/backend/normal-user", NormalUserRouter);
+app.use("/backend/notif", NotificationRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

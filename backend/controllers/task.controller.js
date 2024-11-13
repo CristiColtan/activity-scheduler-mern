@@ -2,6 +2,7 @@ import { errorHandler } from "../utils/error.js";
 
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
 
 export const createTask = async (req, res, next) => {
   console.log(req.params);
@@ -28,6 +29,16 @@ export const createTask = async (req, res, next) => {
       by: userID,
     };
 
+    //notify
+    let text = "New task has been assigned to you";
+    if (team?.length > 1) text = text + ` and ${team.length - 1} others`;
+
+    text =
+      text +
+      `. The task priority is ${priority.toUpperCase()}. Check it and act accordingly. Task deadline: ${new Date(
+        date
+      ).toDateString()}.`;
+
     const currentUser = await User.findById(userID);
     if (!currentUser) return next(errorHandler(404, "User not found!"));
 
@@ -42,6 +53,12 @@ export const createTask = async (req, res, next) => {
       team,
       is_trashed,
       created_by,
+    });
+
+    const notif = await Notification.create({
+      text,
+      task: task._id,
+      sent_to: team,
     });
 
     return res.status(200).json(task);

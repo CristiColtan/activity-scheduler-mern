@@ -2,6 +2,7 @@ import { errorHandler } from "../utils/error.js";
 
 import User from "../models/user.model.js";
 import Task from "../models/task.model.js";
+import Notification from "../models/notification.model.js";
 
 export const getMyTeam = async (req, res, next) => {
   try {
@@ -131,8 +132,36 @@ export const editTeamMember = async (req, res, next) => {
     const user = await User.findById(memberID).select("-password");
     if (!user) return next(errorHandler(404, "User not found!"));
 
-    if (title) user.title = title;
-    if (role) user.role = role;
+    //notify
+    let text_title;
+    let text_role;
+
+    if (title) {
+      user.title = title;
+
+      text_title = `Your title has been updated by ${
+        manager.first_name + " " + manager.last_name
+      }. Check your profile!`;
+
+      const notif = await Notification.create({
+        type: "message",
+        text: text_title,
+        sent_to: user._id,
+      });
+    }
+    if (role) {
+      user.role = role;
+
+      text_role = `Your role has been updated by ${
+        manager.first_name + " " + manager.last_name
+      }. Check your profile!`;
+
+      const notif = await Notification.create({
+        type: "message",
+        text: text_role,
+        sent_to: user._id,
+      });
+    }
 
     await user.save();
     res.status(200).json(user);

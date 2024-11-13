@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import moment from "moment"
 import { useState, Fragment } from 'react'
 import { Link } from 'react-router-dom';
@@ -10,38 +10,7 @@ import { IoIosNotifications } from "react-icons/io";
 import { HiBellAlert } from "react-icons/hi2";
 import { BiSolidMessage } from "react-icons/bi";
 
-const data = [
-  {
-    _id: "65c5bbf3787832cf99f28e6d",
-    team: [
-      "65c202d4aa62f32ffd1303cc",
-      "65c27a0e18c0a1b750ad5cad",
-      "65c30b96e639681a13def0b5",
-    ],
-    text: "New task has been assigned to you and 2 others. The task priority is set a normal priority, so check and act accordingly. The task date is Thu Feb 29 2024. Thank you!!!",
-    task: null,
-    notiType: "alert",
-    isRead: [],
-    createdAt: "2024-02-09T05:45:23.353Z",
-    updatedAt: "2024-02-09T05:45:23.353Z",
-    __v: 0,
-  },
-   {
-    _id: "65c5bbf3787832cf99f28e6d",
-    team: [
-      "65c202d4aa62f32ffd1303cc",
-      "65c27a0e18c0a1b750ad5cad",
-      "65c30b96e639681a13def0b5",
-    ],
-    text: "New task has been assigned to you and 2 others. The task priority is set a normal priority, so check and act accordingly. The task date is Thu Feb 29 2024. Thank you!!!",
-    task: null,
-    notiType: "alert",
-    isRead: [],
-    createdAt: "2024-02-09T05:45:23.353Z",
-    updatedAt: "2024-02-09T05:45:23.353Z",
-    __v: 0,
-  },
-];
+import DialogNotification from './dialog/DialogNotification';
 
 const icons = {
   alert: (<HiBellAlert className='h-5 w-5 text-black group-hover:text-gray-400'></HiBellAlert>),
@@ -51,22 +20,74 @@ const icons = {
 const Notifications = () => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
-  
-  const readHandler = () => {
-    
+  const [notifications, setNotifications] = useState([]);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("http://localhost:8081/backend/notif/get", {
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+
+      setNotifications(data);
+    } catch (error) {
+      console.log(error.message);
+      return;
+    }
   }
 
-  const viewHandler = () => {
-    
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  console.log("NOTIFS", notifications);
+  
+  const readAllHandlerOnClick = async () => {
+    try {
+      const res = await fetch(`http://localhost:8081/backend/notif/mark-all-as-read`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+
+      setNotifications([]);
+      
+    } catch (error) {
+      console.log(error.message);
+      return;
+    }
   }
+
+  const [notifData, setNotifData] = useState(null);
+  const [openDialogNotify, setOpenDialogNotify] = useState(false);
+
+  const viewHandlerOnClick = (item) => {
+    setNotifData(item);
+    setOpenDialogNotify(true);
+  }
+
+  console.log("Open:", openDialogNotify);
+  console.log("notiData", notifData);
   
   const callsToAction = [
-    { name: "Cancel", href: "#", icon: "" },
+    { name: "Cancel" },
     {
       name: "Mark All Read",
-      href: "#",
-      icon: "",
-      onClick: () => readHandler("all", ""),
+      onClick: () => readAllHandlerOnClick(),
     },
   ];
 
@@ -75,10 +96,10 @@ const Notifications = () => {
       <PopoverButton className="items-center inline-flex outline-none ml-1 -mr-2">
         <div className='group flex items-center w-6 h-8 justify-center text-black relative'>
           <IoIosNotifications className=' text-2xl group-hover:text-gray-500'></IoIosNotifications>
-          {data?.length > 0 && (
+          {notifications?.length > 0 && (
             <span className='absolute top-0 -right-1 text-xs text-white font-semibold
               w-4 h-4 rounded-full bg-red-600'>
-              {data?.length}
+              {notifications?.length}
             </span>
           )}
         </div>
@@ -94,25 +115,25 @@ const Notifications = () => {
       >
         <PopoverPanel className='absolute -right-16 md:-right-2 z-10 mt-5 flex w-screen max-w-max  px-4'>
           {({ close }) =>
-            data?.length > 0 && (
+            notifications?.length > 0 ? (
               <div className='w-screen max-w-md flex-auto overflow-hidden rounded-3xl 
                 bg-white text-sm leading-6 shadow-2xl ring-1 ring-gray-900/5'>
                 <div className='p-4'>
-                  {data?.slice(0, 5).map((item, index) => (
+                  {notifications?.slice(0, 5).map((item, index) => (
                     <div
                       key={item._id + index}
                       className='group relative flex gap-x-4 rounded-lg p-4 hover:bg-gray-100'
                     >
                       <div className='mt-1 h-8 w-8 flex items-center justify-center rounded-lg group-hover:text-black'>
-                        {icons[item.notiType]}
+                        {icons[item.type]}
                       </div>
 
                       <div
                         className='cursor-pointer'
-                        onClick={() => viewHandler(item)}
+                        onClick={() => viewHandlerOnClick(item)}
                       >
                         <div className='flex items-center gap-3 font-medium font-sans text-gray-900 capitalize'>
-                          <p> {item.notiType}</p>
+                          <p> {item.type}</p>
                           <span className='text-xs font-thin lowercase'>
                             {moment(item.createdAt).fromNow()}
                           </span>
@@ -138,7 +159,24 @@ const Notifications = () => {
                     </Link>
                   ))}
                 </div>
+
+                <DialogNotification open={openDialogNotify}
+                  setOpen={setOpenDialogNotify}
+                  notifications={notifications}
+                  setNotifications={setNotifications}
+                  notifData={notifData} />
               </div>
+            ) : (
+              <>
+                <div className='w-screen max-w-md flex-auto overflow-hidden rounded-3xl 
+                bg-white text-sm leading-6 shadow-2xl ring-1 ring-gray-900/5'>
+                  <div className='p-4'>
+                    <p>
+                      No notifications.
+                    </p>
+                  </div>
+                </div>
+              </>
             )
           }
         </PopoverPanel>

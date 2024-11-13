@@ -166,7 +166,8 @@ const TaskDetails = () => {
                         </div>
                       </div>
 
-                      <p className='font-thin'><span className='font-semibold'>Created at:</span> {new Date(Task?.createdAt).toDateString()} by
+                      <p className='font-thin'><span className='font-semibold'>Created at:</span> {new Date(Task?.createdAt).toDateString() + " "} 
+                        <span className='font-semibold'>by</span>
                         {" " + Task?.created_by?.first_name + " " + Task?.created_by?.last_name}</p>
                       <p className='font-thin -translate-y-5'><span className='font-semibold'>Deadline:</span> {new Date(Task?.date).toDateString()}</p>
 
