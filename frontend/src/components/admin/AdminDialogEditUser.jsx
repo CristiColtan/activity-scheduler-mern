@@ -25,8 +25,6 @@ const AdminDialogEditUser = ({ open, setOpen, userData, allUsers, setAllUsers })
     if (formData.last_name === "") delete formData.last_name;
     if (formData.email === "") delete formData.email;
     if (formData.username === "") delete formData.username;
-    if (formData.title === "") delete formData.title;
-    if (formData.role === "") delete formData.role;
     if (formData.city === "") delete formData.city;
     if (formData.gender === "") delete formData.gender;
 
@@ -112,29 +110,6 @@ const AdminDialogEditUser = ({ open, setOpen, userData, allUsers, setAllUsers })
                                   text-gray-900 outline-none text-base w-full
                                     focus:ring-2 ring-blue-300 rounded'
                 placeholder={userData?.email}>
-              </input>
-            </div>
-          </div>
-
-          <div className='flex flex-row gap-5'>
-            <div className='w-full flex flex-col gap-1'>
-              <label htmlFor='title' className='font-normal text-base'>Title:</label>
-              <input type="text" id="title" onChange={handleChange}
-                className='bg-transparent px-3 py-0.5
-                                    border border-gray-400 placeholder-gray-500
-                                  text-gray-900 outline-none text-base w-full
-                                    focus:ring-2 ring-blue-300 rounded'
-                placeholder={userData?.title}>
-              </input>
-            </div>
-            <div className='w-full flex flex-col gap-1'>
-              <label htmlFor='role' className='font-normal text-base'>Role:</label>
-              <input type="text" id="role" onChange={handleChange}
-                className='bg-transparent px-3 py-0.5
-                                    border border-gray-400 placeholder-gray-500
-                                  text-gray-900 outline-none text-base w-full
-                                    focus:ring-2 ring-blue-300 rounded'
-                placeholder={userData?.role}>
               </input>
             </div>
           </div>

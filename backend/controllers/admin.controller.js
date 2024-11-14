@@ -2,12 +2,16 @@ import { errorHandler } from "../utils/error.js";
 
 import User from "../models/user.model.js";
 import Task from "../models/task.model.js";
+import AppSettings from "../models/app-settings.model.js";
 
 export const getTeamManagers = async (req, res, next) => {
   try {
-    const users = await User.find({ is_team_manager: "Yes" }).select(
-      "-password"
-    );
+    const users = await User.find({ is_team_manager: "Yes" })
+      .select("-password")
+      .populate({
+        path: "roles.task",
+        select: "title stage priority is_trashed",
+      });
 
     res.status(200).json(users);
   } catch (error) {
@@ -30,9 +34,90 @@ export const getNormalUsers = async (req, res, next) => {
 
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ is_admin: "No" }).select("-password");
+    const users = await User.find({ is_admin: "No" })
+      .select("-password")
+      .populate({
+        path: "roles.task",
+        select: "title stage priority is_trashed",
+      });
 
     res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteRole = async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    const userID = req.user.id;
+
+    console.log(req.body);
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const appsettings = await AppSettings.findOne();
+
+    if (!appsettings.roles.includes(role)) {
+      return next(errorHandler(401, "User role doesn't exist!"));
+    }
+
+    appsettings.roles = appsettings.roles.filter((r) => r !== role);
+    await appsettings.save();
+
+    res.status(200).json(appsettings.roles);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchRoles = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const appsettings = await AppSettings.findOne();
+    if (!appsettings) return next(errorHandler(404, "AppSettings not found!"));
+
+    return res.status(200).json(appsettings.roles);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addRole = async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const appsettings = await AppSettings.findOne();
+
+    if (appsettings.roles.includes(role)) {
+      return next(errorHandler(401, "User role already exists!"));
+    }
+
+    if (role === "" || !role)
+      return next(errorHandler(401, "Enter a valid role!"));
+
+    appsettings.roles.push(role);
+    await appsettings.save();
+
+    res.status(200).json(appsettings.roles);
   } catch (error) {
     next(error);
   }
@@ -61,6 +146,17 @@ export const addTeamManager = async (req, res, next) => {
         );
 
       member.is_team_manager = "Yes";
+      member.title = "Team Manager";
+      await member.save();
+
+      //cautam task-urile create de el si ii atribuim in user.roles rolul de Task Coordinator
+      const tasksCreatedByMember = await Task.find({ created_by: memberID });
+      tasksCreatedByMember.forEach((task) => {
+        member.roles.push({
+          task: task._id,
+          role: "Task Coordinator",
+        });
+      });
       await member.save();
     }
 
@@ -91,7 +187,18 @@ export const removeTeamManager = async (req, res, next) => {
       );
 
     member.is_team_manager = "No";
+    member.title = "Normal User";
     await member.save();
+
+    const tasksCreatedByMember = await Task.find({ created_by: memberID });
+    //mai raman doar intrarile din user.roles in care nu se gasesc task-urile din tasksToUpdate (e cu negatie)
+    if (tasksCreatedByMember.length > 0) {
+      member.roles = member.roles.filter(
+        (role) =>
+          !tasksCreatedByMember.some((task) => task._id.equals(role.task))
+      );
+      await member.save();
+    }
 
     res.status(200).json({ message: "Success!" });
   } catch (error) {
@@ -153,8 +260,14 @@ export const switchStatusFetchUsers = async (req, res, next) => {
     if (!member)
       return next(errorHandler(404, `Member with ID ${member} not found!`));
 
-    if (member.is_active === "Yes") member.is_active = "No";
-    else if (member.is_active === "No") member.is_active = "Yes";
+    if (member.is_active === "Yes") {
+      member.is_active = "No";
+      member.title = "Inactive";
+    } else if (member.is_active === "No") {
+      member.is_active = "Yes";
+      if (member.is_team_manager === "Yes") member.title = "Team Manager";
+      else member.title = "Normal User";
+    }
 
     await member.save();
 
@@ -179,8 +292,14 @@ export const makeAccountActiveOrInactive = async (req, res, next) => {
     if (!member)
       return next(errorHandler(404, `Member with ID ${member} not found!`));
 
-    if (member.is_active === "Yes") member.is_active = "No";
-    else if (member.is_active === "No") member.is_active = "Yes";
+    if (member.is_active === "Yes") {
+      member.is_active = "No";
+      member.title = "Inactive";
+    } else if (member.is_active === "No") {
+      member.is_active = "Yes";
+      if (member.is_team_manager === "Yes") member.title = "Team Manager";
+      else member.title = "Normal User";
+    }
 
     await member.save();
     res.status(200).json({ message: "Success!" });

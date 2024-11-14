@@ -27,13 +27,18 @@ const UserSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      default: "Unknown",
-    },
-    role: {
-      type: String,
-      required: true,
       default: "Normal User",
     },
+    roles: [
+      {
+        task: { type: Schema.Types.ObjectId, ref: "Task" },
+        role: {
+          type: String,
+          required: true,
+          default: "Not assigned yet",
+        },
+      },
+    ],
     tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     team: [{ type: Schema.Types.ObjectId, ref: "User" }],
     gender: {

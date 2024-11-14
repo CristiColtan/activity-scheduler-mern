@@ -19,7 +19,8 @@ import TaskDialog from './TaskDialog.jsx';
 import TaskAddSubTask from './TaskAddSubTask.jsx';
 
 const TaskCard = ({ task, tasks, setTasks }) => {
-  const MyUserInfo = ({ user, index }) => {
+  const MyUserInfo = ({ user, index, taskId }) => {
+    const userTaskRole = user.roles?.find(role => role.task.toString() === taskId.toString())?.role;
     return (
       <>
         <div className='px-4'>
@@ -49,7 +50,7 @@ const TaskCard = ({ task, tasks, setTasks }) => {
 
                     <div className='flex flex-col gap-y-1 mx-1'>
                       <p className='text-black font-serif text-base'>{user?.first_name + " " + user?.last_name}</p>
-                      <span className='text-gray-700 font-serif'>{user?.title}</span>
+                      <span className='text-gray-700 font-serif'>{user?.title + " | " + userTaskRole}</span>
                       <span className='text-gray-700 font-serif'>{user?.email}</span>
                     </div>
                   </div>
@@ -122,7 +123,7 @@ const TaskCard = ({ task, tasks, setTasks }) => {
               {task.team.map((m, index) => (
                 <div key={index} className={clsx("w-7 h-7 rounded-full text-white flex items-center justify-center text-sm -mr-1",
                   bgs[index % bgs.length])}>
-                  <MyUserInfo user={m} index={index} />
+                  <MyUserInfo user={m} index={index} taskId={task._id}/>
                 </div>
               ))}
             </div>

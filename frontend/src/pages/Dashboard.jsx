@@ -124,7 +124,8 @@ export default function Dashboard() {
       low: <MdKeyboardArrowDown />,
     };
 
-    const MyUserInfo = ({ user, index }) => {
+    const MyUserInfo = ({ user, index, taskId }) => {
+      const userTaskRole = user.roles?.find(role => role.task.toString() === taskId.toString())?.role;
       return (
         <>
           <div className='px-4'>
@@ -154,7 +155,7 @@ export default function Dashboard() {
 
                         <div className='flex flex-col gap-y-1 mx-1'>
                         <p className='text-black font-serif text-base'>{user?.first_name + " " + user?.last_name}</p>
-                        <span className='text-gray-700 font-serif'>{user?.title}</span>
+                        <span className='text-gray-700 font-serif'>{user?.title + " | " + userTaskRole}</span>
                         <span className='text-gray-700 font-serif'>{user?.email}</span>
                         </div>
                       </div>
@@ -206,7 +207,7 @@ export default function Dashboard() {
                   <div key={index} className={clsx("w-7 h-7 rounded-full text-white items-center justify-center text-sm flex -mr-1",
                     bgs[index % bgs.length]
                   )}>
-                    <MyUserInfo user={m} index={index} />
+                    <MyUserInfo user={m} index={index} taskId={task._id} />
                   </div>  
                 ))}
               </div>  
@@ -269,7 +270,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className='font-serif'>{user?.first_name + " " + user?.last_name}</p>
-                <span className='font-thin'>{user?.role}</span>
+                <span className='font-thin'>{user?.title}</span>
               </div>
             </div>
           </td>

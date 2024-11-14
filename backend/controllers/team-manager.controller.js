@@ -9,6 +9,11 @@ export const getMyTeam = async (req, res, next) => {
     const user = await User.findById(req.user.id).populate({
       path: "team",
       select: "-password",
+      populate: {
+        path: "roles.task",
+        model: "Task",
+        select: "title stage priority is_trashed",
+      },
     });
 
     if (!user) return next(errorHandler(404, "User not found!"));
@@ -102,6 +107,27 @@ export const removeFromTeam = async (req, res, next) => {
     );
 
     await currentUser.save();
+
+    const member = await User.findById(memberID);
+    if (!member) return next(errorHandler(404, "Member not found!"));
+
+    const tasksToUpdate = await Task.find({
+      created_by: userID,
+      team: memberID,
+    });
+
+    await Promise.all(
+      tasksToUpdate.map(async (task) => {
+        task.team = task.team.filter((id) => id.toString() !== memberID);
+        await task.save();
+      })
+    );
+
+    //mai raman doar intrarile din user.roles in care nu se gasesc task-urile din tasksToUpdate
+    member.roles = member.roles.filter(
+      (role) => !tasksToUpdate.some((task) => task._id.equals(role.task))
+    );
+    await member.save();
 
     const updatedUser = await User.findById(userID).populate({
       path: "team",

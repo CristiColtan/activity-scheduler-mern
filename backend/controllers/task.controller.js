@@ -61,6 +61,22 @@ export const createTask = async (req, res, next) => {
       sent_to: team,
     });
 
+    await Promise.all(
+      team.map(async (memberId) => {
+        await User.findByIdAndUpdate(memberId, {
+          $push: {
+            roles: { task: task._id, role: "Not assigned yet" },
+          },
+        });
+      })
+    );
+
+    await User.findByIdAndUpdate(created_by, {
+      $push: {
+        roles: { task: task._id, role: "Task Coordinator" },
+      },
+    });
+
     return res.status(200).json(task);
   } catch (error) {
     console.error("Error creating task: ", error);
@@ -87,6 +103,61 @@ export const updateTask = async (req, res, next) => {
     const isCreator = task.created_by._id.toString() === userID;
     if (!isCreator && currentUser.is_admin === "No") {
       return next(errorHandler(403, "You are not allowed to edit this task!"));
+    }
+
+    //verificam daca exista membri diferiti fata de cei anteriori
+    const existingTeamIds = task.team.map((member) => member._id.toString());
+    const newTeamIds = req.body.team.map((memberId) => memberId.toString());
+    const newMembers = req.body.team.filter(
+      (memberId) => !existingTeamIds.includes(memberId.toString())
+    );
+
+    const removedMembers = existingTeamIds.filter(
+      (memberId) => !newTeamIds.includes(memberId)
+    );
+
+    if (newMembers.length > 0) {
+      //notify
+      let text = "New task has been assigned to you";
+      if (newMembers.length > 1)
+        text = text + ` and ${newMembers.length - 1} others`;
+
+      text =
+        text +
+        `. The task priority is ${
+          req.body.priority?.toUpperCase() || task.priority.toUpperCase()
+        }. Check it and act accordingly. Task deadline: ${new Date(
+          req.body.date || task.date
+        ).toDateString()}.`;
+
+      await Notification.create({
+        text,
+        task: task._id,
+        sent_to: newMembers,
+      });
+
+      //roles to new members
+      await Promise.all(
+        newMembers.map(async (memberId) => {
+          await User.findByIdAndUpdate(memberId, {
+            $push: {
+              roles: { task: task._id, role: "Not assigned yet" },
+            },
+          });
+        })
+      );
+    }
+
+    if (removedMembers.length > 0) {
+      await Promise.all(
+        removedMembers.map(async (memberId) => {
+          await User.findByIdAndUpdate(memberId, {
+            $pull: {
+              roles: { task: task._id },
+            },
+          });
+        })
+      );
     }
 
     const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {

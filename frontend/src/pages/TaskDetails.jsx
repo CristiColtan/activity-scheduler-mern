@@ -166,7 +166,7 @@ const TaskDetails = () => {
                         </div>
                       </div>
 
-                      <p className='font-thin'><span className='font-semibold'>Created at:</span> {new Date(Task?.createdAt).toDateString() + " "} 
+                      <p className='font-thin'><span className='font-semibold'>Created at:</span> {new Date(Task?.createdAt).toDateString() + " "}
                         <span className='font-semibold'>by</span>
                         {" " + Task?.created_by?.first_name + " " + Task?.created_by?.last_name}</p>
                       <p className='font-thin -translate-y-5'><span className='font-semibold'>Deadline:</span> {new Date(Task?.date).toDateString()}</p>
@@ -183,20 +183,32 @@ const TaskDetails = () => {
                         <p className='font-thin'>TEAM</p>
                         <div className=''>
                           {Task.team && Task.team.length > 0 ? (
-                            Task.team.map((m, index) => (
-                              <div key={index} className='flex gap-4 py-2 items-center border-t border-gray-500'>
-                                <div className='w-10 h-10 rounded-full text-base -mr-1 bg-blue-600 flex items-center justify-center text-white'>
-                                  <span className='text-center'>{getInitials(m?.first_name, m?.last_name)}</span>
-                                </div>
+                            Task.team.map((m, index) => {
+                              const userTaskRole = m.roles?.find(role => role.task.toString() === Task._id.toString())?.role;
+                              return (
+                                <div key={index} className='flex gap-4 py-2 items-center border-t border-gray-500 justify-between'>
+                                  <div className='flex items-center gap-4'>
+                                    <div className='w-10 h-10 rounded-full text-base -mr-1 bg-blue-600 flex items-center justify-center text-white'>
+                                      <span className='text-center'>{getInitials(m?.first_name, m?.last_name)}</span>
+                                    </div>
 
-                                <div>
-                                  <p className='text-lg font-serif'>
-                                    {m?.first_name + " " + m?.last_name}
-                                  </p>
-                                  <span className='font-thin'>{m?.title}</span>
+                                    <div>
+                                      <p className='text-lg font-serif'>
+                                        {m?.first_name + " " + m?.last_name}
+                                      </p>
+                                      <span className='font-thin'>{m?.title}</span>
+                                    </div>
+                                  </div>
+                                  <div className='flex gap-2'>
+                                    {userTaskRole && (
+                                      <>
+                                        <p className='font-thin'>{userTaskRole}</p>
+                                        <button>Edit</button>
+                                      </>)}
+                                  </div>
                                 </div>
-                              </div>
-                            ))) : (<p className='text-lg font-serif border-t border-gray-500 py-2'>"No team members."</p>)
+                              )
+                            })) : (<p className='text-lg font-serif border-t border-gray-500 py-2'>No team members.</p>)
                           }
                         </div>
                       </div>

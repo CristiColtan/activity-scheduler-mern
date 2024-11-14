@@ -53,7 +53,6 @@ const Profile = () => {
     username: false,
     email: false,
     title: false,
-    role: false,
     gender: false,
     city: false,
     //...
@@ -80,7 +79,6 @@ const Profile = () => {
     if (formData.email === "") delete formData.email;
     if (formData.username === "") delete formData.username;
     if (formData.title === "") formData.title = "Unknown";
-    if (formData.role === "") formData.role = "Unknown";
     if (formData.city === "") formData.city = "Unknown";
     if (formData.gender === "") formData.gender = "Unknown";
 
@@ -114,7 +112,7 @@ const Profile = () => {
 
   //verify !!!
   //e-mail, username, firstname, lastname daca exista si e gol sa il scoti din form data, 
-  //title, role, city, gender daca exista si e gol sa fie trecut la Unknown
+  //title, city, gender daca exista si e gol sa fie trecut la Unknown
 
   const [disabledPreferences, setDisabledPreferences] = useState(true);
   
@@ -282,35 +280,6 @@ const Profile = () => {
                                   )}
                                     disabled={currentUser.is_admin === "No"}
                                     onClick={() => handleEditToggle("title")}>
-                                    {<CiEdit className='text-lg' size={26} />}
-                                  </button>
-                                </div>
-                      
-                              </div>
-
-                              {/* 3 sections Role */}
-                              <div className='w-full grid grid-cols-3 gap-5 2xl:gap-8 overflow-y-auto border-t-2 mt-2'>
-                                {/* left */}
-                                <div className='space-y-6 p-4 bg-white shadow-lg text-center'>
-                                  <span className='font-serif md:text-lg text-base'>Role:</span>
-                                </div>
-
-                                {/* middle */}
-                                <div className='space-y-6 p-4 bg-white shadow-lg text-center'>
-                                  <input type="text" placeholder={currentUser.role} required id="role" onChange={handleChange}
-                                    value={formData.role || ''} disabled={!editableFields.role}
-                                    className='border py-1 px-2 w-full placeholder-black focus:ring-2 ring-blue-300 outline-none
-                                            border-black focus:placeholder-gray-500 rounded justify-center disabled:cursor-not-allowed'>
-                                  </input>
-                                </div>
-
-                                {/* right */}
-                                <div className='space-y-6 p-4 bg-white shadow-lg  text-center'>
-                                  <button className={clsx('text-blue-700 hover:text-blue-400 inline-flex items-center disabled:cursor-not-allowed disabled:text-blue-400 border-gray-500 translate-y-1',
-                                    { 'text-blue-400 shadow-xl border border-gray-200 rounded': editableFields.role }
-                                  )}
-                                    disabled={currentUser.is_admin === "No"}
-                                    onClick={() => handleEditToggle("role")}>
                                     {<CiEdit className='text-lg' size={26} />}
                                   </button>
                                 </div>

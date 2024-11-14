@@ -14,9 +14,11 @@ import { FaUsers } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
 import { FaTeamspeak } from "react-icons/fa";
+import { BsPersonSquare } from "react-icons/bs";
 
 import AdminUsers from '../components/admin/AdminUsers.jsx';
 import AdminTasks from '../components/admin/AdminTasks.jsx';
+import AdminRoles from '../components/admin/AdminRoles.jsx';
 
 const tabs = [{
   title: "Users",
@@ -30,6 +32,9 @@ const tabs = [{
 },{
   title: "Team Managers",
   icon: <FaTeamspeak className='text-lg' size={20} />
+},{
+  title: "User Roles",
+  icon: <BsPersonSquare className='text-lg' size={20} />
 }];
 
 const Settings = () => {
@@ -78,6 +83,11 @@ const Settings = () => {
                       {selected === 3 && (
                         <>
                           4
+                        </>
+                      )}
+                      {selected === 4 && (
+                        <>
+                          <AdminRoles />
                         </>
                       )}
                     </TabsProfile>

@@ -18,15 +18,21 @@ import {
   editActivity,
   deleteSubtask,
   editSubtask,
+  fetchRoles,
+  addRole,
+  deleteRole,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { verifyAdmin } from "../utils/verifyAdmin.js";
 
 const router = express.Router();
 
+router.delete("/delete/role", verifyToken, verifyAdmin, deleteRole);
+
 router.get("/get/team-managers", verifyToken, verifyAdmin, getTeamManagers);
 router.get("/get/normal-users", verifyToken, verifyAdmin, getNormalUsers);
 router.get("/get/all-users", verifyToken, verifyAdmin, getAllUsers);
+router.get("/get/roles", verifyToken, verifyAdmin, fetchRoles);
 router.get(
   "/get-dashboard-statistics",
   verifyToken,
@@ -46,6 +52,7 @@ router.get(
   fetchAllTasksPopulated
 );
 
+router.post("/add/role", verifyToken, verifyAdmin, addRole);
 router.post("/add/team-manager", verifyToken, verifyAdmin, addTeamManager);
 router.post(
   "/remove/team-manager",
