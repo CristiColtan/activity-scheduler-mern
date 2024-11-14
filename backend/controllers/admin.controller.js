@@ -66,6 +66,14 @@ export const deleteRole = async (req, res, next) => {
       return next(errorHandler(401, "User role doesn't exist!"));
     }
 
+    if (role === "Task Coordinator")
+      return next(
+        errorHandler(
+          401,
+          "The 'Task Coordinator' role is crucial! You can't delete it!"
+        )
+      );
+
     appsettings.roles = appsettings.roles.filter((r) => r !== role);
     await appsettings.save();
 
@@ -146,7 +154,7 @@ export const addTeamManager = async (req, res, next) => {
         );
 
       member.is_team_manager = "Yes";
-      member.title = "Team Manager";
+      if (member.title === "Normal User") member.title = "Team Manager";
       await member.save();
 
       //cautam task-urile create de el si ii atribuim in user.roles rolul de Task Coordinator
@@ -187,7 +195,7 @@ export const removeTeamManager = async (req, res, next) => {
       );
 
     member.is_team_manager = "No";
-    member.title = "Normal User";
+    if (member.title === "Team Manager") member.title = "Normal User";
     await member.save();
 
     const tasksCreatedByMember = await Task.find({ created_by: memberID });
