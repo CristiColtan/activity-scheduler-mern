@@ -20,6 +20,8 @@ import {
   duplicateTask,
   updateTask,
   getTaskEdit,
+  editUserRole,
+  fetchUserRoles,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -37,12 +39,25 @@ router.get(
   verifyAdminOrTeamManager,
   getTaskEdit
 );
+router.get(
+  "/get-user-roles",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  fetchUserRoles
+);
 
 router.post(
   "/duplicate-task/:id",
   verifyToken,
   verifyAdminOrTeamManager,
   duplicateTask
+);
+
+router.put(
+  "/edit-user-role-on-task",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  editUserRole
 );
 router.put("/add-activity/:id", verifyToken, addActivity);
 router.put("/update/:id", verifyToken, verifyAdminOrTeamManager, updateTask);

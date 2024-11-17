@@ -16,9 +16,11 @@ import {
   MdOutlineDoneAll,
   MdOutlineMessage,
   MdTaskAlt,
+  MdAssignmentAdd,
 } from "react-icons/md";
 import { RxActivityLog } from "react-icons/rx";
 import { FaTrash } from "react-icons/fa";
+import { CiEdit } from "react-icons/ci";
 
 import { priority_styles, task_type, bgs_task_type, bgs_transparent, text_task_type } from '../utils/tableImports.js';
 import { getInitials } from '../utils/FullnameInitials.js';
@@ -26,6 +28,8 @@ import { getInitials } from '../utils/FullnameInitials.js';
 import PageTitle from '../components/PageTitle.jsx';
 import Loading from "../components/Loading.jsx"
 import Tabs from "../components/Tabs.jsx"
+import DialogSetRoleTaskDetails from '../components/dialog/DialogSetRoleTaskDetails.jsx';
+import { current } from '@reduxjs/toolkit';
 
 const t_icons = {
     high: <MdKeyboardDoubleArrowUp />,
@@ -96,7 +100,25 @@ const TaskDetails = () => {
   const [Error, setError] = useState(null);
   const [activities, setActivities] = useState([]);
 
+  const [TaskTeam, setTaskTeam] = useState([]);
+  console.log("TaskTeam", TaskTeam);
+ 
+
+  const [openEditRole, setOpenEditRole] = useState(false);
+  const [editRoleData, setEditRoleData] = useState(null);
+  const [userRoleId, setUserRoleId] = useState(null);
+
+  const handleEditUserRole = (roleData, uId) => {
+    setEditRoleData(roleData);
+    setUserRoleId(uId);
+    setOpenEditRole(true);
+  }
+  
+  console.log("editroledata:", editRoleData);
+  console.log("userroleId",userRoleId);
+
   const { currentUser, error } = useSelector((state) => state.user);
+  console.log("USER", currentUser);
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -116,6 +138,7 @@ const TaskDetails = () => {
         }
 
         setTask(data);
+        setTaskTeam(data.team);
         setActivities(data.activities);
         setLoading(false);
         setError(null);
@@ -182,11 +205,12 @@ const TaskDetails = () => {
                       <div className='space-y-1 py-4'>
                         <p className='font-thin'>TEAM</p>
                         <div className=''>
-                          {Task.team && Task.team.length > 0 ? (
-                            Task.team.map((m, index) => {
+                          {TaskTeam && TaskTeam.length > 0 ? (
+                            TaskTeam.map((m, index) => {
                               const userTaskRole = m.roles?.find(role => role.task.toString() === Task._id.toString())?.role;
+                              console.log("index, usertaskrole", index, userTaskRole);
                               return (
-                                <div key={index} className='flex gap-4 py-2 items-center border-t border-gray-500 justify-between'>
+                                <div key={m._id + index} className='flex gap-4 py-2 items-center border-t border-gray-500 justify-between'>
                                   <div className='flex items-center gap-4'>
                                     <div className='w-10 h-10 rounded-full text-base -mr-1 bg-blue-600 flex items-center justify-center text-white'>
                                       <span className='text-center'>{getInitials(m?.first_name, m?.last_name)}</span>
@@ -202,8 +226,37 @@ const TaskDetails = () => {
                                   <div className='flex gap-2'>
                                     {userTaskRole && (
                                       <>
-                                        <p className='font-thin'>{userTaskRole}</p>
-                                        <button>Edit</button>
+                                        {
+                                          (currentUser.is_admin === "Yes" || currentUser.is_team_manager === "Yes") &&
+                                          <>
+                                            <div className='flex items-center'>
+                                              <p className='font-thin'>{userTaskRole}</p>
+                                          
+                                              <button className='px-2 py-2 rounded 
+                                              text-blue-500 font-sans
+                                              hover:text-blue-300 transition duration-200
+                                                font-medium' onClick={() => handleEditUserRole(userTaskRole, m._id)}>
+                                                <CiEdit className='text-xl' size={28} />
+                                              </button>
+                                            </div>
+                                          </>
+                                        }
+                                        {currentUser.is_admin === "No" && currentUser.is_team_manager === "No" &&
+                                          <>
+                                            <div className='flex items-center'>
+                                              <p className='font-thin'>{userTaskRole}</p>
+                                              {userTaskRole !== "Not assigned yet" && currentUser._id === m._id && 
+                                                <button className='px-2 py-2 rounded 
+                                              text-green-500 font-sans text-center items-center flex
+                                              hover:text-green-300 transition duration-200
+                                                font-medium'>
+                                                  <MdAssignmentAdd className='text-xl' size={28} />
+                                                  Work
+                                                </button>
+                                              }
+                                            </div>
+                                          </>
+                                        }
                                       </>)}
                                   </div>
                                 </div>
@@ -259,6 +312,17 @@ const TaskDetails = () => {
                 </>
               )}
             </Tabs>
+            {
+              (currentUser.is_admin === "Yes" || currentUser.is_team_manager === "Yes") &&
+              <DialogSetRoleTaskDetails open={openEditRole}
+              setOpen={setOpenEditRole}
+              editRoleData={editRoleData}
+              team={TaskTeam}
+              setTeam={setTaskTeam}
+              taskId={Task._id}
+              userId={userRoleId} />
+            }
+            {/*work here dialog*/}
           </>)}
         </>)}
     </div>

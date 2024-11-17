@@ -50,7 +50,6 @@ const DialogNotification = ({ open, setOpen, notifications, setNotifications, no
                 <div className='py-4 w-full flex flex-col gap-4 items-center justify-center'>
                     <DialogTitle as='h3'>
                         <p className='p-3 rounded-full text-black bg-gray-200'>
-                            
                             {icons[notifData?.type]}
                         </p>
                     </DialogTitle>
@@ -63,16 +62,15 @@ const DialogNotification = ({ open, setOpen, notifications, setNotifications, no
                     </p>
 
                     <div className='py-3 flex justify-between gap-4 bg-white w-auto'>
-                        {
-                            notifData?.type === "alert" &&
-                            <button className='px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
+                        
+                        <button className='px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
             hover:bg-gray-300 font-semibold' onClick={() => {
-                                    markAsRead(notifData._id);
-                                    navigate(`/task/${notifData.task}`);
-                                }}>
-                                View
-                            </button>
-                        }
+                                markAsRead(notifData._id);
+                                navigate(`/task/${notifData.task}`);
+                            }}>
+                            View
+                        </button>
+                      
                         <button className='px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
             hover:bg-gray-300 font-semibold' onClick={() => markAsRead(notifData._id)}>
                             Mark as read

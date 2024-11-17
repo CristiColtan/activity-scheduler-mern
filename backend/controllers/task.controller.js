@@ -3,6 +3,7 @@ import { errorHandler } from "../utils/error.js";
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
+import AppSettings from "../models/app-settings.model.js";
 
 export const createTask = async (req, res, next) => {
   console.log(req.params);
@@ -170,6 +171,73 @@ export const updateTask = async (req, res, next) => {
   }
 };
 
+export const fetchUserRoles = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes" && currentUser.is_team_manager !== "Yes")
+      return next(errorHandler(403, "You are not authorized!"));
+
+    const appsettings = await AppSettings.findOne();
+    if (!appsettings) return next(errorHandler(404, "AppSettings not found!"));
+
+    const filteredRoles = appsettings.roles.filter(
+      (role) => role !== "Task Coordinator"
+    );
+    const updatedRoles = [...filteredRoles, "Not assigned yet"];
+
+    return res.status(200).json(updatedRoles);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editUserRole = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { role, userId, taskId } = req.body;
+    const userID = req.user.id;
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const taskMember = await User.findById(userId);
+    if (!taskMember) return next(errorHandler(404, "Member not found!"));
+
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        "roles.task": taskId,
+      },
+      { $set: { "roles.$.role": role } },
+      { new: true }
+    );
+
+    if (!updatedUser)
+      return next(errorHandler(404, "Task or Role not found for the user!"));
+
+    //notify
+    let text_role;
+    text_role = `Your new task role: ${role.toUpperCase()}. Updated by ${
+      currentUser.first_name + " " + currentUser.last_name
+    }!`;
+
+    const notif = await Notification.create({
+      type: "message",
+      task: taskId,
+      text: text_role,
+      sent_to: userId,
+    });
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getTaskEdit = async (req, res, next) => {
   try {
     const userID = req.user.id;
@@ -240,6 +308,8 @@ export const getTask = async (req, res, next) => {
       );
     }
 
+    task.activities.reverse();
+
     res.status(200).json(task);
   } catch (error) {
     next(error);
@@ -277,6 +347,8 @@ export const addActivity = async (req, res, next) => {
       path: "activities.by",
       select: "-password",
     });
+
+    updatedTask.activities.reverse();
 
     res.status(200).json(updatedTask);
   } catch (error) {
@@ -395,6 +467,25 @@ export const deleteTask = async (req, res, next) => {
       );
     }
 
+    const teamMembers = task.team.map((member) => member._id.toString());
+    if (teamMembers.length > 0) {
+      await Promise.all(
+        teamMembers.map(async (memberId) => {
+          await User.findByIdAndUpdate(memberId, {
+            $pull: {
+              roles: { task: task._id },
+            },
+          });
+        })
+      );
+    }
+
+    await User.findByIdAndUpdate(task.created_by, {
+      $pull: {
+        roles: { task: task._id },
+      },
+    });
+
     await Task.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Success!" });
   } catch (error) {
@@ -425,6 +516,27 @@ export const deleteAllTasks = async (req, res, next) => {
           )
         );
       }
+
+      const teamMembers = found_task.team.map((member) =>
+        member._id.toString()
+      );
+      if (teamMembers.length > 0) {
+        await Promise.all(
+          teamMembers.map(async (memberId) => {
+            await User.findByIdAndUpdate(memberId, {
+              $pull: {
+                roles: { task: found_task._id },
+              },
+            });
+          })
+        );
+      }
+
+      await User.findByIdAndUpdate(found_task.created_by, {
+        $pull: {
+          roles: { task: found_task._id },
+        },
+      });
 
       await Task.findByIdAndDelete(found_task._id);
     }
@@ -656,9 +768,42 @@ export const duplicateTask = async (req, res, next) => {
     const taskData = task.toObject();
     delete taskData._id;
 
+    //notify
+    let text = "New task has been assigned to you";
+    if (taskData.team?.length > 1)
+      text = text + ` and ${taskData.team.length - 1} others`;
+
+    text =
+      text +
+      `. The task priority is ${taskData.priority.toUpperCase()}. Check it and act accordingly. Task deadline: ${new Date(
+        taskData.date
+      ).toDateString()}.`;
+
     const duplicatedTask = await Task.create({
       ...taskData,
       title: "Copy of - " + task.title,
+    });
+
+    const notif = await Notification.create({
+      text,
+      task: duplicatedTask._id,
+      sent_to: duplicatedTask.team,
+    });
+
+    await Promise.all(
+      duplicatedTask.team.map(async (memberId) => {
+        await User.findByIdAndUpdate(memberId, {
+          $push: {
+            roles: { task: duplicatedTask._id, role: "Not assigned yet" },
+          },
+        });
+      })
+    );
+
+    await User.findByIdAndUpdate(duplicatedTask.created_by, {
+      $push: {
+        roles: { task: duplicatedTask._id, role: "Task Coordinator" },
+      },
     });
 
     const duplicatedDuplicatedTask = await Task.findById(duplicatedTask._id)
