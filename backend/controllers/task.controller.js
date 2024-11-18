@@ -468,6 +468,32 @@ export const deleteTask = async (req, res, next) => {
     }
 
     const teamMembers = task.team.map((member) => member._id.toString());
+
+    //verify daca cineva a muncit la acest task, daca da nu se poate sterge definitiv
+    const membersWhoWorked = [];
+    await Promise.all(
+      teamMembers.map(async (memberId) => {
+        const member = await User.findById(memberId);
+        if (
+          member &&
+          member.work.some(
+            (entry) => entry.task.toString() === task._id.toString()
+          )
+        ) {
+          membersWhoWorked.push(memberId);
+        }
+      })
+    );
+
+    if (membersWhoWorked.length > 0) {
+      return next(
+        errorHandler(
+          403,
+          "Cannot delete task because team members have logged work for it."
+        )
+      );
+    }
+
     if (teamMembers.length > 0) {
       await Promise.all(
         teamMembers.map(async (memberId) => {
@@ -520,6 +546,32 @@ export const deleteAllTasks = async (req, res, next) => {
       const teamMembers = found_task.team.map((member) =>
         member._id.toString()
       );
+
+      //verify daca cineva a muncit la acest task, daca da nu se poate sterge definitiv
+      const membersWhoWorked = [];
+      await Promise.all(
+        teamMembers.map(async (memberId) => {
+          const member = await User.findById(memberId);
+          if (
+            member &&
+            member.work.some(
+              (entry) => entry.task.toString() === found_task._id.toString()
+            )
+          ) {
+            membersWhoWorked.push(memberId);
+          }
+        })
+      );
+
+      if (membersWhoWorked.length > 0) {
+        return next(
+          errorHandler(
+            403,
+            "Cannot delete task because team members have logged work for it."
+          )
+        );
+      }
+
       if (teamMembers.length > 0) {
         await Promise.all(
           teamMembers.map(async (memberId) => {

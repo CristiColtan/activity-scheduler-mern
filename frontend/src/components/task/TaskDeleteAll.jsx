@@ -14,6 +14,7 @@ const TaskDeleteAll = ({ open, setOpen, trashedTasks, setTrashedTasks }) => {
     
   const handleCancel = () => {
     setOpen(false);
+    setError(null);
   }
 
   const deleteAllTasks = async () => {
@@ -64,10 +65,12 @@ const TaskDeleteAll = ({ open, setOpen, trashedTasks, setTrashedTasks }) => {
           {trashedTasks && <p className='text-center text-black mt-1 font-serif md:text-lg text-base'>
             Are you sure you want to permanently delete all tasks?
           </p>}
+
+          {error && <span className='text-red-600 px-5 text-center'>{error}</span>}
           
           <div className='py-3 flex justify-between gap-4 bg-white w-auto'>
             <button className='px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
-            hover:bg-gray-300 font-semibold' onClick={() => setOpen(false)}>
+            hover:bg-gray-300 font-semibold' onClick={() => handleCancel()}>
               Cancel
             </button>
             <button className='px-6 py-2 rounded mr-5 font-sans font-semibold text-white bg-red-600
@@ -75,8 +78,6 @@ const TaskDeleteAll = ({ open, setOpen, trashedTasks, setTrashedTasks }) => {
               {loading ? "Deleting..." : "Delete"}
             </button>
           </div>
-          
-          <div>{error && <p className="text-red-500">{error}</p>}</div>
         </div>
       </MyModal>
     </>
