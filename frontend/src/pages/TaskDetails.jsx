@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { CgDetailsMore } from "react-icons/cg";
 import { GoDash } from "react-icons/go";
+import { FaBarsProgress } from "react-icons/fa6";
 import { FaBug, FaThumbsUp, FaUser } from "react-icons/fa";
 import { GrInProgress } from "react-icons/gr";
 import {
@@ -220,6 +221,7 @@ const TaskDetails = () => {
                           {TaskTeam && TaskTeam.length > 0 ? (
                             TaskTeam.map((m, index) => {
                               const userTaskRole = m.roles?.find(role => role.task.toString() === Task._id.toString())?.role;
+                              const isWorking = m.work?.find(work => work.task.toString() === Task._id.toString());
                               console.log("index, usertaskrole", index, userTaskRole);
                               return (
                                 <div key={m._id + index} className='flex gap-4 py-2 items-center border-t border-gray-500 justify-between'>
@@ -229,8 +231,9 @@ const TaskDetails = () => {
                                     </div>
 
                                     <div>
-                                      <p className='text-lg font-serif'>
+                                      <p className='text-lg font-serif flex items-center'>
                                         {m?.first_name + " " + m?.last_name}
+                                        {isWorking && <FaBarsProgress className='text-xl text-green-600 mx-2' />}
                                       </p>
                                       <span className='font-thin'>{m?.title}</span>
                                     </div>
@@ -243,7 +246,6 @@ const TaskDetails = () => {
                                           <>
                                             <div className='flex items-center'>
                                               <p className='font-thin'>{userTaskRole}</p>
-                                          
                                               <button className='px-2 py-2 rounded 
                                               text-blue-500 font-sans
                                               hover:text-blue-300 transition duration-200
