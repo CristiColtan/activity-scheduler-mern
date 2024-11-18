@@ -39,6 +39,25 @@ const UserSchema = new mongoose.Schema(
         },
       },
     ],
+    work: [
+      {
+        date: {
+          type: Date,
+          required: true,
+        },
+        hours: {
+          type: Number,
+          required: true,
+          min: 0,
+          max: 8,
+        },
+        task: {
+          type: Schema.Types.ObjectId,
+          ref: "Task",
+          required: true,
+        },
+      },
+    ],
     tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     team: [{ type: Schema.Types.ObjectId, ref: "User" }],
     gender: {

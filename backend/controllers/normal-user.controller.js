@@ -24,6 +24,113 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
+export const fetchHours = async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+    //console.log(req.params);
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const today = new Date();
+    //console.log(today);
+    today.setHours(0, 0, 0, 0);
+
+    console.log(today);
+    //console.log(today.getTime());
+
+    const workEntry = currentUser.work.find(
+      (entry) =>
+        entry.task.toString() === taskId &&
+        entry.date.toISOString().slice(0, 10) ===
+          today.toISOString().slice(0, 10)
+    );
+
+    const loggedHoursToday = currentUser.work
+      .filter((entry) => new Date(entry.date).getTime() === today.getTime())
+      .reduce((sum, entry) => sum + entry.hours, 0);
+
+    console.log("WorkEntry:", workEntry);
+
+    if (!workEntry)
+      return res
+        .status(200)
+        .json({ hours: "Not assigned yet", total_hours: loggedHoursToday });
+
+    return res.status(200).json({
+      hours: workEntry.hours,
+      total_hours: loggedHoursToday,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const assignHoursToTask = async (req, res, next) => {
+  try {
+    const { taskId } = req.body;
+    const { hours } = req.body.formData;
+    //console.log(req.body);
+    //console.log(taskId);
+    console.log("Hours:", hours);
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(taskId);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (hours < 1 || hours > 8)
+      return next(
+        errorHandler(401, "Please enter an input between 1 and 8 hours")
+      );
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const loggedHoursToday = currentUser.work
+      .filter(
+        (entry) =>
+          new Date(entry.date).getTime() === today.getTime() &&
+          entry.task.toString() !== taskId
+      )
+      .reduce((sum, entry) => sum + entry.hours, 0);
+
+    console.log("Ore logate", loggedHoursToday);
+
+    if (loggedHoursToday + Number(hours) > 8) {
+      console.log("hh", loggedHoursToday + Number(hours));
+      return next(
+        errorHandler(401, "You can't work more than 8 hours per day!")
+      );
+    }
+
+    const workEntry = currentUser.work.find(
+      (entry) =>
+        entry.task.toString() === taskId &&
+        new Date(entry.date).getTime() === today.getTime()
+    );
+
+    if (workEntry) {
+      workEntry.hours = hours;
+    } else {
+      currentUser.work.push({
+        task: taskId,
+        date: today,
+        hours,
+      });
+    }
+
+    await currentUser.save();
+
+    res.status(200).json({ message: "Hours have been logged successfully!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const fetchDashboardStatistics = async (req, res, next) => {
   try {
     const userID = req.user.id;

@@ -30,6 +30,7 @@ import Loading from "../components/Loading.jsx"
 import Tabs from "../components/Tabs.jsx"
 import DialogSetRoleTaskDetails from '../components/dialog/DialogSetRoleTaskDetails.jsx';
 import { current } from '@reduxjs/toolkit';
+import DialogAssignHours from '../components/dialog/DialogAssignHours.jsx';
 
 const t_icons = {
     high: <MdKeyboardDoubleArrowUp />,
@@ -108,14 +109,25 @@ const TaskDetails = () => {
   const [editRoleData, setEditRoleData] = useState(null);
   const [userRoleId, setUserRoleId] = useState(null);
 
+  const [openEditHours, setOpenEditHours] = useState(false);
+  const [userHoursId, setUserHoursId] = useState(null);
+
   const handleEditUserRole = (roleData, uId) => {
     setEditRoleData(roleData);
     setUserRoleId(uId);
     setOpenEditRole(true);
   }
+
+  const handleEditUserHours = (uId) => {
+    setUserHoursId(uId);
+    setOpenEditHours(true);
+  }
   
   console.log("editroledata:", editRoleData);
-  console.log("userroleId",userRoleId);
+  console.log("userroleId", userRoleId);
+  
+  console.log("userhoursId", userHoursId);
+  console.log("openedituserhours", openEditHours);
 
   const { currentUser, error } = useSelector((state) => state.user);
   console.log("USER", currentUser);
@@ -245,11 +257,12 @@ const TaskDetails = () => {
                                           <>
                                             <div className='flex items-center'>
                                               <p className='font-thin'>{userTaskRole}</p>
-                                              {userTaskRole !== "Not assigned yet" && currentUser._id === m._id && 
+                                              {userTaskRole !== "Not assigned yet" && currentUser._id === m._id &&
                                                 <button className='px-2 py-2 rounded 
                                               text-green-500 font-sans text-center items-center flex
                                               hover:text-green-300 transition duration-200
-                                                font-medium'>
+                                                font-medium'
+                                                  onClick={() => handleEditUserHours(m._id)}>
                                                   <MdAssignmentAdd className='text-xl' size={28} />
                                                   Work
                                                 </button>
@@ -315,14 +328,22 @@ const TaskDetails = () => {
             {
               (currentUser.is_admin === "Yes" || currentUser.is_team_manager === "Yes") &&
               <DialogSetRoleTaskDetails open={openEditRole}
-              setOpen={setOpenEditRole}
-              editRoleData={editRoleData}
-              team={TaskTeam}
-              setTeam={setTaskTeam}
-              taskId={Task._id}
-              userId={userRoleId} />
+                setOpen={setOpenEditRole}
+                editRoleData={editRoleData}
+                team={TaskTeam}
+                setTeam={setTaskTeam}
+                taskId={Task._id}
+                userId={userRoleId}
+              />
             }
-            {/*work here dialog*/}
+            {
+              (currentUser.is_admin === "No" && currentUser.is_team_manager === "No") &&
+              <DialogAssignHours open={openEditHours}
+                setOpen={setOpenEditHours}
+                taskId={Task._id}
+                userId={userHoursId}
+              />
+            }
           </>)}
         </>)}
     </div>
