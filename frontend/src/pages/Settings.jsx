@@ -38,8 +38,6 @@ const tabs = [{
 }];
 
 const Settings = () => {
-  const { currentUser } = useSelector((state) => state.user);
-
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [errorSettings, setErrorSettings] = useState(null);
 
