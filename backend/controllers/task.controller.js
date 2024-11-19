@@ -25,8 +25,7 @@ export const createTask = async (req, res, next) => {
     } = req.body;
 
     const activity = {
-      type: "assigned",
-      description: "Created the task!",
+      type: "created task",
       by: userID,
     };
 

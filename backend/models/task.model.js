@@ -34,6 +34,7 @@ const TaskSchema = new mongoose.Schema(
             "started",
             "in progress",
             "bug",
+            "created task",
           ],
         },
         description: {

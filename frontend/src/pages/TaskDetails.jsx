@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { CgDetailsMore } from "react-icons/cg";
 import { GoDash } from "react-icons/go";
-import { FaBarsProgress } from "react-icons/fa6";
-import { FaBug, FaThumbsUp, FaUser } from "react-icons/fa";
+import { FaBarsProgress, FaFlag } from "react-icons/fa6";
+import { FaBug, FaThumbsUp, FaUser, FaFlagCheckered } from "react-icons/fa";
 import { GrInProgress } from "react-icons/gr";
 import {
   MdKeyboardArrowDown,
@@ -59,7 +59,7 @@ const activitiy_types = {
     ),
     started: (
       <div className='w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white'>
-        <FaThumbsUp size={20} />
+        <FaThumbsUp className='-translate-y-0.5' size={20} />
       </div>
     ),
     assigned: (
@@ -68,7 +68,7 @@ const activitiy_types = {
       </div>
     ),
     bug: (
-      <div className='text-red-600'>
+      <div className='w-10 h-10 rounded-full border border-red-600 flex items-center justify-center text-red-600'>
         <FaBug size={24} />
       </div>
     ),
@@ -81,7 +81,12 @@ const activitiy_types = {
       <div className='w-10 h-10 rounded-full bg-yellow-600 flex items-center justify-center text-white'>
         <GrInProgress  className='text-xl' />
       </div>
-    )
+  ),
+  "created task": (
+    <div className='w-10 h-10 rounded-full flex border border-gray-500 items-center justify-center text-black'>
+      <FaFlagCheckered className='text-2xl'/>
+      </div>
+  )
 }
 
 const act_types = [
