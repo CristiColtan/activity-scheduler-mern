@@ -12,6 +12,7 @@ const DialogDuplicateTask = ({ open, setOpen, tasks, setTasks, taskData }) => {
   console.log("task duplicate:", taskData);
     
   const handleCancel = () => {
+    setError(null);
     setOpen(false);
   }
 
@@ -60,10 +61,12 @@ const DialogDuplicateTask = ({ open, setOpen, tasks, setTasks, taskData }) => {
           {taskData && <p className='text-center text-black mt-1 font-serif md:text-lg text-base'>
             Are you sure you want to duplicate <span className='font-bold'>{taskData.title}</span> ?
           </p>}
+
+          {error && <span className='text-red-600 px-5 text-center'>{error}</span>}
           
           <div className='py-3 flex justify-between gap-4 bg-white w-auto'>
             <button className='px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
-            hover:bg-gray-300 font-semibold' onClick={() => setOpen(false)}>
+            hover:bg-gray-300 font-semibold' onClick={() => handleCancel()}>
               Cancel
             </button>
             <button className='px-6 py-2 rounded mr-5 font-sans font-semibold text-white bg-blue-600

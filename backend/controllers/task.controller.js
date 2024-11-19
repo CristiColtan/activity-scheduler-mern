@@ -117,6 +117,42 @@ export const updateTask = async (req, res, next) => {
       (memberId) => !newTeamIds.includes(memberId)
     );
 
+    //daca sunt useri care au inceput sa munceasca, componenta echipei nu se mai poate modifica
+    if (newMembers.length > 0) {
+      const membersWhoWorked = [];
+      await Promise.all(
+        existingTeamIds.map(async (memberId) => {
+          const member = await User.findById(memberId);
+          if (
+            member &&
+            member.work.some(
+              (entry) => entry.task.toString() === task._id.toString()
+            )
+          ) {
+            membersWhoWorked.push(memberId);
+          }
+        })
+      );
+
+      if (membersWhoWorked.length > 0) {
+        return next(
+          errorHandler(
+            403,
+            "Cannot edit task members because team members have logged work for it."
+          )
+        );
+      }
+
+      if (removedMembers.length > 0 && membersWhoWorked.length > 0) {
+        return next(
+          errorHandler(
+            403,
+            "Cannot edit task members because team members have logged work for it."
+          )
+        );
+      }
+    }
+
     if (newMembers.length > 0) {
       //notify
       let text = "New task has been assigned to you";
@@ -819,6 +855,30 @@ export const duplicateTask = async (req, res, next) => {
 
     const taskData = task.toObject();
     delete taskData._id;
+
+    const membersWhoWorked = [];
+    await Promise.all(
+      taskData.team.map(async (memberId) => {
+        const member = await User.findById(memberId);
+        if (
+          member &&
+          member.work.some(
+            (entry) => entry.task.toString() === task._id.toString()
+          )
+        ) {
+          membersWhoWorked.push(memberId);
+        }
+      })
+    );
+
+    if (membersWhoWorked.length > 0) {
+      return next(
+        errorHandler(
+          403,
+          "Cannot duplicate task because team members have logged work for it."
+        )
+      );
+    }
 
     //notify
     let text = "New task has been assigned to you";
