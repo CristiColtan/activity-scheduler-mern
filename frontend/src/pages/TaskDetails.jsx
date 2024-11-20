@@ -328,7 +328,7 @@ const TaskDetails = () => {
                 </>
               ) : (
                 <>
-                  <Activities activity={activities} id={params.id} setActivities={setActivities} />
+                  <Activities task={Task} activity={activities} id={params.id} setActivities={setActivities} />
                 </>
               )}
             </Tabs>
@@ -357,7 +357,7 @@ const TaskDetails = () => {
   )
 }
 
-const Activities = ({ activity, id, setActivities }) => {
+const Activities = ({ activity, id, setActivities, task }) => {
   const [select, setSelect] = useState(act_types[0]);
   const [text, setText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -365,6 +365,17 @@ const Activities = ({ activity, id, setActivities }) => {
 
   const navigate = useNavigate();
   const params = useParams();
+
+  const { currentUser } = useSelector((state) => state.user);
+  const userTaskRole = currentUser.roles?.find(role => role.task.toString() === task._id.toString())?.role;
+  console.log("Task activities:", userTaskRole);
+
+  const [isDisabled, setIsDisabled] = useState(true);
+
+  useEffect(() => {
+    if (userTaskRole !== "Not assigned yet" || currentUser.is_admin === "Yes")
+      setIsDisabled(false);
+  }, [userTaskRole]);
 
   const handleSubmit = async () => {
     try {
@@ -438,8 +449,9 @@ const Activities = ({ activity, id, setActivities }) => {
               <button className='px-3 py-2 rounded-lg
                                  bg-blue-700 text-white font-sans
                                 hover:bg-blue-500 transition duration-200
-                                font-medium mb-2 -mt-6'
-                onClick={handleSubmit}>
+                                font-medium mb-2 -mt-6 disabled:cursor-not-allowed
+                                disabled:bg-blue-500'
+                onClick={handleSubmit} disabled={isDisabled}>
                 Submit
               </button>
             )}
