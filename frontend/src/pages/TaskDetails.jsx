@@ -9,6 +9,7 @@ import { CgDetailsMore } from "react-icons/cg";
 import { GoDash } from "react-icons/go";
 import { FaBarsProgress } from "react-icons/fa6";
 import { FaBug, FaThumbsUp, FaUser, FaFlagCheckered } from "react-icons/fa";
+import { CiCircleRemove } from "react-icons/ci";
 import { GrInProgress } from "react-icons/gr";
 import {
   MdKeyboardArrowDown,
@@ -31,6 +32,8 @@ import Loading from "../components/Loading.jsx"
 import Tabs from "../components/Tabs.jsx"
 import DialogSetRoleTaskDetails from '../components/dialog/DialogSetRoleTaskDetails.jsx';
 import DialogAssignHours from '../components/dialog/DialogAssignHours.jsx';
+import DialogEditSubtask from '../components/dialog/DialogEditSubtask.jsx';
+import DialogEditActivity from '../components/dialog/DialogEditActivity.jsx';
 
 const t_icons = {
     high: <MdKeyboardDoubleArrowUp />,
@@ -105,6 +108,7 @@ const TaskDetails = () => {
   const [loading, setLoading] = useState(false);
   const [Error, setError] = useState(null);
   const [activities, setActivities] = useState([]);
+  const [Subtasks, setSubtasks] = useState([]);
 
   const [TaskTeam, setTaskTeam] = useState([]);
   console.log("TaskTeam", TaskTeam);
@@ -156,6 +160,7 @@ const TaskDetails = () => {
           }
 
           setTask(data);
+          setSubtasks(data.subtasks);
           setTaskTeam(data.team);
           setActivities(data.activities);
           setLoading(false);
@@ -173,6 +178,42 @@ const TaskDetails = () => {
   }, [params.id, openEditHours]);
 
   console.log(Task)
+
+  const [openEditSubtask, setOpenEditSubtask] = useState(false);
+  const [subtaskData, setSubtaskData] = useState(null);
+  const [subtaskIndex, setSubtaskIndex] = useState(null);
+  const [taskIdSubtask, settaskIdSubtask] = useState(null);
+
+  const handleOpenEditSubtaskOnClick = (s_data, taskid, sindex) => {
+    setSubtaskData(s_data);
+    settaskIdSubtask(taskid);
+    setSubtaskIndex(sindex);
+    setOpenEditSubtask(true);
+  }
+  
+  const handleDeleteSubTaskOnClick = async (taskID, subtaskIndex) => {
+    try {
+      const res = await fetch("http://localhost:8081/backend/task/delete-task-details-subtask", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ taskID: taskID, subtaskIndex: subtaskIndex }),
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+      
+      setSubtasks(prevSubtasks => prevSubtasks.filter((_, index) => index != subtaskIndex));
+    } catch (error) {
+      console.error(error.message);
+      return;
+    }
+  }
 
   return (
     <div className='w-full flex flex-col gap-3 mb-4 overflow-y-hidden'>
@@ -217,7 +258,7 @@ const TaskDetails = () => {
                         <div className='space-x-2'>
                           <span className='font-serif'>Assets:{" "} <span>{" "}{Task.asseturls && Array.isArray(Task.asseturls) ? Task.asseturls.length : 0}</span></span>
                           <span className='text-gray-500 pl-2 pr-2'>|</span>
-                          <span className='font-serif'>Sub-Tasks:{" "} <span>{" "}{Task.subtasks && Array.isArray(Task.subtasks) ? Task.subtasks.length : 0}</span></span>
+                          <span className='font-serif'>Sub-Tasks:{" "} <span>{" "}{Subtasks && Array.isArray(Subtasks) ? Subtasks.length : 0}</span></span>
                         </div>
                       </div>
 
@@ -291,22 +332,44 @@ const TaskDetails = () => {
                         <p className='font-thin mb-1'>SUB-TASKS</p>
                         <div>
                           {
-                            Task.subtasks && Task.subtasks.length > 0 ? (
-                              Task.subtasks.map((subtask, index) => (
-                                <div key={index} className='flex gap-3 border-t border-gray-500 py-2'>
-                                  <div className='w-10 h-10 rounded-full flex items-center justify-center bg-violet-100'>
-                                    <MdTaskAlt className='text-violet-600' size={24} />
-                                  </div>
-
-                                  <div>
-                                    <div className='flex gap-2 items-center'>
-                                      <span className='font-thin'>{new Date(subtask?.date).toDateString()}</span>
-                                      <span className='px-2 py-0.5 text-center text-sm rounded-full bg-violet-100 text-violet-700 font-semibold'>
-                                        {subtask?.tag}
-                                      </span>
+                            Subtasks && Subtasks.length > 0 ? (
+                              Subtasks.map((subtask, index) => (
+                                <div key={index} className='w-full justify-between inline-flex border-t border-gray-500'>
+                                  <div className='flex gap-3 py-2'>
+                                    <div className='w-10 h-10 rounded-full flex items-center justify-center bg-violet-100'>
+                                      <MdTaskAlt className='text-violet-600' size={24} />
                                     </div>
-                                    <p className='font-serif'>{subtask?.title}</p>
+
+                                    <div>
+                                      <div className='flex gap-2 items-center'>
+                                        <span className='font-thin'>{new Date(subtask?.date).toDateString()}</span>
+                                        <span className='px-2 py-0.5 text-center text-sm rounded-full bg-violet-100 text-violet-700 font-semibold'>
+                                          {subtask?.tag}
+                                        </span>
+                                      </div>
+                                      <p className='font-serif'>{subtask?.title}</p>
+                                    </div>
                                   </div>
+                                  {
+                                    (currentUser.is_admin === "Yes" || currentUser.is_team_manager === "Yes") &&
+                                    <>
+                                      <div className='flex items-center'>
+                                        <button className='px-2 py-2 rounded 
+                                text-red-500 font-sans
+                                hover:text-red-300 transition duration-200
+                                font-medium '
+                                          onClick={() => handleDeleteSubTaskOnClick(Task._id, index)}>
+                                          {<CiCircleRemove className='text-xl mr-3' size={28} />}
+                                        </button>
+                                        <button className='px-2 py-2 rounded 
+                                text-blue-500 font-sans
+                                hover:text-blue-300 transition duration-200
+                                font-medium '
+                                          onClick={() => handleOpenEditSubtaskOnClick(subtask, Task._id, index)}>
+                                          {<CiEdit className='text-xl' size={28} />}
+                                        </button>
+                                      </div></>
+                                  }
                                 </div>
                               ))) : (<p className='text-lg font-serif border-t border-gray-500 py-2'>No subtasks available.</p>)
                           }
@@ -335,14 +398,26 @@ const TaskDetails = () => {
             </Tabs>
             {
               (currentUser.is_admin === "Yes" || currentUser.is_team_manager === "Yes") &&
-              <DialogSetRoleTaskDetails open={openEditRole}
-                setOpen={setOpenEditRole}
-                editRoleData={editRoleData}
-                team={TaskTeam}
-                setTeam={setTaskTeam}
-                taskId={Task._id}
-                userId={userRoleId}
-              />
+              (
+                <>
+                  <DialogSetRoleTaskDetails open={openEditRole}
+                    setOpen={setOpenEditRole}
+                    editRoleData={editRoleData}
+                    team={TaskTeam}
+                    setTeam={setTaskTeam}
+                    taskId={Task._id}
+                    userId={userRoleId}
+                  />
+                  <DialogEditSubtask open={openEditSubtask}
+                    setOpen={setOpenEditSubtask}
+                    subtasks={Subtasks}
+                    setSubtasks={setSubtasks}
+                    taskID={taskIdSubtask}
+                    subtaskIndex={subtaskIndex}
+                    subtaskData={subtaskData}
+                  />
+                </>
+              )
             }
             {
               (currentUser.is_admin === "No" && currentUser.is_team_manager === "No") &&
@@ -413,6 +488,41 @@ const Activities = ({ activity, id, setActivities, task }) => {
     }
   };
 
+  const [openEditActivity, setOpenEditActivity] = useState(false);
+  const [activityData, setActivityData] = useState(null);
+  const [activityIndex, setActivityIndex] = useState(null);
+  const [taskIdActivity, settaskIdActivity] = useState(null);
+
+  const handleOpenEditActivityOnClick = (s_data, taskid, sindex) => {
+    setActivityData(s_data);
+    settaskIdActivity(taskid);
+    setActivityIndex(sindex);
+    setOpenEditActivity(true);
+  }
+
+  const handleDeleteActivityOnClick = async (taskID, activityIndex) => {
+    try {
+      const res = await fetch("http://localhost:8081/backend/task/delete-task-details-activity", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ taskID: taskID, activityIndex: activityIndex }),
+      })
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+      setActivities(prevSubtasks => prevSubtasks.filter((_, index) => index != activityIndex));
+    } catch (error) {
+      console.error(error.message);
+      return;
+    }
+  }
+
   return (
     <>
       <div className='w-full flex gap-10 2xl:gap-20 flex-col md:flex-row overflow-y-auto'>
@@ -423,7 +533,29 @@ const Activities = ({ activity, id, setActivities, task }) => {
               activity && activity.length > 0 ? (
                 activity.map((item, index) => (
                   <Fragment key={index + item}>
-                    <Card item={item} isConnected={index < activity.length - 1} />
+                    <div className='grid grid-cols-[2fr_1fr] justify-between'>
+                      <Card item={item} isConnected={index < activity.length - 1} />
+                      {
+                        (currentUser.is_admin === "Yes" || currentUser._id === item.by._id) &&
+                        <>
+                          <div className=''>
+                            <button className='px-2 py-2 rounded 
+                                text-red-500 font-sans
+                                hover:text-red-300 transition duration-200
+                                font-medium '
+                              onClick={() => handleDeleteActivityOnClick(task._id, index)}>
+                              {<CiCircleRemove className='text-3xl mr-2' />}
+                            </button>
+                            <button className='px-2 py-2 rounded 
+                                text-blue-500 font-sans
+                                hover:text-blue-300 transition duration-200
+                                font-medium '
+                              onClick={() => handleOpenEditActivityOnClick(item, task._id, index)}>
+                              {<CiEdit className='text-3xl' />}
+                            </button></div>
+                        </>
+                      }
+                    </div>
                   </Fragment>
                 ))) : (<p className='text-lg font-serif'>No activities available.</p>)
             }
@@ -461,6 +593,13 @@ const Activities = ({ activity, id, setActivities, task }) => {
           </div>
         </div>
       </div>
+      <DialogEditActivity open={openEditActivity}
+        setOpen={setOpenEditActivity}
+        setActivities={setActivities}
+        taskID={taskIdActivity}
+        activityIndex={activityIndex}
+        activityData={activityData}
+      />
     </>
   )
 }
@@ -475,7 +614,7 @@ const Card = ({ item, isConnected }) => {
             {activitiy_types[item?.type]}
           </div>
 
-          <div className={clsx('w-full flex items-center  ml-10', isConnected ? "min-h-[70px]" : "min-h-[0px]")}>
+          <div className={clsx('w-full flex items-center  ml-10', isConnected ? "min-h-[100px]" : "min-h-[0px]")}>
             <div className='w-0.5 bg-gray-400 h-full'></div>
           </div>
         </div>

@@ -958,3 +958,144 @@ export const duplicateTask = async (req, res, next) => {
     next(error);
   }
 };
+
+export const editSubtask = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { formData, taskID, subtaskIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes" && currentUser.is_team_manager !== "Yes")
+      return next(errorHandler(403, "You are not allowed to edit subtasks!"));
+
+    const task = await Task.findById(taskID);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (subtaskIndex < 0 || subtaskIndex >= task.subtasks.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    if (formData.title) task.subtasks[subtaskIndex].title = formData.title;
+    if (formData.date) task.subtasks[subtaskIndex].date = formData.date;
+
+    await task.save();
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSubtask = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { taskID, subtaskIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes" && currentUser.is_team_manager !== "Yes")
+      return next(errorHandler(403, "You are not allowed to edit subtasks!"));
+
+    const task = await Task.findById(taskID);
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (subtaskIndex < 0 || subtaskIndex >= task.subtasks.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    task.subtasks.splice(subtaskIndex, 1);
+    await task.save();
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editActivity = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { formData, taskID, activityIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(taskID).populate({
+      path: "activities.by",
+      select: "-password",
+    });
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (activityIndex < 0 || activityIndex >= task.activities.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    /*console.log(
+      task.activities[
+        task.activities.length - activityIndex - 1
+      ].by._id.toString()
+    );
+    console.log(currentUser._id.toString());*/
+
+    if (
+      currentUser.is_admin !== "Yes" &&
+      currentUser._id.toString() !==
+        task.activities[
+          task.activities.length - activityIndex - 1
+        ].by._id.toString()
+    )
+      return next(errorHandler(403, "You are not allowed to edit activity!"));
+
+    if (formData.description)
+      task.activities[task.activities.length - activityIndex - 1].description =
+        formData.description;
+
+    await task.save();
+
+    task.activities.reverse();
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteActivity = async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { taskID, activityIndex } = req.body;
+
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    const task = await Task.findById(taskID).populate({
+      path: "activities.by",
+      select: "-password",
+    });
+    if (!task) return next(errorHandler(404, "Task not found!"));
+
+    if (activityIndex < 0 || activityIndex >= task.activities.length)
+      return next(errorHandler(400, "Invalid index!"));
+
+    if (
+      currentUser.is_admin !== "Yes" &&
+      currentUser._id.toString() !==
+        task.activities[
+          task.activities.length - activityIndex - 1
+        ].by._id.toString()
+    )
+      return next(errorHandler(403, "You are not allowed to edit activity!"));
+
+    task.activities.splice(task.activities.length - activityIndex - 1, 1);
+    await task.save();
+
+    task.activities.reverse();
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};

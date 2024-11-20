@@ -22,6 +22,10 @@ import {
   getTaskEdit,
   editUserRole,
   fetchUserRoles,
+  editSubtask,
+  deleteSubtask,
+  editActivity,
+  deleteActivity,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -93,5 +97,19 @@ router.delete(
   verifyAdminOrTeamManager,
   deleteAllTasks
 );
+router.put(
+  "/edit-task-details-subtask",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  editSubtask
+);
+router.put(
+  "/delete-task-details-subtask",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  deleteSubtask
+);
+router.put("/edit-task-details-activity", verifyToken, editActivity);
+router.put("/delete-task-details-activity", verifyToken, deleteActivity);
 
 export default router;
