@@ -82,9 +82,9 @@ export const assignHoursToTask = async (req, res, next) => {
     const task = await Task.findById(taskId);
     if (!task) return next(errorHandler(404, "Task not found!"));
 
-    if (hours < 1 || hours > 8)
+    if (hours < 0 || hours > 8)
       return next(
-        errorHandler(401, "Please enter an input between 1 and 8 hours")
+        errorHandler(401, "Please enter an input between 0 and 8 hours")
       );
 
     const today = new Date();
@@ -114,13 +114,25 @@ export const assignHoursToTask = async (req, res, next) => {
     );
 
     if (workEntry) {
-      workEntry.hours = hours;
+      if (hours === 0) {
+        const index = currentUser.work.findIndex(
+          (entry) =>
+            entry.task.toString() === taskId &&
+            new Date(entry.date).getTime() === today.getTime()
+        );
+        if (index !== -1) {
+          currentUser.work.splice(index, 1); //if hours is 0 eliminate work entry for today
+        }
+      } else {
+        workEntry.hours = hours;
+      }
     } else {
-      currentUser.work.push({
-        task: taskId,
-        date: today,
-        hours,
-      });
+      if (hours !== 0)
+        currentUser.work.push({
+          task: taskId,
+          date: today,
+          hours,
+        });
     }
 
     await currentUser.save();

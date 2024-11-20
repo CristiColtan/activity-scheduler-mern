@@ -139,37 +139,39 @@ const TaskDetails = () => {
   console.log("USER", currentUser);
 
   useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        setLoading(true);
+    if (!openEditHours) {
+      const fetchTask = async () => {
+        try {
+          setLoading(true);
 
-        const res = await fetch(`http://localhost:8081/backend/task/get/${params.id}`, {
-          credentials: "include",
-        });
+          const res = await fetch(`http://localhost:8081/backend/task/get/${params.id}`, {
+            credentials: "include",
+          });
 
-        const data = await res.json();
+          const data = await res.json();
 
-        if (data.success === false) {
-          setError(data.message);
+          if (data.success === false) {
+            setError(data.message);
+            setLoading(false);
+            return;
+          }
+
+          setTask(data);
+          setTaskTeam(data.team);
+          setActivities(data.activities);
+          setLoading(false);
+          setError(null);
+        } catch (error) {
+          console.log(error.message);
+          setError(error.message);
           setLoading(false);
           return;
         }
-
-        setTask(data);
-        setTaskTeam(data.team);
-        setActivities(data.activities);
-        setLoading(false);
-        setError(null);
-      } catch (error) {
-        console.log(error.message);
-        setError(error.message);
-        setLoading(false);
-        return;
       }
-    }
     
-    fetchTask();
-  }, [params.id]);
+      fetchTask();
+    }
+  }, [params.id, openEditHours]);
 
   console.log(Task)
 
