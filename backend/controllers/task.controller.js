@@ -373,6 +373,15 @@ export const addActivity = async (req, res, next) => {
       return next(errorHandler(403, "You are not allowed to add activities!"));
     }
 
+    const currentUserRole = currentUser.roles.find(
+      (role) => role.task.toString() === task._id.toString()
+    );
+
+    //verify if currentUser is team member && if current user's role is !== 'Not assigned yet' -> cant add activities
+    if (isTeamMember && currentUserRole.role === "Not assigned yet") {
+      return next(errorHandler(403, "You are not allowed to add activities!"));
+    }
+
     const data = { type, description, date, by: userID };
     task.activities.push(data);
 
@@ -408,6 +417,26 @@ export const addSubTask = async (req, res, next) => {
     if (!isCreator && currentUser.is_admin === "No") {
       return next(errorHandler(403, "You are not allowed to add subtasks!"));
     }
+
+    //notify
+    let text = `New subtask has been assigned to your team. Check it and act accordingly. Subtask deadline: ${new Date(
+      date
+    ).toDateString()}.`;
+
+    const notif = await Notification.create({
+      text,
+      task: task._id,
+      sent_to: task.team,
+    });
+
+    //add to timeline
+    const activity_data = {
+      type: "assigned",
+      description: `subtask (${title}) to ${tag}`,
+      date: new Date(),
+      by: userID,
+    };
+    task.activities.push(activity_data);
 
     const data = { title, date, tag };
     task.subtasks.push(data);

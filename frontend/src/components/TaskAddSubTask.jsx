@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import MyModal from "./MyModal";
 
-const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks }) => {
+const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks, activities, setActivities }) => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -40,6 +40,7 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks }) => {
         return;
       }
 
+      setActivities(data.activities);
       setSubTasks(data.subtasks);
       setLoading(false);
       setError(null);

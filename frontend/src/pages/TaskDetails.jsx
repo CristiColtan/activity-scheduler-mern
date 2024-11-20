@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { CgDetailsMore } from "react-icons/cg";
 import { GoDash } from "react-icons/go";
-import { FaBarsProgress, FaFlag } from "react-icons/fa6";
+import { FaBarsProgress } from "react-icons/fa6";
 import { FaBug, FaThumbsUp, FaUser, FaFlagCheckered } from "react-icons/fa";
 import { GrInProgress } from "react-icons/gr";
 import {
@@ -30,7 +30,6 @@ import PageTitle from '../components/PageTitle.jsx';
 import Loading from "../components/Loading.jsx"
 import Tabs from "../components/Tabs.jsx"
 import DialogSetRoleTaskDetails from '../components/dialog/DialogSetRoleTaskDetails.jsx';
-import { current } from '@reduxjs/toolkit';
 import DialogAssignHours from '../components/dialog/DialogAssignHours.jsx';
 
 const t_icons = {
@@ -135,7 +134,7 @@ const TaskDetails = () => {
   console.log("userhoursId", userHoursId);
   console.log("openedituserhours", openEditHours);
 
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser } = useSelector((state) => state.user);
   console.log("USER", currentUser);
 
   useEffect(() => {
@@ -371,6 +370,7 @@ const Activities = ({ activity, id, setActivities, task }) => {
   const { currentUser } = useSelector((state) => state.user);
   const userTaskRole = currentUser.roles?.find(role => role.task.toString() === task._id.toString())?.role;
   console.log("Task activities:", userTaskRole);
+  console.log("Current user:", currentUser);
 
   const [isDisabled, setIsDisabled] = useState(true);
 

@@ -73,10 +73,13 @@ const TaskCard = ({ task, tasks, setTasks }) => {
   const { currentUser } = useSelector((state) => state.user);
   const [open, setOpen] = useState(false);
   const [subTasks, setSubTasks] = useState([]);
+  const [Activitiess, setActivitiess] = useState([]);
 
   useEffect(() => {
-    if (task.subtasks)
+    if (task.subtasks) {
       setSubTasks(task.subtasks);
+      setActivitiess(task.activities);
+    }
   }, [task.subtasks])
 
   return (
@@ -108,7 +111,7 @@ const TaskCard = ({ task, tasks, setTasks }) => {
             <div className='flex items-center gap-3 mt-1'>
               <div className='flex gap-1 items-center font-thin text-black'>
                 <LiaCommentSolid className='text-lg' />
-                <span className='font-thin'>{task.activities && Array.isArray(task.activities) ? task.activities.length : 0}</span>
+                <span className='font-thin'>{Activitiess && Array.isArray(Activitiess) ? Activitiess.length : 0}</span>
               </div>
               <div className='flex gap-1 items-center font-thin text-black'>
                 <IoMdAttach className='text-lg' />
@@ -158,7 +161,8 @@ const TaskCard = ({ task, tasks, setTasks }) => {
         </div>
       </div>
       
-      <TaskAddSubTask open={open} setOpen={setOpen} id={task._id} subTasks={subTasks} setSubTasks={setSubTasks} />
+      <TaskAddSubTask open={open} setOpen={setOpen} id={task._id} subTasks={subTasks} setSubTasks={setSubTasks}
+        activities={Activitiess} setActivities={setActivitiess} />
     </>
   )
 }
