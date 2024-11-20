@@ -48,4 +48,5 @@ export const task_activity_list_type = [
   "STARTED",
   "IN PROGRESS",
   "BUG",
+  "CREATED TASK",
 ];

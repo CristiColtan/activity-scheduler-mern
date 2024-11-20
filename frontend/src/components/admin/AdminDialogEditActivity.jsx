@@ -121,6 +121,7 @@ const AdminDialogEditActivity = ({ open, setOpen, allTasks, setAllTasks, taskID,
                 type: "",
                 description: "",
               });
+              setType(activityData.type.toUpperCase());
             }}
               className="px-3 py-1 rounded
                                 bg-white text-black font-sans w-1/2

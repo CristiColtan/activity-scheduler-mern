@@ -15,7 +15,7 @@ import { TbSubtask } from "react-icons/tb";
 import { RxActivityLog } from "react-icons/rx";
 import { FaPhotoVideo } from "react-icons/fa";
 import { CiCircleRemove } from "react-icons/ci";
-import { FaBug, FaThumbsUp, FaUser } from "react-icons/fa";
+import { FaBug, FaThumbsUp, FaUser, FaFlagCheckered } from "react-icons/fa";
 import { MdOutlineMessage, MdOutlineDoneAll } from "react-icons/md"
 import { GrInProgress } from "react-icons/gr";
 import { CiEdit } from "react-icons/ci";
@@ -246,6 +246,11 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
       "in progress": (
         <div className='w-10 h-10 rounded-full bg-yellow-600 flex items-center justify-center text-white'>
           <GrInProgress className='text-xl' />
+        </div>
+      ),
+      "created task": (
+        <div className='w-10 h-10 rounded-full flex border border-gray-500 items-center justify-center text-black'>
+          <FaFlagCheckered className='text-2xl' />
         </div>
       )
     }
