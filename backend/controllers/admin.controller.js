@@ -7,11 +7,15 @@ import AppSettings from "../models/app-settings.model.js";
 export const getTeamManagers = async (req, res, next) => {
   try {
     const users = await User.find({ is_team_manager: "Yes" })
-      .select("-password")
+      .populate({
+        path: "team",
+        select: "-password",
+      })
       .populate({
         path: "roles.task",
         select: "title stage priority is_trashed",
-      });
+      })
+      .select("-password");
 
     res.status(200).json(users);
   } catch (error) {
@@ -34,7 +38,7 @@ export const getNormalUsers = async (req, res, next) => {
 
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ is_admin: "No" })
+    const users = await User.find({ is_admin: "No", is_team_manager: "No" })
       .select("-password")
       .populate({
         path: "roles.task",
@@ -227,7 +231,12 @@ export const editUser = async (req, res, next) => {
 
     const updatedUser = await User.findByIdAndUpdate(memberID, req.body, {
       new: true,
-    }).select("-password");
+    })
+      .populate({
+        path: "roles.task",
+        select: "title stage priority is_trashed",
+      })
+      .select("-password");
 
     res.status(200).json(updatedUser);
   } catch (error) {
@@ -264,7 +273,13 @@ export const switchStatusFetchUsers = async (req, res, next) => {
     if (currentUser.is_admin !== "Yes")
       return next(errorHandler(403, "You are not an admin!"));
 
-    const member = await User.findById(memberID);
+    const member = await User.findById(memberID)
+      .populate({
+        path: "roles.task",
+        select: "title stage priority is_trashed",
+      })
+      .select("-password");
+
     if (!member)
       return next(errorHandler(404, `Member with ID ${member} not found!`));
 
@@ -296,7 +311,13 @@ export const makeAccountActiveOrInactive = async (req, res, next) => {
     if (currentUser.is_admin !== "Yes")
       return next(errorHandler(403, "You are not an admin!"));
 
-    const member = await User.findById(memberID);
+    const member = await User.findById(memberID)
+      .populate({
+        path: "roles.task",
+        select: "title stage priority is_trashed",
+      })
+      .select("-password");
+
     if (!member)
       return next(errorHandler(404, `Member with ID ${member} not found!`));
 

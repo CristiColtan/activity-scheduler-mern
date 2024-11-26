@@ -15,6 +15,7 @@ import { MdKeyboardArrowUp } from "react-icons/md";
 import { MdKeyboardDoubleArrowUp } from "react-icons/md";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { GoDash } from "react-icons/go";
+import { BsMicrosoftTeams } from "react-icons/bs";
 
 import { getInitials } from "../../utils/FullnameInitials.js";
 import { priority_styles, task_type, bgs } from "../../utils/tableImports.js";
@@ -23,7 +24,7 @@ import AdminDialogStatusAction from "./AdminDialogStatusAction.jsx";
 import AdminDialogEditUser from "./AdminDialogEditUser.jsx";
 import AdminTabs from "./AdminTabs.jsx";
 
-const AdminUsers = () => {
+const AdminTeamManagers = () => {
   const navigate = useNavigate();
 
   const t_icons = {
@@ -33,7 +34,7 @@ const AdminUsers = () => {
     low: <MdKeyboardArrowDown />,
   };
 
-  const [allUsers, setAllUsers] = useState([]);
+  const [allTeamManagers, setAllTeamManagers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -53,14 +54,14 @@ const AdminUsers = () => {
     setOpenDialogEditUser(true);
   };
 
-  console.log("AdminUsers-AllUsers:", allUsers);
+  console.log("AdminUsers-AllTeamManagers:", allTeamManagers);
 
-  const fetchAllUsers = async () => {
+  const fetchAllTeamManagers = async () => {
     try {
       setLoading(true);
 
       const res = await fetch(
-        "http://localhost:8081/backend/admin/get/all-users",
+        "http://localhost:8081/backend/admin/get/team-managers",
         {
           credentials: "include",
         }
@@ -74,7 +75,7 @@ const AdminUsers = () => {
         return;
       }
 
-      setAllUsers(data);
+      setAllTeamManagers(data);
       setLoading(false);
       setError(null);
     } catch (error) {
@@ -86,7 +87,7 @@ const AdminUsers = () => {
   };
 
   useEffect(() => {
-    fetchAllUsers();
+    fetchAllTeamManagers();
   }, []);
 
   const MyTableHeaderUsers = () => {
@@ -115,7 +116,24 @@ const AdminUsers = () => {
     );
   };
 
+  const MyTableHeaderUsersTeam = () => {
+    return (
+      <thead className="border-b border-black">
+        <tr className="text-black text-left">
+          <th className="py-2">Name</th>
+          <th className="py-2 hidden lg:block">Email</th>
+          <th className="py-2 pr-4"></th>
+          <th className="py-2 px-2 hidden lg:block">Created</th>
+        </tr>
+      </thead>
+    );
+  };
+
   const tabs = [
+    {
+      title: "Team",
+      icon: <BsMicrosoftTeams className="text-lg" size={20} />,
+    },
     {
       title: "Roles",
       icon: <BsPersonSquare className="text-lg" size={20} />,
@@ -200,7 +218,6 @@ const AdminUsers = () => {
             </div>
           </td>
         </tr>
-
         {expand && (
           <tr className="text-black border-b border-black table-row">
             <td colSpan="5">
@@ -209,7 +226,70 @@ const AdminUsers = () => {
                 selectedd={selected}
                 setSelected={setSelected}
               >
-                {selected === 0 && (
+                {selected == 0 && (
+                  <>
+                    <table className="w-full mb-5">
+                      <MyTableHeaderUsersTeam />
+                      {user.team && user.team.length > 0 ? (
+                        <>
+                          {user.team.map((member, index) => (
+                            <tr
+                              key={index}
+                              className=" border-b border-gray-300 py-2 hover:bg-gray-200"
+                            >
+                              <td className="py-2 pr-2">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm bg-violet-500">
+                                    <span className="text-center">
+                                      {getInitials(
+                                        member.first_name,
+                                        member.last_name
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <p className="font-serif">
+                                      {member.first_name +
+                                        " " +
+                                        member.last_name}
+                                    </p>
+                                    <span className="font-thin">
+                                      {member.title}
+                                    </span>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="py-2 pr-2 hidden lg:table-cell">
+                                <p className="font-thin ">{user.email}</p>
+                              </td>
+
+                              <td className="py-2"></td>
+
+                              <td className="py-2 font-thin px-2 hidden lg:table-cell">
+                                <span className="">
+                                  {moment(user.createdAt).fromNow()}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </>
+                      ) : (
+                        <>
+                          <tr>
+                            <td
+                              colSpan="5"
+                              className="text-center py-4 text-lg"
+                            >
+                              <p>No team members.</p>
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                    </table>
+                  </>
+                )}
+                {selected === 1 && (
                   <>
                     <table className="w-full mb-5">
                       <TableHeaderRoles />
@@ -308,7 +388,7 @@ const AdminUsers = () => {
     <>
       <div className="w-full bg-white rounded shadow-lg mb-8">
         <div className="flex items-center justify-between px-2 py-2">
-          <AdminPagetitle title="All Users" />
+          <AdminPagetitle title="All Team Managers" />
         </div>
       </div>
 
@@ -316,8 +396,8 @@ const AdminUsers = () => {
         <table className="w-full mb-5">
           <MyTableHeaderUsers />
           <tbody>
-            {allUsers && allUsers.length > 0 ? (
-              allUsers.map((user, index) => (
+            {allTeamManagers && allTeamManagers.length > 0 ? (
+              allTeamManagers.map((user, index) => (
                 <MyTableRowUsers key={index + user._id} user={user} />
               ))
             ) : (
@@ -339,18 +419,18 @@ const AdminUsers = () => {
         open={openDialogStatusAction}
         setOpen={setOpenDialogStatusAction}
         userData={userDataStatusAction}
-        allUsers={allUsers}
-        setAllUsers={setAllUsers}
+        allUsers={allTeamManagers}
+        setAllUsers={setAllTeamManagers}
       />
       <AdminDialogEditUser
         open={openDialogEditUser}
         setOpen={setOpenDialogEditUser}
         userData={userDataEdit}
-        allUsers={allUsers}
-        setAllUsers={setAllUsers}
+        allUsers={allTeamManagers}
+        setAllUsers={setAllTeamManagers}
       />
     </>
   );
 };
 
-export default AdminUsers;
+export default AdminTeamManagers;

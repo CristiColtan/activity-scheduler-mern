@@ -65,7 +65,7 @@ const activitiy_types = {
       </div>
     ),
     assigned: (
-      <div className='w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center text-white'>
+      <div className='w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white'>
         <FaUser className='text-xl'/>
       </div>
     ),
@@ -208,7 +208,7 @@ const TaskDetails = () => {
         return;
       }
       
-      setSubtasks(prevSubtasks => prevSubtasks.filter((_, index) => index != subtaskIndex));
+      setSubtasks(prevSubtasks => prevSubtasks.filter((_, index) => index !== subtaskIndex));
     } catch (error) {
       console.error(error.message);
       return;
@@ -516,7 +516,7 @@ const Activities = ({ activity, id, setActivities, task }) => {
         console.log(data.message);
         return;
       }
-      setActivities(prevSubtasks => prevSubtasks.filter((_, index) => index != activityIndex));
+      setActivities(prevSubtasks => prevSubtasks.filter((_, index) => index !== activityIndex));
     } catch (error) {
       console.error(error.message);
       return;

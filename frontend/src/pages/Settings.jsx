@@ -19,6 +19,7 @@ import { BsPersonSquare } from "react-icons/bs";
 import AdminUsers from '../components/admin/AdminUsers.jsx';
 import AdminTasks from '../components/admin/AdminTasks.jsx';
 import AdminRoles from '../components/admin/AdminRoles.jsx';
+import AdminTeamManagers from '../components/admin/AdminTeamManagers.jsx';
 
 const tabs = [{
   title: "Users",
@@ -80,7 +81,7 @@ const Settings = () => {
                       )}
                       {selected === 3 && (
                         <>
-                          4
+                          <AdminTeamManagers />
                         </>
                       )}
                       {selected === 4 && (
