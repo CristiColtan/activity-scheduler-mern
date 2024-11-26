@@ -242,6 +242,18 @@ export const editUserRole = async (req, res, next) => {
     const taskMember = await User.findById(userId);
     if (!taskMember) return next(errorHandler(404, "Member not found!"));
 
+    const hasLoggedHours = taskMember.work.some(
+      (workEntry) => workEntry.task.toString() === taskId && workEntry.hours > 0
+    );
+
+    if (hasLoggedHours)
+      return next(
+        errorHandler(
+          400,
+          "Cannot change role. User has already logged hours for this task!"
+        )
+      );
+
     const updatedUser = await User.findOneAndUpdate(
       {
         _id: userId,

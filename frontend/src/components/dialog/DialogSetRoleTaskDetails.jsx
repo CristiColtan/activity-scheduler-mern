@@ -51,6 +51,7 @@ const DialogSetRoleTaskDetails = ({ open, setOpen, editRoleData, taskId, userId,
 
     const handleCancel = () => {
         setOpen(false);
+        setEroare(null);
     }
 
     console.log("UserRoles: ", rolesList);
@@ -123,6 +124,7 @@ const DialogSetRoleTaskDetails = ({ open, setOpen, editRoleData, taskId, userId,
                     <div className="w-full flex justify-between gap-4">
                         <button onClick={() => {
                             setOpen(false);
+                            setEroare(null);
                             setRolee(editRoleData);
                         }}
                             className="px-3 py-1 rounded
