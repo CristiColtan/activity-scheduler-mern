@@ -1,14 +1,14 @@
-import React, { useState, Fragment, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import clsx from 'clsx'
-import moment from "moment"
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, Fragment, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import clsx from "clsx";
+import moment from "moment";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-import PageTitle from '../components/PageTitle.jsx';
+import PageTitle from "../components/PageTitle.jsx";
 import Loading from "../components/Loading.jsx";
 import TabsProfile from "../components/TabsProfile.jsx";
-import { getInitials } from '../utils/FullnameInitials.js';
+import { getInitials } from "../utils/FullnameInitials.js";
 
 import { FaUsers } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
@@ -16,27 +16,34 @@ import { IoIosNotifications } from "react-icons/io";
 import { FaTeamspeak } from "react-icons/fa";
 import { BsPersonSquare } from "react-icons/bs";
 
-import AdminUsers from '../components/admin/AdminUsers.jsx';
-import AdminTasks from '../components/admin/AdminTasks.jsx';
-import AdminRoles from '../components/admin/AdminRoles.jsx';
-import AdminTeamManagers from '../components/admin/AdminTeamManagers.jsx';
+import AdminUsers from "../components/admin/AdminUsers.jsx";
+import AdminTasks from "../components/admin/AdminTasks.jsx";
+import AdminRoles from "../components/admin/AdminRoles.jsx";
+import AdminTeamManagers from "../components/admin/AdminTeamManagers.jsx";
+import AdminNotificationsLog from "../components/admin/AdminNotificationsLog.jsx";
 
-const tabs = [{
-  title: "Users",
-  icon: <FaUsers className='text-lg' size={20} />
-},{
-  title: "Tasks",
-  icon: <FaTasks className='text-lg' size={20} />
-},{
-  title: "Notifications",
-  icon: <IoIosNotifications className='text-lg' size={20} />
-},{
-  title: "Team Managers",
-  icon: <FaTeamspeak className='text-lg' size={20} />
-},{
-  title: "User Roles",
-  icon: <BsPersonSquare className='text-lg' size={20} />
-}];
+const tabs = [
+  {
+    title: "Users",
+    icon: <FaUsers className="text-lg" size={20} />,
+  },
+  {
+    title: "Tasks",
+    icon: <FaTasks className="text-lg" size={20} />,
+  },
+  {
+    title: "Notifications",
+    icon: <IoIosNotifications className="text-lg" size={20} />,
+  },
+  {
+    title: "Team Managers",
+    icon: <FaTeamspeak className="text-lg" size={20} />,
+  },
+  {
+    title: "User Roles",
+    icon: <BsPersonSquare className="text-lg" size={20} />,
+  },
+];
 
 const Settings = () => {
   const [loadingSettings, setLoadingSettings] = useState(false);
@@ -51,54 +58,58 @@ const Settings = () => {
 
   return (
     <>
-      <div className='w-full flex flex-col gap-3 mb-4 overflow-y-hidden'>
-        {loadingSettings ?
-          (<div><Loading></Loading></div>) : (
-            <>
-              {errorSettings ?
-                (<p className='text-red-500 text-4xl'>Something went wrong! {errorSettings}</p>) : (
-                  <>
-                    <div className='pl-1 w-full bg-white h-fit px-2 md:px-6 py-4 shadow-lg rounded mb-8'>
-                      <PageTitle title="Admin Page" />
-                      <p className='font-serif'>Manage everything</p>
-                    </div>
+      <div className="w-full flex flex-col gap-3 mb-4 overflow-y-hidden">
+        {loadingSettings ? (
+          <div>
+            <Loading></Loading>
+          </div>
+        ) : (
+          <>
+            {errorSettings ? (
+              <p className="text-red-500 text-4xl">
+                Something went wrong! {errorSettings}
+              </p>
+            ) : (
+              <>
+                <div className="pl-1 w-full bg-white h-fit px-2 md:px-6 py-4 shadow-lg rounded mb-8">
+                  <PageTitle title="Admin Page" />
+                  <p className="font-serif">Manage everything</p>
+                </div>
 
-                    <TabsProfile tabs={tabs} setSelected={setSelected}>
-                      {selected === 0 && (
-                        <>
-                          <AdminUsers />
-                        </>
-                      )}
-                      {selected === 1 && (
-                        <>
-                          <AdminTasks />
-                        </>
-                      )}
-                      {selected === 2 && (
-                        <>
-                          3
-                        </>
-                      )}
-                      {selected === 3 && (
-                        <>
-                          <AdminTeamManagers />
-                        </>
-                      )}
-                      {selected === 4 && (
-                        <>
-                          <AdminRoles />
-                        </>
-                      )}
-                    </TabsProfile>
-                  </>
-                )
-              }
-            </>
-          )
-        }
+                <TabsProfile tabs={tabs} setSelected={setSelected}>
+                  {selected === 0 && (
+                    <>
+                      <AdminUsers />
+                    </>
+                  )}
+                  {selected === 1 && (
+                    <>
+                      <AdminTasks />
+                    </>
+                  )}
+                  {selected === 2 && (
+                    <>
+                      <AdminNotificationsLog />
+                    </>
+                  )}
+                  {selected === 3 && (
+                    <>
+                      <AdminTeamManagers />
+                    </>
+                  )}
+                  {selected === 4 && (
+                    <>
+                      <AdminRoles />
+                    </>
+                  )}
+                </TabsProfile>
+              </>
+            )}
+          </>
+        )}
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Settings
+export default Settings;

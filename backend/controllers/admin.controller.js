@@ -3,6 +3,7 @@ import { errorHandler } from "../utils/error.js";
 import User from "../models/user.model.js";
 import Task from "../models/task.model.js";
 import AppSettings from "../models/app-settings.model.js";
+import Notification from "../models/notification.model.js";
 
 export const getTeamManagers = async (req, res, next) => {
   try {
@@ -583,6 +584,29 @@ export const editSubtask = async (req, res, next) => {
     await task.save();
 
     res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getNotificationsLog = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const notifications = await Notification.find({})
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate({
+        path: "sent_to",
+        select: "first_name last_name title email",
+      });
+
+    res.status(200).json(notifications);
   } catch (error) {
     next(error);
   }

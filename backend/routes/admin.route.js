@@ -21,6 +21,7 @@ import {
   fetchRoles,
   addRole,
   deleteRole,
+  getNotificationsLog,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { verifyAdmin } from "../utils/verifyAdmin.js";
@@ -50,6 +51,12 @@ router.get(
   verifyToken,
   verifyAdmin,
   fetchAllTasksPopulated
+);
+router.get(
+  "/get/notifications-log",
+  verifyToken,
+  verifyAdmin,
+  getNotificationsLog
 );
 
 router.post("/add/role", verifyToken, verifyAdmin, addRole);
