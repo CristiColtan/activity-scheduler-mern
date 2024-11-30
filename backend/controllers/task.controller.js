@@ -116,11 +116,12 @@ export const updateTask = async (req, res, next) => {
       (memberId) => !newTeamIds.includes(memberId)
     );
 
-    //daca sunt useri care au inceput sa munceasca, componenta echipei nu se mai poate modifica
-    if (newMembers.length > 0) {
+    //daca sunt useri care au inceput sa munceasca, componenta echipei se mai poate modifica doar pentru a adauga un user nou,
+    //nu se pot scoate useri care au muncit
+    if (removedMembers.length > 0) {
       const membersWhoWorked = [];
       await Promise.all(
-        existingTeamIds.map(async (memberId) => {
+        removedMembers.map(async (memberId) => {
           const member = await User.findById(memberId);
           if (
             member &&
@@ -142,13 +143,15 @@ export const updateTask = async (req, res, next) => {
         );
       }
 
-      if (removedMembers.length > 0 && membersWhoWorked.length > 0) {
+      {
+        /*if (removedMembers.length > 0 && membersWhoWorked.length > 0) {
         return next(
           errorHandler(
             403,
             "Cannot edit task members because team members have logged work for it."
           )
         );
+      }*/
       }
     }
 
