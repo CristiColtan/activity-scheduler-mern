@@ -237,6 +237,10 @@ export const editUser = async (req, res, next) => {
         path: "roles.task",
         select: "title stage priority is_trashed",
       })
+      .populate({
+        path: "team",
+        select: "-password",
+      })
       .select("-password");
 
     res.status(200).json(updatedUser);
@@ -278,6 +282,10 @@ export const switchStatusFetchUsers = async (req, res, next) => {
       .populate({
         path: "roles.task",
         select: "title stage priority is_trashed",
+      })
+      .populate({
+        path: "team",
+        select: "-password",
       })
       .select("-password");
 
@@ -442,6 +450,161 @@ export const fetchDashboardStatistics = async (req, res, next) => {
     };
 
     res.status(200).json(summary);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchUserReport1 = async (req, res, next) => {
+  try {
+    console.log(req.params);
+    console.log(req.body);
+
+    const memberID = req.params.id;
+    const { date_from, date_until } = req.body;
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    if (!date_from || !date_until)
+      return next(errorHandler(400, "Both dates are required!"));
+
+    const targetUser = await User.findById(memberID)
+      .populate("work.task")
+      .select("-password");
+
+    if (!targetUser) return next(errorHandler(404, "Member not found!"));
+
+    const fromDate = new Date(date_from);
+    const untilDate = new Date(date_until);
+
+    if (fromDate > untilDate)
+      return next(
+        errorHandler(400, "Please enter dates in cronological order!")
+      );
+
+    const filteredWork = targetUser.work.filter(
+      (entry) => entry.date >= fromDate && entry.date <= untilDate
+    );
+
+    const filteredTasks = [...new Set(filteredWork.map((entry) => entry.task))];
+
+    const taskHours = Object.entries(
+      filteredWork.reduce((result, { task, hours }) => {
+        const taskName = task.title;
+        result[taskName] = (result[taskName] || 0) + hours;
+        return result;
+      }, {})
+    ).map(([name, total]) => ({ name, total }));
+
+    res.status(200).json({ taskHours, filteredTasks });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchUserReport2 = async (req, res, next) => {
+  try {
+    console.log(req.params);
+    console.log(req.body);
+
+    const memberID = req.params.id;
+    const { date_from, date_until } = req.body;
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    if (!date_from || !date_until)
+      return next(errorHandler(400, "Both dates are required!"));
+
+    const targetUser = await User.findById(memberID).select("-password");
+
+    if (!targetUser) return next(errorHandler(404, "Member not found!"));
+
+    const fromDate = new Date(date_from);
+    const untilDate = new Date(date_until);
+
+    if (fromDate > untilDate)
+      return next(
+        errorHandler(400, "Please enter dates in cronological order!")
+      );
+
+    const filteredWork = targetUser.work.filter(
+      (entry) => entry.date >= fromDate && entry.date <= untilDate
+    );
+
+    const roleHours = Object.entries(
+      filteredWork.reduce((result, { task, hours }) => {
+        //find role
+        const roleEntry = targetUser.roles.find(
+          (role) => role.task.toString() === task._id.toString()
+        );
+        const roleName = roleEntry.role;
+        result[roleName] = (result[roleName] || 0) + hours;
+        return result;
+      }, {})
+    ).map(([name, total]) => ({ name, total }));
+
+    return res.status(200).json(roleHours);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchTeamManagerReports = async (req, res, next) => {
+  try {
+    const teamManagerID = req.params.id;
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_admin !== "Yes")
+      return next(errorHandler(403, "You are not an admin!"));
+
+    const teamManager = await User.findById(teamManagerID);
+    if (!teamManager) return next(errorHandler(404, "Team Manager not found!"));
+
+    const tasks = await Task.find({ created_by: teamManagerID }).populate({
+      path: "team",
+      select: "-password",
+    });
+
+    //task-uri in functie de stage
+    //ex: to do - 10
+    const taskStatusDistribution = Object.entries(
+      tasks.reduce((result, task) => {
+        result[task.stage] = (result[task.stage] || 0) + 1;
+        return result;
+      }, {})
+    ).map(([name, total]) => ({ name, total }));
+
+    //ore lucrate per membru al echipei team manager-ului
+    //ex: user normal 1 - 53
+    const teamMemberIDs = [
+      ...new Set(
+        tasks.flatMap((task) => task.team.map((member) => member._id))
+      ),
+    ];
+    const teamMembers = await User.find({ _id: { $in: teamMemberIDs } });
+
+    const teamEfficency = teamMembers.map((member) => {
+      const totalHours = member.work.reduce(
+        (sum, entry) => sum + entry.hours,
+        0
+      );
+      return {
+        name: `${member.first_name} ${member.last_name}`,
+        hours: totalHours,
+      };
+    });
+
+    res.status(200).json({ taskStatusDistribution, teamEfficency });
   } catch (error) {
     next(error);
   }

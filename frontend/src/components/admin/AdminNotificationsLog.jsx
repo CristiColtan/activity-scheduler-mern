@@ -210,7 +210,9 @@ const AdminNotificationsLog = () => {
           </td>
 
           <td className="py-2 pr-4 max-w-xs">
-            <p className="font-sans line-clamp-2">{notification.text}</p>
+            <p className="font-sans hover:line-clamp-none line-clamp-2">
+              {notification.text}
+            </p>
           </td>
 
           <td className="py-2"></td>

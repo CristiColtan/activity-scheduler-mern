@@ -22,6 +22,9 @@ import {
   addRole,
   deleteRole,
   getNotificationsLog,
+  fetchUserReport1,
+  fetchUserReport2,
+  fetchTeamManagerReports,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 import { verifyAdmin } from "../utils/verifyAdmin.js";
@@ -66,6 +69,15 @@ router.post(
   verifyToken,
   verifyAdmin,
   removeTeamManager
+);
+
+router.put("/get/report-1/:id", verifyToken, verifyAdmin, fetchUserReport1);
+router.put("/get/report-2/:id", verifyToken, verifyAdmin, fetchUserReport2);
+router.put(
+  "/get/reports-TM/:id",
+  verifyToken,
+  verifyAdmin,
+  fetchTeamManagerReports
 );
 
 router.put("/delete/asset", verifyToken, verifyAdmin, deleteAsset);

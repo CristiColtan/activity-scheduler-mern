@@ -5,6 +5,12 @@ export const priority_styles = {
   low: "text-green-600",
 };
 
+export const task_type_report = {
+  "to do": "#dc2626",
+  "in progress": "#ca8a04",
+  completed: "#16a34a",
+};
+
 export const task_type = {
   "to do": "bg-red-600",
   "in progress": "bg-yellow-600",
