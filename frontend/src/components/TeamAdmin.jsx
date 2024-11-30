@@ -18,13 +18,33 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import { GoDash } from "react-icons/go";
 
 import { getInitials } from "../utils/FullnameInitials.js";
-import { priority_styles, task_type, bgs } from "../utils/tableImports.js";
+import {
+  priority_styles,
+  task_type,
+  bgs,
+  task_type_report,
+} from "../utils/tableImports.js";
 
 import DialogStatusAction from "./dialog/DialogStatusAction.jsx";
 import DialogDeleteConfirmTeamManager from "./dialog/DialogDeleteConfirmTeamManager.jsx";
 import AddTeamManager from "./AddTeamManager.jsx";
 import EditUser from "./EditUser.jsx";
 import AdminTabs from "./admin/AdminTabs.jsx";
+
+import {
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  Cell,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+import CustomToolTipReportTM1 from "./recharts/CustomToolTipReportTM1.jsx";
 
 const TeamAdmin = () => {
   const navigate = useNavigate();
@@ -148,6 +168,58 @@ const TeamAdmin = () => {
       setExpand((prevExpand) => !prevExpand);
       if (!expand) setSelected(0);
     };
+
+    //reports
+    const [loadingReports, setLoadingReports] = useState(false);
+    const [errorReports, setErrorReports] = useState(null);
+    const [reportsData, setReportsData] = useState({});
+
+    const [activeIndex1, setActiveIndex1] = useState(-1);
+    const COLORSS = ["#1A8E01", "#008678", "#00437D", "#6B007D", "#7D0000"];
+    const onPieEnter1 = (_, index) => {
+      setActiveIndex1(index);
+    };
+
+    const [showReports, setShowReports] = useState(false);
+
+    const fetchReports = async () => {
+      try {
+        setLoadingReports(true);
+
+        const res = await fetch(
+          `http://localhost:8081/backend/admin/get/reports-TM/${user._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+
+        const data = await res.json();
+        if (data.success === false) {
+          console.log(data.message);
+          setErrorReports(data.message);
+          setLoadingReports(false);
+          return;
+        }
+
+        setLoadingReports(false);
+        setErrorReports(null);
+        setShowReports(true);
+        setReportsData(data);
+      } catch (error) {
+        console.log(error.message);
+        setErrorReports(error);
+        setLoadingReports(false);
+        return;
+      }
+    };
+
+    useEffect(() => {
+      fetchReports();
+    }, []);
 
     return (
       <>
@@ -307,6 +379,137 @@ const TeamAdmin = () => {
                         </>
                       )}
                     </table>
+                  </>
+                )}
+                {selected === 1 && (
+                  <>
+                    <div className="w-full flex flex-col overflow-y-hidden gap-4">
+                      <div className="w-full flex flex-col gap-2">
+                        <p className="font-serif">
+                          Tasks proportion depending on their stage.
+                        </p>
+                        <div className="w-full grid grid-cols-1 justify-center items-center gap-x-6 gap-y-2 mt-4">
+                          {loadingReports && <Loading />}
+                          {errorReports && (
+                            <p className="text-red-500 text-center">
+                              {errorReports}
+                            </p>
+                          )}
+                          {!loadingReports && !errorReports && showReports && (
+                            <>
+                              {reportsData?.taskStatusDistribution?.length >
+                              0 ? (
+                                <>
+                                  <div className="">
+                                    <ResponsiveContainer
+                                      width={"100%"}
+                                      height={300}
+                                    >
+                                      <PieChart width={150} height={150}>
+                                        <Pie
+                                          activeIndex={activeIndex1}
+                                          data={
+                                            reportsData.taskStatusDistribution
+                                          }
+                                          dataKey="total"
+                                          nameKey="name"
+                                          fill="black"
+                                          outerRadius={150}
+                                          innerRadius={90}
+                                          onMouseEnter={onPieEnter1}
+                                          style={{
+                                            cursor: "pointer",
+                                            outline: "none",
+                                          }}
+                                        >
+                                          {reportsData.taskStatusDistribution.map(
+                                            (entry, index) => (
+                                              <Cell
+                                                key={`cell-${index}`}
+                                                fill={
+                                                  task_type_report[entry.name]
+                                                }
+                                              />
+                                            )
+                                          )}
+                                        </Pie>
+                                        <Tooltip
+                                          content={<CustomToolTipReportTM1 />}
+                                        />
+                                      </PieChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-center text-lg font-serif text-red-500">
+                                    No data available.
+                                  </p>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <br></br>
+                      <div className="w-full flex flex-col gap-2">
+                        <p className="font-serif">
+                          The contribution of team members through the number of
+                          hours worked on tasks.
+                        </p>
+                        <div className="w-full grid grid-cols-1 justify-center items-center gap-x-6 gap-y-2 mt-4">
+                          {loadingReports && <Loading />}
+                          {errorReports && (
+                            <p className="text-red-500 text-center">
+                              {errorReports}
+                            </p>
+                          )}
+                          {!loadingReports && !errorReports && showReports && (
+                            <>
+                              {reportsData?.teamEfficency?.length > 0 ? (
+                                <>
+                                  <div className="">
+                                    <ResponsiveContainer
+                                      width={"100%"}
+                                      height={300}
+                                    >
+                                      <BarChart
+                                        data={reportsData.teamEfficency}
+                                      >
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Bar dataKey="hours" fill="#6B007D">
+                                          {reportsData?.teamEfficiency?.map(
+                                            (entry, index) => (
+                                              <Cell
+                                                key={`cell-${index}`}
+                                                fill={
+                                                  COLORSS[
+                                                    index % COLORSS.length
+                                                  ]
+                                                }
+                                              />
+                                            )
+                                          )}
+                                        </Bar>
+                                      </BarChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-center text-lg font-serif text-red-500">
+                                    No data available.
+                                  </p>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </>
                 )}
               </AdminTabs>

@@ -290,3 +290,105 @@ export const fetchDashboardStatistics = async (req, res, next) => {
     next(error);
   }
 };
+
+export const fetchTeamMemberReport1 = async (req, res, next) => {
+  try {
+    console.log(req.params);
+    console.log(req.body);
+
+    const memberID = req.params.id;
+    const { date_from, date_until } = req.body;
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_team_manager !== "Yes")
+      return next(errorHandler(403, "You are not an team-manager!"));
+
+    if (!date_from || !date_until)
+      return next(errorHandler(400, "Both dates are required!"));
+
+    const targetUser = await User.findById(memberID)
+      .populate("work.task")
+      .select("-password");
+
+    if (!targetUser) return next(errorHandler(404, "Member not found!"));
+
+    const fromDate = new Date(date_from);
+    const untilDate = new Date(date_until);
+
+    if (fromDate > untilDate)
+      return next(
+        errorHandler(400, "Please enter dates in cronological order!")
+      );
+
+    const filteredWork = targetUser.work.filter(
+      (entry) => entry.date >= fromDate && entry.date <= untilDate
+    );
+
+    const filteredTasks = [...new Set(filteredWork.map((entry) => entry.task))];
+
+    const taskHours = Object.entries(
+      filteredWork.reduce((result, { task, hours }) => {
+        const taskName = task.title;
+        result[taskName] = (result[taskName] || 0) + hours;
+        return result;
+      }, {})
+    ).map(([name, total]) => ({ name, total }));
+
+    res.status(200).json({ taskHours, filteredTasks });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchTeamMemberReport2 = async (req, res, next) => {
+  try {
+    console.log(req.params);
+    console.log(req.body);
+
+    const memberID = req.params.id;
+    const { date_from, date_until } = req.body;
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (currentUser.is_team_manager !== "Yes")
+      return next(errorHandler(403, "You are not an team-manager!"));
+
+    if (!date_from || !date_until)
+      return next(errorHandler(400, "Both dates are required!"));
+
+    const targetUser = await User.findById(memberID).select("-password");
+
+    if (!targetUser) return next(errorHandler(404, "Member not found!"));
+
+    const fromDate = new Date(date_from);
+    const untilDate = new Date(date_until);
+
+    if (fromDate > untilDate)
+      return next(
+        errorHandler(400, "Please enter dates in cronological order!")
+      );
+
+    const filteredWork = targetUser.work.filter(
+      (entry) => entry.date >= fromDate && entry.date <= untilDate
+    );
+
+    const roleHours = Object.entries(
+      filteredWork.reduce((result, { task, hours }) => {
+        //find role
+        const roleEntry = targetUser.roles.find(
+          (role) => role.task.toString() === task._id.toString()
+        );
+        const roleName = roleEntry.role;
+        result[roleName] = (result[roleName] || 0) + hours;
+        return result;
+      }, {})
+    ).map(([name, total]) => ({ name, total }));
+
+    return res.status(200).json(roleHours);
+  } catch (error) {
+    next(error);
+  }
+};

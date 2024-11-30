@@ -10,6 +10,8 @@ import {
   editTeamMember,
   fetchAllTrashedTasks,
   fetchDashboardStatistics,
+  fetchTeamMemberReport1,
+  fetchTeamMemberReport2,
 } from "../controllers/team-manager.controller.js";
 
 const router = express.Router();
@@ -43,6 +45,18 @@ router.put(
   verifyToken,
   verifyTeamManager,
   editTeamMember
+);
+router.put(
+  "/get/report-1/:id",
+  verifyToken,
+  verifyTeamManager,
+  fetchTeamMemberReport1
+);
+router.put(
+  "/get/report-2/:id",
+  verifyToken,
+  verifyTeamManager,
+  fetchTeamMemberReport2
 );
 
 export default router;
