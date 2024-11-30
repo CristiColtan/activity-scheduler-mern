@@ -82,6 +82,19 @@ export const assignHoursToTask = async (req, res, next) => {
     const task = await Task.findById(taskId);
     if (!task) return next(errorHandler(404, "Task not found!"));
 
+    const isUserInTaskTeam = task.team.some(
+      (memberId) => memberId.toString() === userID
+    );
+
+    if (!isUserInTaskTeam) {
+      return next(
+        errorHandler(
+          403,
+          "You are not part of this task's team, so you can't log hours!"
+        )
+      );
+    }
+
     if (hours < 0 || hours > 8)
       return next(
         errorHandler(401, "Please enter an input between 0 and 8 hours")

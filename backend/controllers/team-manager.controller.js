@@ -124,9 +124,23 @@ export const removeFromTeam = async (req, res, next) => {
     );
 
     //mai raman doar intrarile din user.roles in care nu se gasesc task-urile din tasksToUpdate
-    member.roles = member.roles.filter(
-      (role) => !tasksToUpdate.some((task) => task._id.equals(role.task))
-    );
+    //si care au logate ore muncite
+
+    //old: !tasksToUpdate.some((task) => task._id.equals(role.task))
+    member.roles = member.roles.filter((roleEntry) => {
+      const taskInRoles = tasksToUpdate.some((task) =>
+        task._id.equals(roleEntry.task)
+      );
+
+      if (!taskInRoles) return true;
+
+      const hasLoggedWork = member.work.some(
+        (workEntry) =>
+          workEntry.task._id.equals(roleEntry.task) && workEntry.hours > 0
+      );
+
+      return hasLoggedWork;
+    });
     await member.save();
 
     const updatedUser = await User.findById(userID).populate({
