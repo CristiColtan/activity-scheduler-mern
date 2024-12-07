@@ -176,13 +176,22 @@ export const updateTask = async (req, res, next) => {
       });
 
       //roles to new members
+      //daca membrul a lucrat la task, munca sa ii va ramane salvata, asa ca va trebui sa verificam in roles daca exista deja
       await Promise.all(
         newMembers.map(async (memberId) => {
-          await User.findByIdAndUpdate(memberId, {
-            $push: {
-              roles: { task: task._id, role: "Not assigned yet" },
-            },
-          });
+          const member = await User.findById(memberId);
+
+          const alreadyHasRole = member.roles.some((role) =>
+            role.task.equals(task._id)
+          );
+
+          if (!alreadyHasRole) {
+            await User.findByIdAndUpdate(memberId, {
+              $push: {
+                roles: { task: task._id, role: "Not assigned yet" },
+              },
+            });
+          }
         })
       );
     }
