@@ -584,6 +584,10 @@ export const fetchTeamManagerReports = async (req, res, next) => {
       }, {})
     ).map(([name, total]) => ({ name, total }));
 
+    const teamManagerTeamIDs = teamManager.team.map((member) =>
+      member._id.toString()
+    );
+
     //ore lucrate per membru al echipei team manager-ului
     //ex: user normal 1 - 53
     const teamMemberIDs = [
@@ -591,7 +595,13 @@ export const fetchTeamManagerReports = async (req, res, next) => {
         tasks.flatMap((task) => task.team.map((member) => member._id))
       ),
     ];
-    const teamMembers = await User.find({ _id: { $in: teamMemberIDs } });
+
+    const teamMembers = await User.find({ _id: { $in: teamMemberIDs } }).then(
+      (members) =>
+        members.filter((member) =>
+          teamManagerTeamIDs.includes(member._id.toString())
+        )
+    );
 
     const taskIDs = tasks.map((task) => task._id.toString());
 
