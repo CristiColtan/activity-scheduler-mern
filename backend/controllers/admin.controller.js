@@ -593,11 +593,12 @@ export const fetchTeamManagerReports = async (req, res, next) => {
     ];
     const teamMembers = await User.find({ _id: { $in: teamMemberIDs } });
 
+    const taskIDs = tasks.map((task) => task._id.toString());
+
     const teamEfficency = teamMembers.map((member) => {
-      const totalHours = member.work.reduce(
-        (sum, entry) => sum + entry.hours,
-        0
-      );
+      const totalHours = member.work
+        .filter((entry) => taskIDs.includes(entry.task.toString()))
+        .reduce((sum, entry) => sum + entry.hours, 0);
       return {
         name: `${member.first_name} ${member.last_name}`,
         hours: totalHours,
