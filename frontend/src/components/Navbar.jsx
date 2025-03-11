@@ -1,44 +1,70 @@
-import React, { useState } from 'react'
-import clsx from "clsx"
+import React, { useState } from "react";
+import clsx from "clsx";
 
 import { IoIosMenu } from "react-icons/io";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 
 import { FaSearch } from "react-icons/fa";
 
-import { setOpenSidebar } from '../redux/user/userSlice.js';
+import { setOpenSidebar } from "../redux/user/userSlice.js";
+import { setSearchTerm } from "../redux/search/searchSlice.js";
 
-import UserAvatar from './UserAvatar.jsx';
-import Notifications from './Notifications.jsx';
+import UserAvatar from "./UserAvatar.jsx";
+import Notifications from "./Notifications.jsx";
 
 const Navbar = () => {
-    const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const location = useLocation();
 
-    const [isHovered, setIsHovered] = useState(false);
+  const isTasksPage = location.pathname.startsWith("/tasks");
+  const searchValue = useSelector((state) => state.search.searchTerm);
 
-    return (
-        <div className='flex justify-between items-center bg-white px-4 py-3 2xl:py-4 sticky z-10 top-0'>
-            <div className='flex items-center justify-between gap-4'>
-                <button>
-                    <IoIosMenu className='text-2xl font-medium text-black block md:hidden
-                    hover:text-gray-400'
-                        onClick={() => dispatch(setOpenSidebar(true))} />
-                </button>
-                <div className='w-64 2xl:w-[400px] flex items-center py-2 px-3 gap-2 rounded-full bg-[#f2f2f2]'>
-                    <FaSearch className={clsx('text-black search-icon', isHovered ? "text-gray-400" : "text-black")}></FaSearch>
-                    <input type="text" placeholder='Search...'
-                        className='bg-[#f2f2f2] flex-1 outline-none placeholder:text-gray-500 text-black'
-                        onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-                    </input>
-                </div>
-            </div>
-            <div className='flex gap-2 items-center'>
-                <Notifications></Notifications>
-                <br></br>
-                <UserAvatar></UserAvatar>
-            </div>
-        </div>
-    )
-}
+  const [isHovered, setIsHovered] = useState(false);
 
-export default Navbar
+  const [search, setSearch] = useState("");
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    dispatch(setSearchTerm(e.target.value));
+  };
+
+  return (
+    <div className="flex justify-between items-center bg-white px-4 py-3 2xl:py-4 sticky z-10 top-0">
+      <div className="flex items-center justify-between gap-4">
+        <button>
+          <IoIosMenu
+            className="text-2xl font-medium text-black block md:hidden
+                    hover:text-gray-400"
+            onClick={() => dispatch(setOpenSidebar(true))}
+          />
+        </button>
+        {isTasksPage && (
+          <div className="w-64 2xl:w-[400px] flex items-center py-2 px-3 gap-2 rounded-full bg-[#f2f2f2]">
+            <FaSearch
+              className={clsx(
+                "text-black search-icon",
+                isHovered ? "text-gray-400" : "text-black"
+              )}
+            ></FaSearch>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchValue}
+              onChange={handleSearch}
+              className="bg-[#f2f2f2] flex-1 outline-none placeholder:text-gray-500 text-black"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            ></input>
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2 items-center">
+        <Notifications></Notifications>
+        <br></br>
+        <UserAvatar></UserAvatar>
+      </div>
+    </div>
+  );
+};
+
+export default Navbar;

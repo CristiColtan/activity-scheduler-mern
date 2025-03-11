@@ -479,29 +479,72 @@ export const fetchAllTasks = async (req, res, next) => {
     const currentUser = await User.findById(userID);
     if (!currentUser) return next(errorHandler(404, "User not found!"));
 
+    const limit = parseInt(req.query.limit) || 9;
+    const startIndex = parseInt(req.query.startIndex) || 0;
+
+    let priority = req.query.priority;
+    if (!priority || priority === "any-priority") {
+      priority = { $in: ["high", "medium", "normal", "low"] };
+    }
+
+    let status = req.query.status;
+    if (!status || status === "any-status") {
+      status = { $in: ["completed", "to do", "in progress"] };
+    }
+
+    const searchTerm = req.query.searchTerm || "";
+    const sort = req.query.sort || "createdAt";
+    const order = req.query.order || "desc";
+
     let tasks;
 
     if (currentUser.is_admin === "Yes") {
-      tasks = await Task.find({ is_trashed: "No" })
+      tasks = await Task.find({
+        title: { $regex: searchTerm, $options: "i" },
+        is_trashed: "No",
+        priority,
+        stage: status,
+      })
         .populate({
           path: "team",
           select: "-password",
         })
-        .populate({ path: "created_by", select: "-password" });
+        .populate({ path: "created_by", select: "-password" })
+        .sort({ [sort]: order })
+        .limit(limit)
+        .skip(startIndex);
     } else if (currentUser.is_team_manager === "Yes") {
-      tasks = await Task.find({ is_trashed: "No", created_by: userID })
+      tasks = await Task.find({
+        title: { $regex: searchTerm, $options: "i" },
+        is_trashed: "No",
+        created_by: userID,
+        priority,
+        stage: status,
+      })
         .populate({
           path: "team",
           select: "-password",
         })
-        .populate({ path: "created_by", select: "-password" });
+        .populate({ path: "created_by", select: "-password" })
+        .sort({ [sort]: order })
+        .limit(limit)
+        .skip(startIndex);
     } else {
-      tasks = await Task.find({ is_trashed: "No", team: userID })
+      tasks = await Task.find({
+        title: { $regex: searchTerm, $options: "i" },
+        is_trashed: "No",
+        team: userID,
+        priority,
+        stage: status,
+      })
         .populate({
           path: "team",
           select: "-password",
         })
-        .populate({ path: "created_by", select: "-password" });
+        .populate({ path: "created_by", select: "-password" })
+        .sort({ [sort]: order })
+        .limit(limit)
+        .skip(startIndex);
     }
 
     res.status(200).json(tasks);
