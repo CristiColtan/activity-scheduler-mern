@@ -83,6 +83,16 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: "No",
     },
+    mfa_enabled: {
+      type: String,
+      required: true,
+      default: "No",
+    },
+    mfa_secret: {
+      type: String,
+      required: false,
+      default: "",
+    },
   },
   {
     timestamps: true,
