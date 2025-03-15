@@ -142,11 +142,10 @@ export const signgoogle = async (req, res, next) => {
           is_admin: user.is_admin,
           is_team_manager: user.is_team_manager,
         },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
       );
       const { password: pass, ...rest } = user._doc; //ascundem parola din json
-
-      console.log("Token generat:");
 
       res
         .cookie("access_token", token, {
