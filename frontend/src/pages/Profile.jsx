@@ -22,6 +22,7 @@ import {
   updateUserFailure,
   updateUserSuccess,
 } from "../redux/user/userSlice.js";
+import DialogResetPassword from "../components/dialog/DialogResetPassword.jsx";
 
 const tabs = [
   {
@@ -48,6 +49,7 @@ const tabs = [
 
 const Profile = () => {
   const { currentUser, loading, error } = useSelector((state) => state.user);
+  console.log("CURRENT USER", currentUser);
   const dispatch = useDispatch();
 
   const [loadingProfile, setLoadingProfile] = useState(false);
@@ -128,6 +130,7 @@ const Profile = () => {
   const [disabledPreferences, setDisabledPreferences] = useState(true);
   const [openSetUp2Fa, setOpenSetUp2Fa] = useState(false);
   const [openDisable2Fa, setOpenDisable2Fa] = useState(false);
+  const [openResetPassword, setOpenResetPassword] = useState(false);
 
   return (
     <>
@@ -563,17 +566,17 @@ const Profile = () => {
 
                           <div className="space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center">
                             <span className="font-serif md:text-base text-sm">
-                              Reset your password regularly to keep your account
-                              secure
+                              Change your password regularly to keep your
+                              account secure
                             </span>
                           </div>
 
                           <div className="space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center">
                             <button
+                              onClick={() => setOpenResetPassword(true)}
                               className="bg-blue-700 hover:bg-blue-400 inline-flex text-white font-medium 
                                 items-center disabled:cursor-not-allowed disabled:bg-blue-400 border-gray-500 px-4 py-2
                                 rounded"
-                              disabled={true}
                             >
                               Reset
                             </button>
@@ -756,6 +759,10 @@ const Profile = () => {
       </div>
       <DialogSetUp2Fa open={openSetUp2Fa} setOpen={setOpenSetUp2Fa} />
       <DialogDisable2Fa open={openDisable2Fa} setOpen={setOpenDisable2Fa} />
+      <DialogResetPassword
+        open={openResetPassword}
+        setOpen={setOpenResetPassword}
+      />
     </>
   );
 };

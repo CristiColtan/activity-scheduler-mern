@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import speakeasy from "speakeasy";
 
 import { errorHandler } from "../utils/error.js";
 
@@ -133,6 +134,63 @@ export const signgoogle = async (req, res, next) => {
         .status(200)
         .json(rest);
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetpass = async (req, res, next) => {
+  try {
+    const userID = req.user.id;
+    const currentUser = await User.findById(userID);
+    if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+    if (userID !== req.params.id)
+      return next(
+        errorHandler(401, "You can only reset your own account password!")
+      );
+
+    console.log("BODY:", req.body);
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    console.log(oldPassword, newPassword, confirmPassword);
+
+    if (currentUser.mfa_enabled === "Yes") {
+      const { token } = req.body;
+      console.log("Token:", token);
+
+      if (!token)
+        return next(
+          errorHandler(401, "Two-factor authentication code required!")
+        );
+
+      const verified = speakeasy.totp.verify({
+        secret: currentUser.mfa_secret,
+        encoding: "base32",
+        token: token,
+      });
+
+      if (!verified)
+        return next(errorHandler(401, "Invalid token! Please try again!"));
+    }
+
+    const validPassword = bcryptjs.compareSync(
+      oldPassword,
+      currentUser.password
+    );
+    if (!validPassword)
+      return next(errorHandler(401, "Your old password is wrong!"));
+
+    const isSamePassword = bcryptjs.compareSync(
+      newPassword,
+      currentUser.password
+    );
+    if (isSamePassword)
+      return next(errorHandler(400, "New password must be different!"));
+
+    const newHashedPassword = bcryptjs.hashSync(newPassword, 10);
+    await User.findByIdAndUpdate(userID, { password: newHashedPassword });
+
+    res.status(200).json("Password updated successfully!");
   } catch (error) {
     next(error);
   }
