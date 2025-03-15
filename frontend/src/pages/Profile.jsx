@@ -532,7 +532,10 @@ const Profile = () => {
                             </span>
                           </div>
 
-                          <div className="space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center"></div>
+                          <div className="space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center">
+                            Even disabled persons can use our app without any
+                            problems.
+                          </div>
 
                           <div className="space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center">
                             <button
@@ -609,20 +612,19 @@ const Profile = () => {
                           </div>
                         </div>
 
-                        <div className="w-full grid grid-cols-3 gap-5 2xl:gap-8 overflow-y-auto mt-2">
+                        <div className="w-full hidden grid-cols-3 gap-5 2xl:gap-8 overflow-y-auto mt-2">
+                          {/*change hidden to grid*/}
                           <div className="space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center">
                             <span className="font-serif md:text-lg text-base">
                               Active sessions
                             </span>
                           </div>
-
                           <div className="space-y-6 p-4 bg-white shadow-lg text-center">
                             <span className="font-serif md:text-base text-sm">
                               Selecting "Sign out" will sign you out from all
                               devices.
                             </span>
                           </div>
-
                           <div className="space-y-6 p-4 bg-white shadow-lg flex items-center justify-center text-center">
                             <button
                               className="bg-red-700 hover:bg-red-400 inline-flex text-white font-medium 
