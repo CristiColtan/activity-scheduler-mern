@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import { DialogTitle } from "@headlessui/react";
 import { toast } from "react-toastify";
@@ -7,7 +7,11 @@ import { toast } from "react-toastify";
 import MyModal from "../MyModal.jsx";
 import Loading from "../Loading.jsx";
 
+import { updateUserSuccess } from "../../redux/user/userSlice.js";
+
 const DialogDisable2Fa = ({ open, setOpen }) => {
+  const dispatch = useDispatch();
+
   const { currentUser } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -59,6 +63,8 @@ const DialogDisable2Fa = ({ open, setOpen }) => {
         draggable: true,
         theme: "light",
       });
+
+      dispatch(updateUserSuccess(data));
 
       setOpen(false);
     } catch (error) {

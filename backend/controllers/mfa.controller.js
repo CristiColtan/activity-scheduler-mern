@@ -16,7 +16,7 @@ export const generateQR = async (req, res, next) => {
         errorHandler(401, "You can only generate QR for your own account!")
       );
 
-    if (currentUser.mfa_secret !== "")
+    if (currentUser.mfa_secret !== "" && currentUser.mfa_enabled === "Yes")
       return next(
         errorHandler(
           401,
@@ -31,10 +31,14 @@ export const generateQR = async (req, res, next) => {
     await User.findByIdAndUpdate(userID, { mfa_secret: secret.base32 });
     console.log(secret);
 
+    const updatedUser = await User.findById(userID).select("-password");
+
     QRCode.toDataURL(secret.otpauth_url, (err, QRData) => {
       if (err) return next(errorHandler(500, "Error generating QR code!"));
 
-      res.status(200).json({ qr_code: QRData, secret: secret.base32 });
+      res
+        .status(200)
+        .json({ qr_code: QRData, secret: secret.base32, user: updatedUser });
     });
   } catch (error) {
     next(error);
@@ -71,7 +75,9 @@ export const firstVerifyMFA = async (req, res, next) => {
 
     await User.findByIdAndUpdate(userID, { mfa_enabled: "Yes" });
 
-    res.status(200).json("MFA verified successfully!");
+    const updatedUser = await User.findById(userID).select("-password");
+
+    res.status(200).json(updatedUser);
   } catch (error) {
     next(error);
   }
@@ -139,12 +145,16 @@ export const disableMFA = async (req, res, next) => {
     if (!verified)
       return next(errorHandler(401, "Invalid token! Please try again!"));
 
-    await User.findByIdAndUpdate(userID, {
-      mfa_secret: "",
-      mfa_enabled: "No",
-    });
+    const updatedUser = await User.findByIdAndUpdate(
+      userID,
+      {
+        mfa_secret: "",
+        mfa_enabled: "No",
+      },
+      { new: true }
+    ).select("-password");
 
-    res.status(200).json("MFA disabled successfully!");
+    res.status(200).json(updatedUser);
   } catch (error) {
     next(error);
   }

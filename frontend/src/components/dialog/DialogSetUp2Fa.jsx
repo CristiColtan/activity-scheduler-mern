@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import { DialogTitle } from "@headlessui/react";
 import { toast } from "react-toastify";
@@ -7,14 +7,17 @@ import { toast } from "react-toastify";
 import MyModal from "../MyModal.jsx";
 import Loading from "../Loading.jsx";
 
+import { updateUserSuccess } from "../../redux/user/userSlice.js";
+
 const DialogSetUp2Fa = ({ open, setOpen }) => {
+  const dispatch = useDispatch();
+
   const { currentUser } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
   const [loadingVerify, setLoadingVerify] = useState(false);
   const [error, setError] = useState(null);
 
   const [code, setCode] = useState("");
-  console.log("CODE:", code);
 
   const handleChange = (e) => {
     setCode(e.target.value);
@@ -29,8 +32,6 @@ const DialogSetUp2Fa = ({ open, setOpen }) => {
   const [QRCode, setQRCode] = useState("");
   const [secret, setSecret] = useState("");
 
-  console.log("QR CODE:", QRCode);
-  console.log("SECRET:", secret);
   const [verified, setVerified] = useState(false);
 
   const generateQR = async () => {
@@ -56,12 +57,11 @@ const DialogSetUp2Fa = ({ open, setOpen }) => {
         return;
       }
 
-      console.log("DATA FROM QR", data);
-
       setQRCode(data.qr_code);
       setSecret(data.secret);
       setLoading(false);
       setError(null);
+      dispatch(updateUserSuccess(data.user));
     } catch (error) {
       console.log(error.message);
       setError(error.message);
@@ -107,6 +107,8 @@ const DialogSetUp2Fa = ({ open, setOpen }) => {
         draggable: true,
         theme: "light",
       });
+
+      dispatch(updateUserSuccess(data));
 
       setOpen(false);
     } catch (error) {
