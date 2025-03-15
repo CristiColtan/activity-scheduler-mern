@@ -23,6 +23,10 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    signInCancel: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
     setOpenSidebar: (state, action) => {
       state.sidebarOpen = action.payload;
     },
@@ -57,6 +61,7 @@ export const {
   signInStart,
   signInFailure,
   signInSuccess,
+  signInCancel,
   setOpenSidebar,
   signOutUserFailure,
   signOutUserStart,

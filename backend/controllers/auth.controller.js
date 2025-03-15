@@ -41,6 +41,61 @@ export const signin = async (req, res, next) => {
     if (validUser.is_active === "No")
       return next(errorHandler(401, "Your account has been deactivated!"));
 
+    if (validUser.mfa_enabled === "Yes") {
+      return res.status(200).json({
+        mfa_required: true,
+        message: "Two-factor authentication code required!",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: validUser._id,
+        is_admin: validUser.is_admin,
+        is_team_manager: validUser.is_team_manager,
+      },
+      process.env.JWT_SECRET
+    );
+    const { password: pass, ...rest } = validUser._doc; //ascundem parola din json
+
+    res
+      .cookie("access_token", token, {
+        httpOnly: true,
+        domain: "localhost",
+        path: "/",
+      })
+      .status(200)
+      .json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signinTOTP = async (req, res, next) => {
+  const { username, code } = req.body;
+  console.log("TOTP:", username, code);
+
+  try {
+    const validUser = await User.findOne({ username });
+    if (!validUser) return next(errorHandler(400, "User not found!"));
+
+    if (!code)
+      return next(
+        errorHandler(401, "Two-factor authentication code required!")
+      );
+
+    if (validUser.mfa_enabled !== "Yes")
+      return next(errorHandler(400, "Two-factor authentication not enabled!"));
+
+    const verified = speakeasy.totp.verify({
+      secret: validUser.mfa_secret,
+      encoding: "base32",
+      token: code,
+    });
+
+    if (!verified)
+      return next(errorHandler(401, "Invalid token! Please try again!"));
+
     const token = jwt.sign(
       {
         id: validUser._id,
@@ -76,6 +131,7 @@ export const signout = async (req, res, next) => {
 export const signgoogle = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
+
     if (user) {
       if (user.is_active === "No")
         return next(errorHandler(401, "Your account has been deactivated!"));
@@ -89,6 +145,8 @@ export const signgoogle = async (req, res, next) => {
         process.env.JWT_SECRET
       );
       const { password: pass, ...rest } = user._doc; //ascundem parola din json
+
+      console.log("Token generat:");
 
       res
         .cookie("access_token", token, {

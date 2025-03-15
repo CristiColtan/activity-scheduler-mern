@@ -3,6 +3,7 @@ import express from "express";
 import {
   signup,
   signin,
+  signinTOTP,
   signout,
   signgoogle,
   resetpass,
@@ -16,6 +17,7 @@ router.get("/signout", signout);
 
 router.post("/signup", signup);
 router.post("/signin", signin);
+router.post("/signin-totp", signinTOTP);
 router.post("/signgoogle", signgoogle);
 router.post("/reset-password/:id", verifyToken, resetpass);
 
