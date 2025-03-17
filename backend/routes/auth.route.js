@@ -6,6 +6,7 @@ import {
   signinTOTP,
   signout,
   signgoogle,
+  signingoogleTOTP,
   resetpass,
 } from "../controllers/auth.controller.js";
 
@@ -19,6 +20,7 @@ router.post("/signup", signup);
 router.post("/signin", signin);
 router.post("/signin-totp", signinTOTP);
 router.post("/signgoogle", signgoogle);
+router.post("/signingoogle-totp", signingoogleTOTP);
 router.post("/reset-password/:id", verifyToken, resetpass);
 
 export default router;
