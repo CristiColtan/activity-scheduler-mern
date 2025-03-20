@@ -87,14 +87,39 @@ export const signinTOTP = async (req, res, next) => {
     if (validUser.mfa_enabled !== "Yes")
       return next(errorHandler(400, "Two-factor authentication not enabled!"));
 
+    const now = Date.now();
+    if (validUser.totp_cooldown && now < validUser.totp_cooldown) {
+      return next(
+        errorHandler(
+          429,
+          `Too many failed attempts! Try again in
+        ${Math.ceil((validUser.totp_cooldown - now) / 1000)} seconds.`
+        )
+      );
+    }
+
     const verified = speakeasy.totp.verify({
       secret: validUser.mfa_secret,
       encoding: "base32",
       token: code,
     });
 
-    if (!verified)
+    if (!verified) {
+      validUser.totp_attempts = (validUser.totp_attempts || 0) + 1;
+
+      if (validUser.totp_attempts >= 3) {
+        validUser.totp_cooldown = now + 30 * 1000;
+        validUser.totp_attempts = 0;
+      }
+
+      await validUser.save();
+
       return next(errorHandler(401, "Invalid token! Please try again!"));
+    }
+
+    validUser.totp_attempts = 0;
+    validUser.totp_cooldown = null;
+    await validUser.save();
 
     const token = jwt.sign(
       {
@@ -145,14 +170,39 @@ export const signingoogleTOTP = async (req, res, next) => {
     if (validUser.mfa_enabled !== "Yes")
       return next(errorHandler(400, "Two-factor authentication not enabled!"));
 
+    const now = Date.now();
+    if (validUser.totp_cooldown && now < validUser.totp_cooldown) {
+      return next(
+        errorHandler(
+          429,
+          `Too many failed attempts! Try again in
+        ${Math.ceil((validUser.totp_cooldown - now) / 1000)} seconds.`
+        )
+      );
+    }
+
     const verified = speakeasy.totp.verify({
       secret: validUser.mfa_secret,
       encoding: "base32",
       token: code,
     });
 
-    if (!verified)
+    if (!verified) {
+      validUser.totp_attempts = (validUser.totp_attempts || 0) + 1;
+
+      if (validUser.totp_attempts >= 3) {
+        validUser.totp_cooldown = now + 30 * 1000;
+        validUser.totp_attempts = 0;
+      }
+
+      await validUser.save();
+
       return next(errorHandler(401, "Invalid token! Please try again!"));
+    }
+
+    validUser.totp_attempts = 0;
+    validUser.totp_cooldown = null;
+    await validUser.save();
 
     const token = jwt.sign(
       {

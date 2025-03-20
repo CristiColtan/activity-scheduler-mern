@@ -93,6 +93,16 @@ const UserSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    totp_attempts: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    totp_cooldown: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
   {
     timestamps: true,
