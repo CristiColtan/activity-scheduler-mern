@@ -90,7 +90,7 @@ export default function Login() {
               </span>
 
               <p className="flex flex-col gap-0 md:gap-4 text-4xl md:text-6xl font-black text-center text-blue-700">
-                <span>Coud-Based</span>
+                <span>Cloud-Based</span>
                 <span>Task Manager</span>
               </p>
 

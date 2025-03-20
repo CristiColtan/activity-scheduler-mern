@@ -111,7 +111,7 @@ export default function Register() {
               <span>CCTask</span>
             </p>
             <p className="flex flex-col gap-0 md:gap-4 text-3xl md:text-4xl font-black text-center text-blue-700 mb-4">
-              <span>Coud-Based</span>
+              <span>Cloud-Based</span>
               <span>Task Manager</span>
             </p>
             <MdTask className="text-blue-700 text-9xl" />
