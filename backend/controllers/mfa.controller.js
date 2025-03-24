@@ -7,6 +7,8 @@ import QRCode from "qrcode";
 
 export const generateQR = async (req, res, next) => {
   try {
+    //console.log("REQ: ", req.user.id);
+    //console.log("PARAM: ", req.params.id);
     const userID = req.user.id;
     const currentUser = await User.findById(userID);
     if (!currentUser) return next(errorHandler(404, "User not found!"));

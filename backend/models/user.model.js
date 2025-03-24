@@ -103,6 +103,11 @@ const UserSchema = new mongoose.Schema(
       required: false,
       default: null,
     },
+    refresh_token: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   {
     timestamps: true,

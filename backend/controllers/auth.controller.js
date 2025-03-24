@@ -18,7 +18,12 @@ export const signup = async (req, res, next) => {
   });
 
   const existingUser = await User.findOne({ email });
-  if (existingUser) return next(errorHandler(400, "User already exists!"));
+  if (existingUser)
+    return next(errorHandler(400, "User already exists! (email)"));
+
+  const existingUser2 = await User.findOne({ username });
+  if (existingUser2)
+    return next(errorHandler(400, "User already exists! (username)"));
 
   try {
     await newUser.save();
@@ -48,18 +53,40 @@ export const signin = async (req, res, next) => {
       });
     }
 
-    const token = jwt.sign(
+    const access_token = jwt.sign(
       {
         id: validUser._id,
         is_admin: validUser.is_admin,
         is_team_manager: validUser.is_team_manager,
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15m",
+      }
     );
+
+    const refresh_token = jwt.sign(
+      {
+        id: validUser._id,
+      },
+      process.env.JWT_REFRESH_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    validUser.refresh_token = refresh_token;
+    await validUser.save();
+
     const { password: pass, ...rest } = validUser._doc; //ascundem parola din json
 
     res
-      .cookie("access_token", token, {
+      .cookie("access_token", access_token, {
+        httpOnly: true,
+        domain: "localhost",
+        path: "/",
+      })
+      .cookie("refresh_token", refresh_token, {
         httpOnly: true,
         domain: "localhost",
         path: "/",
@@ -121,18 +148,40 @@ export const signinTOTP = async (req, res, next) => {
     validUser.totp_cooldown = null;
     await validUser.save();
 
-    const token = jwt.sign(
+    const access_token = jwt.sign(
       {
         id: validUser._id,
         is_admin: validUser.is_admin,
         is_team_manager: validUser.is_team_manager,
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15m",
+      }
     );
+
+    const refresh_token = jwt.sign(
+      {
+        id: validUser._id,
+      },
+      process.env.JWT_REFRESH_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    validUser.refresh_token = refresh_token;
+    await validUser.save();
+
     const { password: pass, ...rest } = validUser._doc; //ascundem parola din json
 
     res
-      .cookie("access_token", token, {
+      .cookie("access_token", access_token, {
+        httpOnly: true,
+        domain: "localhost",
+        path: "/",
+      })
+      .cookie("refresh_token", refresh_token, {
         httpOnly: true,
         domain: "localhost",
         path: "/",
@@ -147,6 +196,7 @@ export const signinTOTP = async (req, res, next) => {
 export const signout = async (req, res, next) => {
   try {
     res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
     res.status(200).json("User has logged out!");
   } catch (error) {
     next(error);
@@ -204,18 +254,40 @@ export const signingoogleTOTP = async (req, res, next) => {
     validUser.totp_cooldown = null;
     await validUser.save();
 
-    const token = jwt.sign(
+    const access_token = jwt.sign(
       {
         id: validUser._id,
         is_admin: validUser.is_admin,
         is_team_manager: validUser.is_team_manager,
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15m",
+      }
     );
+
+    const refresh_token = jwt.sign(
+      {
+        id: validUser._id,
+      },
+      process.env.JWT_REFRESH_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    validUser.refresh_token = refresh_token;
+    await validUser.save();
+
     const { password: pass, ...rest } = validUser._doc; //ascundem parola din json
 
     res
-      .cookie("access_token", token, {
+      .cookie("access_token", access_token, {
+        httpOnly: true,
+        domain: "localhost",
+        path: "/",
+      })
+      .cookie("refresh_token", refresh_token, {
         httpOnly: true,
         domain: "localhost",
         path: "/",
@@ -242,19 +314,40 @@ export const signgoogle = async (req, res, next) => {
         });
       }
 
-      const token = jwt.sign(
+      const access_token = jwt.sign(
         {
           id: user._id,
           is_admin: user.is_admin,
           is_team_manager: user.is_team_manager,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "1h" }
+        {
+          expiresIn: "15m",
+        }
       );
+
+      const refresh_token = jwt.sign(
+        {
+          id: user._id,
+        },
+        process.env.JWT_REFRESH_SECRET,
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      user.refresh_token = refresh_token;
+      await user.save();
+
       const { password: pass, ...rest } = user._doc; //ascundem parola din json
 
       res
-        .cookie("access_token", token, {
+        .cookie("access_token", access_token, {
+          httpOnly: true,
+          domain: "localhost",
+          path: "/",
+        })
+        .cookie("refresh_token", refresh_token, {
           httpOnly: true,
           domain: "localhost",
           path: "/",
@@ -278,18 +371,40 @@ export const signgoogle = async (req, res, next) => {
       });
 
       await newUser.save();
-      const token = jwt.sign(
+      const access_token = jwt.sign(
         {
           id: newUser._id,
           is_admin: newUser.is_admin,
           is_team_manager: newUser.is_team_manager,
         },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "15m",
+        }
       );
+
+      const refresh_token = jwt.sign(
+        {
+          id: newUser._id,
+        },
+        process.env.JWT_REFRESH_SECRET,
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      newUser.refresh_token = refresh_token;
+      await newUser.save();
+
       const { password: pass, ...rest } = newUser._doc;
 
       res
-        .cookie("access_token", token, {
+        .cookie("access_token", access_token, {
+          httpOnly: true,
+          domain: "localhost",
+          path: "/",
+        })
+        .cookie("refresh_token", refresh_token, {
           httpOnly: true,
           domain: "localhost",
           path: "/",
