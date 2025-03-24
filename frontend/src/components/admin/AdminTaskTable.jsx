@@ -37,6 +37,8 @@ import AdminTabs from "./AdminTabs.jsx";
 import AdminDialogEditActivity from "./AdminDialogEditActivity.jsx";
 import AdminDialogEditSubtask from "./AdminDialogEditSubtask.jsx";
 
+import { apiRequest } from "../../utils/apiReq.js";
+
 const t_icons = {
   high: <MdKeyboardDoubleArrowUp />,
   medium: <MdKeyboardArrowUp />,
@@ -129,17 +131,18 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
 
   const handleDeleteAssetOnClick = async (taskID, asseturlIndex) => {
     try {
-      const res = await fetch(
+      const res = await apiRequest(
         "http://localhost:8081/backend/admin/delete/asset",
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({ taskID: taskID, assetIndex: asseturlIndex }),
         }
       );
+
+      if (!res) return;
 
       const data = await res.json();
       if (data.success === false) {
@@ -166,20 +169,21 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
 
   const handleDeleteActivityOnClick = async (taskID, activityIndex) => {
     try {
-      const res = await fetch(
+      const res = await apiRequest(
         "http://localhost:8081/backend/admin/delete/activity",
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({
             taskID: taskID,
             activityIndex: activityIndex,
           }),
         }
       );
+
+      if (!res) return;
 
       const data = await res.json();
       if (data.success === false) {
@@ -206,17 +210,18 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
 
   const handleDeleteSubtaskOnClick = async (taskID, subtaskIndex) => {
     try {
-      const res = await fetch(
+      const res = await apiRequest(
         "http://localhost:8081/backend/admin/delete/subtask",
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({ taskID: taskID, subtaskIndex: subtaskIndex }),
         }
       );
+
+      if (!res) return;
 
       const data = await res.json();
       if (data.success === false) {

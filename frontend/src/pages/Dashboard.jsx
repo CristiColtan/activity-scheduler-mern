@@ -42,8 +42,6 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [Summary, setSummary] = useState(null);
 
-  console.log("summary:", Summary);
-
   const fetchDashboard = async () => {
     try {
       setLoading(true);
@@ -63,6 +61,8 @@ export default function Dashboard() {
           `http://localhost:8081/backend/normal-user/get-dashboard-statistics`
         );
       }
+
+      if (!res) return;
 
       const data = await res.json();
 

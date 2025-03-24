@@ -9,6 +9,8 @@ import Loading from "../Loading.jsx";
 
 import { updateUserSuccess } from "../../redux/user/userSlice.js";
 
+import { apiRequest } from "../../utils/apiReq.js";
+
 const DialogSetUp2Fa = ({ open, setOpen }) => {
   const dispatch = useDispatch();
 
@@ -38,16 +40,17 @@ const DialogSetUp2Fa = ({ open, setOpen }) => {
     try {
       setLoading(true);
 
-      const res = await fetch(
+      const res = await apiRequest(
         `http://localhost:8081/backend/mfa/generate-qr/${currentUser._id}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
         }
       );
+
+      if (!res) return;
 
       const data = await res.json();
 
@@ -74,17 +77,18 @@ const DialogSetUp2Fa = ({ open, setOpen }) => {
     try {
       setLoadingVerify(true);
 
-      const res = await fetch(
+      const res = await apiRequest(
         `http://localhost:8081/backend/mfa/first-verify-totp/${currentUser._id}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({ token: code }), //6 digit from user
         }
       );
+
+      if (!res) return;
 
       const data = await res.json();
 

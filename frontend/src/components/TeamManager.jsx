@@ -35,6 +35,8 @@ import CustomToolTipReport2 from "./recharts/CustomToolTipReport2.jsx";
 
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
+import { apiRequest } from "../utils/apiReq.js";
+
 const TeamManager = () => {
   const navigate = useNavigate();
 
@@ -70,12 +72,11 @@ const TeamManager = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:8081/backend/team-manager/get/my-team",
-        {
-          credentials: "include",
-        }
+      const res = await apiRequest(
+        "http://localhost:8081/backend/team-manager/get/my-team"
       );
+
+      if (!res) return;
 
       const data = await res.json();
       setTeamManagerTeam(data);
@@ -191,17 +192,18 @@ const TeamManager = () => {
       try {
         setLoadingReport1(true);
 
-        const res = await fetch(
+        const res = await apiRequest(
           `http://localhost:8081/backend/team-manager/get/report-1/${user._id}`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include",
             body: JSON.stringify(formData),
           }
         );
+
+        if (!res) return;
 
         const data = await res.json();
         if (data.success === false) {
@@ -241,17 +243,18 @@ const TeamManager = () => {
       try {
         setLoadingReport2(true);
 
-        const res = await fetch(
+        const res = await apiRequest(
           `http://localhost:8081/backend/team-manager/get/report-2/${user._id}`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include",
             body: JSON.stringify(formData),
           }
         );
+
+        if (!res) return;
 
         const data = await res.json();
         if (data.success === false) {

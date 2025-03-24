@@ -24,6 +24,8 @@ import {
 } from "../redux/user/userSlice.js";
 import DialogResetPassword from "../components/dialog/DialogResetPassword.jsx";
 
+import { apiRequest } from "../utils/apiReq.js";
+
 const tabs = [
   {
     title: "Personal Details",
@@ -80,8 +82,6 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  console.log("FormData", formData);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -96,17 +96,18 @@ const Profile = () => {
     try {
       dispatch(updateUserStart());
 
-      const res = await fetch(
+      const res = await apiRequest(
         `http://localhost:8081/backend/normal-user/update-my-profile/${currentUser._id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify(formData),
         }
       );
+
+      if (!res) return;
 
       const data = await res.json();
       if (data.success === false) {

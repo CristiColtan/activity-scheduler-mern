@@ -46,6 +46,8 @@ import {
 
 import CustomToolTipReportTM1 from "./recharts/CustomToolTipReportTM1.jsx";
 
+import { apiRequest } from "../utils/apiReq.js";
+
 const TeamAdmin = () => {
   const navigate = useNavigate();
 
@@ -90,12 +92,11 @@ const TeamAdmin = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:8081/backend/admin/get/team-managers",
-        {
-          credentials: "include",
-        }
+      const res = await apiRequest(
+        "http://localhost:8081/backend/admin/get/team-managers"
       );
+
+      if (!res) return;
 
       const data = await res.json();
       setAdminTeamManagers(data);

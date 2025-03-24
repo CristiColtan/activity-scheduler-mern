@@ -17,6 +17,8 @@ import { FaSort } from "react-icons/fa";
 
 import { getInitials } from "../../utils/FullnameInitials.js";
 
+import { apiRequest } from "../../utils/apiReq.js";
+
 const AdminNotificationsLog = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -70,12 +72,11 @@ const AdminNotificationsLog = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:8081/backend/admin/get/notifications-log",
-        {
-          credentials: "include",
-        }
+      const res = await apiRequest(
+        "http://localhost:8081/backend/admin/get/notifications-log"
       );
+
+      if (!res) return;
 
       const data = await res.json();
       if (data.success === false) {

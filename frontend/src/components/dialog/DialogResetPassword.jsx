@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import MyModal from "../MyModal.jsx";
 import Loading from "../Loading.jsx";
 
+import { apiRequest } from "../../utils/apiReq.js";
+
 const DialogResetPassword = ({ open, setOpen }) => {
   const { currentUser } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
@@ -62,17 +64,18 @@ const DialogResetPassword = ({ open, setOpen }) => {
               ? { ...formData, token: code }
               : formData;
 
-          const res = await fetch(
+          const res = await apiRequest(
             `http://localhost:8081/backend/auth/reset-password/${currentUser._id}`,
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              credentials: "include",
               body: JSON.stringify(body),
             }
           );
+
+          if (!res) return;
 
           const data = await res.json();
 

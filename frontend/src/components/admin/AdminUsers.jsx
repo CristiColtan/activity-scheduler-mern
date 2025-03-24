@@ -28,6 +28,8 @@ import CustomToolTipReport2 from "../../components/recharts/CustomToolTipReport2
 
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
+import { apiRequest } from "../../utils/apiReq.js";
+
 const AdminUsers = () => {
   const navigate = useNavigate();
 
@@ -64,12 +66,11 @@ const AdminUsers = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:8081/backend/admin/get/all-users",
-        {
-          credentials: "include",
-        }
+      const res = await apiRequest(
+        "http://localhost:8081/backend/admin/get/all-users"
       );
+
+      if (!res) return;
 
       const data = await res.json();
       if (data.success === false) {
@@ -184,17 +185,18 @@ const AdminUsers = () => {
       try {
         setLoadingReport1(true);
 
-        const res = await fetch(
+        const res = await apiRequest(
           `http://localhost:8081/backend/admin/get/report-1/${user._id}`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include",
             body: JSON.stringify(formData),
           }
         );
+
+        if (!res) return;
 
         const data = await res.json();
         if (data.success === false) {
@@ -234,17 +236,18 @@ const AdminUsers = () => {
       try {
         setLoadingReport2(true);
 
-        const res = await fetch(
+        const res = await apiRequest(
           `http://localhost:8081/backend/admin/get/report-2/${user._id}`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include",
             body: JSON.stringify(formData),
           }
         );
+
+        if (!res) return;
 
         const data = await res.json();
         if (data.success === false) {

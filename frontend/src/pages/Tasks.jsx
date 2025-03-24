@@ -13,6 +13,8 @@ import { task_type } from "../utils/tableImports.js";
 import TaskTitle from "../components/TaskTitle.jsx";
 import BoardView from "../components/BoardView.jsx";
 
+import { apiRequest } from "../utils/apiReq.js";
+
 const Tasks = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -44,7 +46,7 @@ const Tasks = () => {
   const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
-    setSideBarData({ ...sideBarData, searchTerm: searchTermRedux });
+    setSideBarData({ ...sideBarData, searchTerm: searchTermRedux || "" });
   }, [searchTermRedux]);
 
   useEffect(() => {
@@ -71,10 +73,10 @@ const Tasks = () => {
         order: orderFromURL || "desc",
       });
     }
-
-    if (searchTermRedux !== searchTermFromURL) {
-      dispatch(setSearchTerm(searchTermFromURL));
-    }
+    if (searchTermFromURL !== null && searchTermFromURL !== undefined)
+      if (searchTermRedux !== searchTermFromURL) {
+        dispatch(setSearchTerm(searchTermFromURL));
+      }
 
     const fetchTasks = async () => {
       try {
@@ -83,12 +85,11 @@ const Tasks = () => {
 
         const searchQuery = urlParams.toString();
 
-        const res = await fetch(
-          `http://localhost:8081/backend/task/get-all-tasks?${searchQuery}`,
-          {
-            credentials: "include",
-          }
+        const res = await apiRequest(
+          `http://localhost:8081/backend/task/get-all-tasks?${searchQuery}`
         );
+
+        if (!res) return;
 
         const data = await res.json();
 
@@ -169,12 +170,11 @@ const Tasks = () => {
     urlParams.set("startIndex", startIndex);
     const searchQuery = urlParams.toString();
 
-    const res = await fetch(
-      `http://localhost:8081/backend/task/get-all-tasks?${searchQuery}`,
-      {
-        credentials: "include",
-      }
+    const res = await apiRequest(
+      `http://localhost:8081/backend/task/get-all-tasks?${searchQuery}`
     );
+
+    if (!res) return;
 
     const data = await res.json();
     if (data.length < 9) {
@@ -357,9 +357,11 @@ const Tasks = () => {
 
       {Tasks && Tasks.length > 0 ? (
         <BoardView tasks={Tasks} setTasks={setTasks} />
+      ) : error ? (
+        <p className="text-red-500 text-4xl"> {error}</p>
       ) : (
         <p className="font-sans mt-10 text-2xl flex justify-center">
-          No tasks available
+          No tasks available.
         </p>
       )}
       <div className="w-full py-0 mb-2">

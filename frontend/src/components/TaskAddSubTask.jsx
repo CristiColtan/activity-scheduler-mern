@@ -4,7 +4,17 @@ import { useNavigate } from "react-router-dom";
 
 import MyModal from "./MyModal";
 
-const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks, activities, setActivities }) => {
+import { apiRequest } from "../utils/apiReq.js";
+
+const TaskAddSubTask = ({
+  open,
+  setOpen,
+  id,
+  subTasks,
+  setSubTasks,
+  activities,
+  setActivities,
+}) => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,14 +32,18 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks, activities, 
       setLoading(true);
       e.preventDefault();
 
-      const res = await fetch(`http://localhost:8081/backend/task/add-subtask/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+      const res = await apiRequest(
+        `http://localhost:8081/backend/task/add-subtask/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!res) return;
 
       const data = await res.json();
 
@@ -52,7 +66,7 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks, activities, 
       setLoading(false);
       return;
     }
-  }
+  };
 
   return (
     <>
@@ -102,15 +116,14 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks, activities, 
               </div>
             </div>
             <div className="w-full -mt-2 gap-4 flex">
-              <div className="w-full">
-                {/*blank*/}
-              </div>
+              <div className="w-full">{/*blank*/}</div>
 
               <div className="w-full flex justify-between gap-4">
-                <button onClick={(e) => {
-                  e.preventDefault();
-                  setOpen(false)
-                }}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                  }}
                   className="px-3 py-2 rounded
                                 bg-white text-black font-sans w-1/2
                                 hover:bg-gray-300 transition duration-200
@@ -119,7 +132,9 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks, activities, 
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={loading}
+                <button
+                  type="submit"
+                  disabled={loading}
                   className="px-3 py-2 rounded w-1/2
                                 bg-blue-700 text-white font-sans
                                 hover:bg-blue-500 transition duration-200
@@ -134,6 +149,6 @@ const TaskAddSubTask = ({ open, setOpen, id, subTasks, setSubTasks, activities, 
       </MyModal>
     </>
   );
-}
+};
 
 export default TaskAddSubTask;
