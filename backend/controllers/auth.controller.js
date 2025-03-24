@@ -473,3 +473,63 @@ export const resetpass = async (req, res, next) => {
     next(error);
   }
 };
+
+export const refresh = async (req, res, next) => {
+  const refresh_token = req.cookies.refresh_token;
+  if (!refresh_token)
+    return next(
+      errorHandler(403, "Refresh Token missing! Please log in again!")
+    );
+
+  try {
+    jwt.verify(
+      refresh_token,
+      process.env.JWT_REFRESH_SECRET,
+      async (err, user) => {
+        if (err)
+          return next(
+            errorHandler(403, "Refresh Token expired! Please log in again!")
+          );
+
+        const currentUser = await User.findById(user.id);
+        if (!currentUser) return next(errorHandler(404, "User not found!"));
+
+        if (!currentUser.refresh_token)
+          return next(
+            errorHandler(403, "No Refresh Token found! Please log in again!")
+          );
+
+        if (currentUser.refresh_token !== refresh_token)
+          return next(
+            errorHandler(
+              403,
+              "Refresh Tokens not matching! Please log in again!"
+            )
+          );
+
+        const new_access_token = jwt.sign(
+          {
+            id: currentUser._id,
+            is_admin: currentUser.is_admin,
+            is_team_manager: currentUser.is_team_manager,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "15m",
+          }
+        );
+
+        res
+          .cookie("access_token", new_access_token, {
+            httpOnly: true,
+            domain: "localhost",
+            path: "/",
+          })
+          .status(200)
+          .json("Access Token refreshed successfully!");
+      }
+    );
+  } catch (error) {
+    next(error);
+  }
+};
