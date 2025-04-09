@@ -3,14 +3,47 @@ import { errorHandler } from "../utils/error.js";
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
 
+import apm from "elastic-apm-node";
+import { userLogger, authLogger } from "../utils/logger.js";
+
 export const updateProfile = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction("User-[UpdateProfile]", "users");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const userID = req.user.id;
-    const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
 
-    if (userID !== req.params.id)
+    userLogger.info("Updating profile", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+    });
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/normal-user/update-my-profile/:id",
+      method: "POST",
+    });
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) {
+      userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    if (userID !== req.params.id) {
+      userLogger.error("Tried to update profile for another account!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
       return next(errorHandler(401, "You can only update your own account!"));
+    }
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -18,20 +51,61 @@ export const updateProfile = async (req, res, next) => {
 
     const { password: pass, ...userWithoutPassword } = updatedUser._doc;
 
+    const duration = Date.now() - start;
+    userLogger.info("User updated profile successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json(userWithoutPassword);
   } catch (error) {
+    userLogger.error("Error updating profile!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const fetchHours = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction("User-[FetchHours]", "users");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const { taskId } = req.params;
     //console.log(req.params);
 
     const userID = req.user.id;
+
+    userLogger.info("Fetching hours", {
+      traceId,
+      taskID: taskId,
+      transactionId: transaction?.id,
+      userID,
+    });
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/normal-user/get-hours/:taskId",
+      method: "POST",
+    });
+
     const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    if (!currentUser) {
+      userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+        taskID: taskId,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
 
     const today = new Date();
     //console.log(today);
@@ -53,6 +127,17 @@ export const fetchHours = async (req, res, next) => {
 
     console.log("WorkEntry:", workEntry);
 
+    const duration = Date.now() - start;
+    userLogger.info("Fetched hours successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      taskID: taskId,
+      duration,
+      data_message: `Total hours logged today: ${loggedHoursToday}`,
+    });
+    if (transaction) transaction.end();
+
     if (!workEntry)
       return res
         .status(200)
@@ -63,11 +148,21 @@ export const fetchHours = async (req, res, next) => {
       total_hours: loggedHoursToday,
     });
   } catch (error) {
+    userLogger.error("Error fetching hours!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const assignHoursToTask = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction("User-[AssignHours]", "users");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const { taskId } = req.body;
     const { hours } = req.body.formData;
@@ -76,17 +171,53 @@ export const assignHoursToTask = async (req, res, next) => {
     console.log("Hours:", hours);
 
     const userID = req.user.id;
+
+    userLogger.info("Logging hours", {
+      traceId,
+      taskID: taskId,
+      transactionId: transaction?.id,
+      userID,
+    });
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/normal-user/assign-hours",
+      method: "POST",
+    });
+
     const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    if (!currentUser) {
+      userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+        taskID: taskId,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
 
     const task = await Task.findById(taskId);
-    if (!task) return next(errorHandler(404, "Task not found!"));
+    if (!task) {
+      userLogger.error("Task not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+        taskID: taskId,
+      });
+      return next(errorHandler(404, "Task not found!"));
+    }
 
     const isUserInTaskTeam = task.team.some(
       (memberId) => memberId.toString() === userID
     );
 
     if (!isUserInTaskTeam) {
+      userLogger.error("Not part of task's team! Can't log hours!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+        taskID: taskId,
+      });
       return next(
         errorHandler(
           403,
@@ -95,10 +226,17 @@ export const assignHoursToTask = async (req, res, next) => {
       );
     }
 
-    if (hours < 0 || hours > 8)
+    if (hours < 0 || hours > 8) {
+      userLogger.error("Not entered an input between 0 and 8 hours!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+        taskID: taskId,
+      });
       return next(
         errorHandler(401, "Please enter an input between 0 and 8 hours")
       );
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -115,6 +253,12 @@ export const assignHoursToTask = async (req, res, next) => {
 
     if (loggedHoursToday + Number(hours) > 8) {
       console.log("hh", loggedHoursToday + Number(hours));
+      userLogger.error("Logged more than 8 hours today!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+        taskID: taskId,
+      });
       return next(
         errorHandler(401, "You can't work more than 8 hours per day!")
       );
@@ -150,17 +294,58 @@ export const assignHoursToTask = async (req, res, next) => {
 
     await currentUser.save();
 
+    const duration = Date.now() - start;
+    userLogger.info("Logged hours successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      taskID: taskId,
+      duration,
+      data_message: `Logged: ${hours} hours. Total hours logged today: ${loggedHoursToday}`,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json({ message: "Hours have been logged successfully!" });
   } catch (error) {
+    userLogger.error("Error logging hours!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const fetchDashboardStatistics = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction("User-[FetchDashboard]", "users");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const userID = req.user.id;
+
+    userLogger.info("Fetching dashboard statistics", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+    });
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/normal-user/get-dashboard-statistics",
+      method: "POST",
+    });
+
     const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    if (!currentUser) {
+      userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
 
     const allTasks = await Task.find({
       is_trashed: "No",
@@ -228,8 +413,23 @@ export const fetchDashboardStatistics = async (req, res, next) => {
       tasksLastMonth: tasksDataLastMonth,
     };
 
+    const duration = Date.now() - start;
+    userLogger.info("Fetch dashboard statistics successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json(summary);
   } catch (error) {
+    userLogger.error("Error fetching dashboard statistics!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };

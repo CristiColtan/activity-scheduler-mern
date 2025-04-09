@@ -1,6 +1,20 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+import apm from "elastic-apm-node";
+
+apm.start({
+  serviceName: process.env.ELASTIC_APM_SERVICE_NAME,
+  serverUrl: process.env.ELASTIC_APM_SERVER_URL,
+  secretToken: process.env.ELASTIC_APM_SECRET_TOKEN,
+  environment: "my-environment",
+  frameworkName: "express",
+  frameworkVersion: "4.21.0",
+  transactionSampleRate: 1.0,
+});
+
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -11,8 +25,6 @@ import TaskRouter from "./routes/task.route.js";
 import NormalUserRouter from "./routes/normal-user.route.js";
 import NotificationRouter from "./routes/notification.route.js";
 import MFARouter from "./routes/mfa.route.js";
-
-dotenv.config();
 
 mongoose
   .connect(process.env.MONGO)

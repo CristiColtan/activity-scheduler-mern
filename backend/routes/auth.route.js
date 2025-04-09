@@ -15,7 +15,7 @@ import { verifyToken } from "../utils/verifyUser.js";
 
 const router = express.Router();
 
-router.get("/signout", signout);
+router.get("/signout/:id", signout);
 
 router.post("/signup", signup);
 router.post("/signin", signin);

@@ -4,8 +4,32 @@ import User from "../models/user.model.js";
 import Task from "../models/task.model.js";
 import Notification from "../models/notification.model.js";
 
+import apm from "elastic-apm-node";
+import { userLogger, notifsLogger, tmadminLogger } from "../utils/logger.js";
+
 export const getMyTeam = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[getMyTeam]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
+    tmadminLogger.info("Fetching team", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
+
+    transaction?.addLabels({
+      userID: req.user.id,
+      endpoint: "/backend/team-manager/get/my-team",
+      method: "GET",
+    });
+
     const user = await User.findById(req.user.id).populate({
       path: "team",
       select: "-password",
@@ -16,22 +40,75 @@ export const getMyTeam = async (req, res, next) => {
       },
     });
 
-    if (!user) return next(errorHandler(404, "User not found!"));
+    if (!user) {
+      tmadminLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    const duration = Date.now() - start;
+    tmadminLogger.info("Team Manager fetch team successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      duration,
+    });
+    if (transaction) transaction.end();
 
     res.status(200).json(user.team); //return user team
   } catch (error) {
+    tmadminLogger.error("Error fetching team!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const getNormalUsers = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[getNormalUsers]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const userID = req.user.id;
+
+    tmadminLogger.info("Fetching normal users", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/team-manager/get/normal-users",
+      method: "GET",
+    });
+
     const currentUser = await User.findById(userID).populate({
       path: "team",
       select: "-password",
     });
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    if (!currentUser) {
+      tmadminLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
 
     const users = await User.find({
       is_admin: "No",
@@ -45,33 +122,91 @@ export const getNormalUsers = async (req, res, next) => {
 
     console.log(filteredUsers);
 
+    const duration = Date.now() - start;
+    tmadminLogger.info("Team Manager fetch normal users successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json(filteredUsers);
   } catch (error) {
+    tmadminLogger.error("Error fetching all normal users!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const addToTeam = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[addToTeam]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const userID = req.user.id;
     const { membersID } = req.body;
 
+    tmadminLogger.info("Adding to team", {
+      traceId,
+      transactionId: transaction?.id,
+      data_message: membersID,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
+
+    transaction?.addLabels({
+      userID: req.user.id,
+      endpoint: "/backend/team-manager/add/team-member",
+      method: "POST",
+    });
+
     const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    if (!currentUser) {
+      tmadminLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
 
     let newMembers = [];
     for (let memberID of membersID) {
       const newMember = await User.findById(memberID);
-      if (!newMember)
+      if (!newMember) {
+        tmadminLogger.error(`Member with ID ${memberID} not found!`, {
+          traceId,
+          transactionId: transaction?.id,
+          userID: req.user.id,
+        });
         return next(errorHandler(404, `Member with ID ${memberID} not found!`));
+      }
 
-      if (currentUser.team.includes(memberID))
+      if (currentUser.team.includes(memberID)) {
+        tmadminLogger.error(`Member with ID ${memberID} already in team!`, {
+          traceId,
+          transactionId: transaction?.id,
+          userID: req.user.id,
+        });
         return next(
           errorHandler(
             400,
             `Member with ID ${memberID} is already in your team!`
           )
         );
+      }
 
       newMembers.push(memberID);
     }
@@ -83,24 +218,78 @@ export const addToTeam = async (req, res, next) => {
       path: "team",
       select: "-password",
     });
+
+    const duration = Date.now() - start;
+    tmadminLogger.info("Team Manager added member(s) to team successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      data_message: membersID,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json(updatedUser.team);
   } catch (error) {
+    tmadminLogger.error("Error adding member(s) to team!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const removeFromTeam = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[removeFromTeam]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const userID = req.user.id;
     const { memberID } = req.params;
 
-    const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    tmadminLogger.info("Removing from team", {
+      traceId,
+      transactionId: transaction?.id,
+      data_message: memberID,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
 
-    if (!currentUser.team.includes(memberID))
+    transaction?.addLabels({
+      userID: req.user.id,
+      endpoint: "/backend/team-manager/remove/team-member/:memberID",
+      method: "DELETE",
+    });
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) {
+      tmadminLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    if (!currentUser.team.includes(memberID)) {
+      tmadminLogger.error("Member is not in team!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(
         errorHandler(400, `Member with ID ${memberID} is not in your team!`)
       );
+    }
 
     currentUser.team = currentUser.team.filter(
       (user) => user.toString() !== memberID
@@ -109,7 +298,14 @@ export const removeFromTeam = async (req, res, next) => {
     await currentUser.save();
 
     const member = await User.findById(memberID);
-    if (!member) return next(errorHandler(404, "Member not found!"));
+    if (!member) {
+      tmadminLogger.error("Member not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "Member not found!"));
+    }
 
     const tasksToUpdate = await Task.find({
       created_by: userID,
@@ -147,12 +343,32 @@ export const removeFromTeam = async (req, res, next) => {
       path: "team",
       select: "-password",
     });
+
+    const duration = Date.now() - start;
+    tmadminLogger.info("Team Manager removed member from team successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      data_message: memberID,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json(updatedUser.team);
   } catch (error) {
+    tmadminLogger.error("Error removing member from team!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
+//not using this
 export const editTeamMember = async (req, res, next) => {
   try {
     const { memberID } = req.params;
@@ -211,24 +427,98 @@ export const editTeamMember = async (req, res, next) => {
 };
 
 export const fetchAllTrashedTasks = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[fetchTrashedTasks]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const userID = req.user.id;
 
+    tmadminLogger.info("Fetching all trashed tasks", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
+
+    transaction?.addLabels({
+      userID: req.user.id,
+      endpoint: "/backend/team-manager/get/all-trashed-tasks",
+      method: "GET",
+    });
+
     const tasks = await Task.find({ is_trashed: "Yes", created_by: userID });
+
+    const duration = Date.now() - start;
+    tmadminLogger.info("Team Manager fetch all trashed tasks successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json(tasks);
   } catch (error) {
+    tmadminLogger.error("Error fetching all trashed tasks!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const fetchDashboardStatistics = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[fetchDashboard]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     const userID = req.user.id;
-    const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
 
-    if (currentUser.is_team_manager !== "Yes")
+    tmadminLogger.info("Fetching dashboard statistics", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
+
+    transaction?.addLabels({
+      userID: req.user.id,
+      endpoint: "/backend/team-manager/get/dashboard-statistics",
+      method: "GET",
+    });
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) {
+      tmadminLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    if (currentUser.is_team_manager !== "Yes") {
+      tmadminLogger.error("Not a team manager!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(errorHandler(403, "You are not an team-manager!"));
+    }
 
     const allTasks = await Task.find({
       is_trashed: "No",
@@ -299,13 +589,37 @@ export const fetchDashboardStatistics = async (req, res, next) => {
       tasksLastMonth: tasksDataLastMonth,
     };
 
+    const duration = Date.now() - start;
+    tmadminLogger.info("Fetch dashboard statistics successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json(summary);
   } catch (error) {
+    tmadminLogger.error("Error fetching dashboard statistics!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const fetchTeamMemberReport1 = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[fetchTeamMemberReport1]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     console.log(req.params);
     console.log(req.body);
@@ -313,28 +627,76 @@ export const fetchTeamMemberReport1 = async (req, res, next) => {
     const memberID = req.params.id;
     const { date_from, date_until } = req.body;
     const userID = req.user.id;
+
+    tmadminLogger.info("Fetching team member report 1", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      data_message: `MemberID: ${memberID}, From: ${date_from} Until: ${date_until}`,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
+
+    transaction?.addLabels({
+      userID: req.user.id,
+      endpoint: "/backend/team-manager/get/report-1/:id",
+      method: "PUT",
+    });
+
     const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    if (!currentUser) {
+      tmadminLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
 
-    if (currentUser.is_team_manager !== "Yes")
+    if (currentUser.is_team_manager !== "Yes") {
+      tmadminLogger.error("Not a team manager!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(errorHandler(403, "You are not an team-manager!"));
+    }
 
-    if (!date_from || !date_until)
+    if (!date_from || !date_until) {
+      tmadminLogger.error("Both dates required!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(errorHandler(400, "Both dates are required!"));
+    }
 
     const targetUser = await User.findById(memberID)
       .populate("work.task")
       .select("-password");
 
-    if (!targetUser) return next(errorHandler(404, "Member not found!"));
+    if (!targetUser) {
+      tmadminLogger.error("Member not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "Member not found!"));
+    }
 
     const fromDate = new Date(date_from);
     const untilDate = new Date(date_until);
 
-    if (fromDate > untilDate)
+    if (fromDate > untilDate) {
+      tmadminLogger.error("Dates in chronological order required!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(
-        errorHandler(400, "Please enter dates in cronological order!")
+        errorHandler(400, "Please enter dates in chronological order!")
       );
+    }
 
     const filteredWork = targetUser.work.filter(
       (entry) => entry.date >= fromDate && entry.date <= untilDate
@@ -350,13 +712,38 @@ export const fetchTeamMemberReport1 = async (req, res, next) => {
       }, {})
     ).map(([name, total]) => ({ name, total }));
 
+    const duration = Date.now() - start;
+    tmadminLogger.info("Fetch team member report 1 successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      data_message: `MemberID: ${memberID}, From: ${date_from} Until: ${date_until}`,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     res.status(200).json({ taskHours, filteredTasks });
   } catch (error) {
+    tmadminLogger.error("Error fetching team member report 1!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
 
 export const fetchTeamMemberReport2 = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "TeamManager-[fetchTeamMemberReport2]",
+    "teammanagers"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
   try {
     console.log(req.params);
     console.log(req.body);
@@ -364,26 +751,74 @@ export const fetchTeamMemberReport2 = async (req, res, next) => {
     const memberID = req.params.id;
     const { date_from, date_until } = req.body;
     const userID = req.user.id;
+
+    tmadminLogger.info("Fetching team member report 2", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      data_message: `MemberID: ${memberID}, From: ${date_from} Until: ${date_until}`,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+    });
+
+    transaction?.addLabels({
+      userID: req.user.id,
+      endpoint: "/backend/team-manager/get/report-2/:id",
+      method: "PUT",
+    });
+
     const currentUser = await User.findById(userID);
-    if (!currentUser) return next(errorHandler(404, "User not found!"));
+    if (!currentUser) {
+      tmadminLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
 
-    if (currentUser.is_team_manager !== "Yes")
+    if (currentUser.is_team_manager !== "Yes") {
+      tmadminLogger.error("Not a team manager!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(errorHandler(403, "You are not an team-manager!"));
+    }
 
-    if (!date_from || !date_until)
+    if (!date_from || !date_until) {
+      tmadminLogger.error("Both dates required!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(errorHandler(400, "Both dates are required!"));
+    }
 
     const targetUser = await User.findById(memberID).select("-password");
 
-    if (!targetUser) return next(errorHandler(404, "Member not found!"));
+    if (!targetUser) {
+      tmadminLogger.error("Member not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(404, "Member not found!"));
+    }
 
     const fromDate = new Date(date_from);
     const untilDate = new Date(date_until);
 
-    if (fromDate > untilDate)
+    if (fromDate > untilDate) {
+      tmadminLogger.error("Dates in chronological order required!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
       return next(
         errorHandler(400, "Please enter dates in cronological order!")
       );
+    }
 
     const filteredWork = targetUser.work.filter(
       (entry) => entry.date >= fromDate && entry.date <= untilDate
@@ -401,8 +836,26 @@ export const fetchTeamMemberReport2 = async (req, res, next) => {
       }, {})
     ).map(([name, total]) => ({ name, total }));
 
+    const duration = Date.now() - start;
+    tmadminLogger.info("Fetch team member report 2 successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID: req.user.id,
+      is_admin: req.user.is_admin,
+      is_team_manager: req.user.is_team_manager,
+      data_message: `MemberID: ${memberID}, From: ${date_from} Until: ${date_until}`,
+      duration,
+    });
+    if (transaction) transaction.end();
+
     return res.status(200).json(roleHours);
   } catch (error) {
+    tmadminLogger.error("Error fetching team member report 2!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
     next(error);
   }
 };
