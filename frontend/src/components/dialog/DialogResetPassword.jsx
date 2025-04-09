@@ -50,6 +50,20 @@ const DialogResetPassword = ({ open, setOpen }) => {
       if (formData.newPassword !== formData.confirmPassword) {
         isValid = false;
         setError("Passwords not matching!");
+
+        await apiRequest(
+          `http://localhost:8081/backend/notif/log-client-event`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              level: "warn",
+              message: "User entered mismatching passwords in reset form",
+            }),
+          }
+        );
       }
 
       //regex validation
