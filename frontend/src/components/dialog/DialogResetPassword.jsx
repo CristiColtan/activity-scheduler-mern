@@ -52,7 +52,7 @@ const DialogResetPassword = ({ open, setOpen }) => {
         setError("Passwords not matching!");
 
         await apiRequest(
-          `http://localhost:8081/backend/notif/log-client-event`,
+          `http://localhost:8081/backend/utils/log-client-event`,
           {
             method: "POST",
             headers: {

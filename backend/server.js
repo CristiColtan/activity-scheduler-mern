@@ -25,6 +25,7 @@ import TaskRouter from "./routes/task.route.js";
 import NormalUserRouter from "./routes/normal-user.route.js";
 import NotificationRouter from "./routes/notification.route.js";
 import MFARouter from "./routes/mfa.route.js";
+import UtilsRouter from "./routes/utils.route.js";
 
 mongoose
   .connect(process.env.MONGO)
@@ -56,6 +57,7 @@ app.use("/backend/task", TaskRouter);
 app.use("/backend/normal-user", NormalUserRouter);
 app.use("/backend/notif", NotificationRouter);
 app.use("/backend/mfa", MFARouter);
+app.use("/backend/utils", UtilsRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

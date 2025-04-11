@@ -200,34 +200,3 @@ export const markAllAsRead = async (req, res, next) => {
     next(error);
   }
 };
-
-export const logClientEvent = async (req, res, next) => {
-  const { level = "info", message } = req.body;
-
-  const transaction = apm.startTransaction("Frontend-[log]", "frontend");
-  const traceId = apm?.currentTraceIds?.["trace.id"];
-
-  const logPayload = {
-    traceId,
-    transactionId: transaction?.id,
-    userID: req.user.id,
-  };
-
-  switch (level) {
-    case "info":
-      notifsLogger.info(message, logPayload);
-      break;
-    case "warn":
-      notifsLogger.warn(message, logPayload);
-      break;
-    case "error":
-      notifsLogger.error(message, logPayload);
-      break;
-    default:
-      notifsLogger.info(message, logPayload);
-  }
-
-  if (transaction) transaction.end();
-
-  res.status(200).json("Logged frontend successfully!");
-};

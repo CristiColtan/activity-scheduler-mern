@@ -15,12 +15,14 @@ import { FaTasks } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
 import { FaTeamspeak } from "react-icons/fa";
 import { BsPersonSquare } from "react-icons/bs";
+import { SiKibana } from "react-icons/si";
 
 import AdminUsers from "../components/admin/AdminUsers.jsx";
 import AdminTasks from "../components/admin/AdminTasks.jsx";
 import AdminRoles from "../components/admin/AdminRoles.jsx";
 import AdminTeamManagers from "../components/admin/AdminTeamManagers.jsx";
 import AdminNotificationsLog from "../components/admin/AdminNotificationsLog.jsx";
+import AdminPageTitle from "../components/admin/AdminPageTitle.jsx";
 
 const tabs = [
   {
@@ -43,6 +45,10 @@ const tabs = [
     title: "User Roles",
     icon: <BsPersonSquare className="text-lg" size={20} />,
   },
+  {
+    title: "Kibana",
+    icon: <SiKibana className="text-lg" size={20} />,
+  },
 ];
 
 const Settings = () => {
@@ -55,6 +61,15 @@ const Settings = () => {
   const [selectedTasks, setSelectedTasks] = useState(0);
   const [selectedNotifications, setSelectedNotifications] = useState(0);
   const [selectedTeamMs, setSelectedTeamMs] = useState(0);
+
+  useEffect(() => {
+    if (selected === 5) {
+      window.open(
+        "https://cctask-observability2.kb.us-central1.gcp.cloud.es.io/app/dashboards#/view/aec3dffc-0d50-4892-94f0-128357978d7d?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))",
+        "_blank"
+      );
+    }
+  }, [selected]);
 
   return (
     <>
@@ -100,6 +115,13 @@ const Settings = () => {
                   {selected === 4 && (
                     <>
                       <AdminRoles />
+                    </>
+                  )}
+                  {selected === 5 && (
+                    <>
+                      <span>
+                        <AdminPageTitle title="Kibana interface opened" />
+                      </span>
                     </>
                   )}
                 </TabsProfile>

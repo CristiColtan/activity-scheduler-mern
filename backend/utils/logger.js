@@ -48,7 +48,7 @@ const esTMorAdminTransport = new ElasticsearchTransport({
   client: elasticClient,
   indexPrefix: "winston-logs-tmadmin",
 });
-esUserTransport.on("error", (err) => {
+esTMorAdminTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [tmadmin]:", err);
 });
 
@@ -57,8 +57,26 @@ const esNotifTransport = new ElasticsearchTransport({
   client: elasticClient,
   indexPrefix: "winston-logs-notifs",
 });
-esUserTransport.on("error", (err) => {
+esNotifTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [notifs]:", err);
+});
+
+const esSystemTransport = new ElasticsearchTransport({
+  level: "info",
+  client: elasticClient,
+  indexPrefix: "winston-logs-system",
+});
+esSystemTransport.on("error", (err) => {
+  console.error("Elasticsearch transport error [system]:", err);
+});
+
+const esClientTransport = new ElasticsearchTransport({
+  level: "info",
+  client: elasticClient,
+  indexPrefix: "winston-logs-client",
+});
+esClientTransport.on("error", (err) => {
+  console.error("Elasticsearch transport error [client]:", err);
 });
 
 const logger = winston.createLogger({
@@ -91,4 +109,24 @@ const notifsLogger = winston.createLogger({
   transports: [new winston.transports.Console(), esNotifTransport],
 });
 
-export { logger, userLogger, authLogger, tmadminLogger, notifsLogger };
+const clientLogger = winston.createLogger({
+  level: "info",
+  format: ecsFormat(),
+  transports: [new winston.transports.Console(), esClientTransport],
+});
+
+const systemLogger = winston.createLogger({
+  level: "info",
+  format: ecsFormat(),
+  transports: [new winston.transports.Console(), esSystemTransport],
+});
+
+export {
+  logger,
+  userLogger,
+  authLogger,
+  tmadminLogger,
+  notifsLogger,
+  clientLogger,
+  systemLogger,
+};
