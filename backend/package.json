@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js --ignore backups/"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@elastic/ecs-winston-format": "^1.5.3",
     "@elastic/elasticsearch": "^8.17.1",
+    "archiver": "^7.0.1",
     "backend": "file:",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -22,9 +23,11 @@
     "express": "^4.21.0",
     "mongoose": "^8.13.1",
     "mysql": "^2.18.1",
+    "node-cron": "^3.0.3",
     "nodemon": "^3.1.4",
     "qrcode": "^1.5.4",
     "speakeasy": "^2.0.0",
+    "unzipper": "^0.12.3",
     "winston": "^3.17.0",
     "winston-elasticsearch": "^0.19.0"
   }

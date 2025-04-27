@@ -16,6 +16,7 @@ import { IoIosNotifications } from "react-icons/io";
 import { FaTeamspeak } from "react-icons/fa";
 import { BsPersonSquare } from "react-icons/bs";
 import { SiKibana } from "react-icons/si";
+import { LuDatabaseBackup } from "react-icons/lu";
 
 import AdminUsers from "../components/admin/AdminUsers.jsx";
 import AdminTasks from "../components/admin/AdminTasks.jsx";
@@ -23,6 +24,7 @@ import AdminRoles from "../components/admin/AdminRoles.jsx";
 import AdminTeamManagers from "../components/admin/AdminTeamManagers.jsx";
 import AdminNotificationsLog from "../components/admin/AdminNotificationsLog.jsx";
 import AdminPageTitle from "../components/admin/AdminPageTitle.jsx";
+import AdminDatabase from "../components/admin/AdminDatabase.jsx";
 
 const tabs = [
   {
@@ -48,6 +50,10 @@ const tabs = [
   {
     title: "Kibana",
     icon: <SiKibana className="text-lg" size={20} />,
+  },
+  {
+    title: "Database backups",
+    icon: <LuDatabaseBackup className="text-lg" size={20} />,
   },
 ];
 
@@ -122,6 +128,11 @@ const Settings = () => {
                       <span>
                         <AdminPageTitle title="Kibana interface opened" />
                       </span>
+                    </>
+                  )}
+                  {selected === 6 && (
+                    <>
+                      <AdminDatabase />
                     </>
                   )}
                 </TabsProfile>
