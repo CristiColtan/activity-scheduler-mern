@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js --ignore backups/"
+    "start": "nodemon server.js --ignore backups/",
+    "go": "node server.js"
   },
   "keywords": [],
   "author": "",
