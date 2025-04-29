@@ -371,12 +371,14 @@ export const signinTOTP = async (req, res, next) => {
     res
       .cookie("access_token", access_token, {
         httpOnly: true,
-        domain: "localhost",
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
         path: "/",
       })
       .cookie("refresh_token", refresh_token, {
         httpOnly: true,
-        domain: "localhost",
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
         path: "/",
       })
       .status(200)
@@ -591,12 +593,14 @@ export const signingoogleTOTP = async (req, res, next) => {
     res
       .cookie("access_token", access_token, {
         httpOnly: true,
-        domain: "localhost",
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
         path: "/",
       })
       .cookie("refresh_token", refresh_token, {
         httpOnly: true,
-        domain: "localhost",
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
         path: "/",
       })
       .status(200)
@@ -694,12 +698,14 @@ export const signgoogle = async (req, res, next) => {
       res
         .cookie("access_token", access_token, {
           httpOnly: true,
-          domain: "localhost",
+          secure: isProduction,
+          sameSite: isProduction ? "None" : "Lax",
           path: "/",
         })
         .cookie("refresh_token", refresh_token, {
           httpOnly: true,
-          domain: "localhost",
+          secure: isProduction,
+          sameSite: isProduction ? "None" : "Lax",
           path: "/",
         })
         .status(200)
@@ -764,12 +770,14 @@ export const signgoogle = async (req, res, next) => {
       res
         .cookie("access_token", access_token, {
           httpOnly: true,
-          domain: "localhost",
+          secure: isProduction,
+          sameSite: isProduction ? "None" : "Lax",
           path: "/",
         })
         .cookie("refresh_token", refresh_token, {
           httpOnly: true,
-          domain: "localhost",
+          secure: isProduction,
+          sameSite: isProduction ? "None" : "Lax",
           path: "/",
         })
         .status(200)
@@ -1020,7 +1028,8 @@ export const refresh = async (req, res, next) => {
         res
           .cookie("access_token", new_access_token, {
             httpOnly: true,
-            domain: "localhost",
+            secure: isProduction,
+            sameSite: isProduction ? "None" : "Lax",
             path: "/",
           })
           .status(200)
