@@ -7,7 +7,12 @@ import speakeasy from "speakeasy";
 import { errorHandler } from "../utils/error.js";
 
 import apm from "elastic-apm-node";
+import dotenv from "dotenv";
 import { userLogger, authLogger } from "../utils/logger.js";
+
+dotenv.config();
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export const signup = async (req, res, next) => {
   const start = Date.now();
@@ -196,12 +201,14 @@ export const signin = async (req, res, next) => {
     res
       .cookie("access_token", access_token, {
         httpOnly: true,
-        domain: "localhost",
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
         path: "/",
       })
       .cookie("refresh_token", refresh_token, {
         httpOnly: true,
-        domain: "localhost",
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
         path: "/",
       })
       .status(200)

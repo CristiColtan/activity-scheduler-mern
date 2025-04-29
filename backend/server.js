@@ -37,7 +37,10 @@ mongoose
   });
 
 const corsOptions = {
-  origin: true,
+  origin: [
+    "http://localhost:3000",
+    "https://frontend-deployment-ww19.onrender.com",
+  ],
   credentials: true,
 };
 
