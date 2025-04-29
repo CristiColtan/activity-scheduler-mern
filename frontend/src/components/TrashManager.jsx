@@ -21,6 +21,7 @@ import DialogRestoreTask from "./dialog/DialogRestoreTask.jsx";
 import TaskDeleteAll from "./task/TaskDeleteAll.jsx";
 import TaskRestoreAll from "./task/TaskRestoreAll.jsx";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const TrashManager = () => {
@@ -62,7 +63,7 @@ const TrashManager = () => {
   const fetchTrashedTasks = async () => {
     try {
       const res = await apiRequest(
-        "http://localhost:8081/backend/team-manager/get/all-trashed-tasks"
+        `${proxy}/backend/team-manager/get/all-trashed-tasks`
       );
 
       if (!res) return;

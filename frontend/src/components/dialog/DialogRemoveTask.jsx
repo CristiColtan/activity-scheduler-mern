@@ -5,6 +5,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogRemoveTask = ({
@@ -27,7 +28,7 @@ const DialogRemoveTask = ({
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/task/delete-task/${taskID}`,
+        `${proxy}/backend/task/delete-task/${taskID}`,
         {
           method: "DELETE",
         }

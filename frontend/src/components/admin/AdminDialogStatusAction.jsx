@@ -5,6 +5,7 @@ import { FaExclamation } from "react-icons/fa";
 
 import MyModal from "../MyModal";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminDialogStatusAction = ({
@@ -27,7 +28,7 @@ const AdminDialogStatusAction = ({
       setLoading(true);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/admin/switch-status-fetch-users",
+        `${proxy}/backend/admin/switch-status-fetch-users`,
         {
           method: "PUT",
           headers: {

@@ -28,6 +28,7 @@ import CustomToolTipReport2 from "../../components/recharts/CustomToolTipReport2
 
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminUsers = () => {
@@ -66,9 +67,7 @@ const AdminUsers = () => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/get/all-users"
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/get/all-users`);
 
       if (!res) return;
 
@@ -186,7 +185,7 @@ const AdminUsers = () => {
         setLoadingReport1(true);
 
         const res = await apiRequest(
-          `http://localhost:8081/backend/admin/get/report-1/${user._id}`,
+          `${proxy}/backend/admin/get/report-1/${user._id}`,
           {
             method: "PUT",
             headers: {
@@ -237,7 +236,7 @@ const AdminUsers = () => {
         setLoadingReport2(true);
 
         const res = await apiRequest(
-          `http://localhost:8081/backend/admin/get/report-2/${user._id}`,
+          `${proxy}/backend/admin/get/report-2/${user._id}`,
           {
             method: "PUT",
             headers: {

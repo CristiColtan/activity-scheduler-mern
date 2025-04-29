@@ -41,6 +41,7 @@ import DialogAssignHours from "../components/dialog/DialogAssignHours.jsx";
 import DialogEditSubtask from "../components/dialog/DialogEditSubtask.jsx";
 import DialogEditActivity from "../components/dialog/DialogEditActivity.jsx";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const t_icons = {
@@ -147,7 +148,7 @@ const TaskDetails = () => {
           setLoading(true);
 
           const res = await apiRequest(
-            `http://localhost:8081/backend/task/get/${params.id}`
+            `${proxy}/backend/task/get/${params.id}`
           );
 
           if (!res) return;
@@ -193,7 +194,7 @@ const TaskDetails = () => {
   const handleDeleteSubTaskOnClick = async (taskID, subtaskIndex) => {
     try {
       const res = await apiRequest(
-        "http://localhost:8081/backend/task/delete-task-details-subtask",
+        `${proxy}/backend/task/delete-task-details-subtask`,
         {
           method: "PUT",
           headers: {
@@ -645,7 +646,7 @@ const Activities = ({ activity, id, setActivities, task }) => {
       setIsLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/task/add-activity/${params.id}`,
+        `${proxy}/backend/task/add-activity/${params.id}`,
         {
           method: "PUT",
           headers: {
@@ -697,7 +698,7 @@ const Activities = ({ activity, id, setActivities, task }) => {
   const handleDeleteActivityOnClick = async (taskID, activityIndex) => {
     try {
       const res = await apiRequest(
-        "http://localhost:8081/backend/task/delete-task-details-activity",
+        `${proxy}/backend/task/delete-task-details-activity`,
         {
           method: "PUT",
           headers: {

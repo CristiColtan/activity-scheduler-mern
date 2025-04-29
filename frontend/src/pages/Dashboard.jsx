@@ -33,6 +33,7 @@ import { getInitials } from "../utils/FullnameInitials.js";
 
 import Loading from "../components/Loading.jsx";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 export default function Dashboard() {
@@ -50,15 +51,15 @@ export default function Dashboard() {
 
       if (currentUser.is_admin === "Yes") {
         res = await apiRequest(
-          `http://localhost:8081/backend/admin/get-dashboard-statistics`
+          `${proxy}/backend/admin/get-dashboard-statistics`
         );
       } else if (currentUser.is_team_manager === "Yes") {
         res = await apiRequest(
-          `http://localhost:8081/backend/team-manager/get/dashboard-statistics`
+          `${proxy}/backend/team-manager/get/dashboard-statistics`
         );
       } else {
         res = await apiRequest(
-          `http://localhost:8081/backend/normal-user/get-dashboard-statistics`
+          `${proxy}/backend/normal-user/get-dashboard-statistics`
         );
       }
 

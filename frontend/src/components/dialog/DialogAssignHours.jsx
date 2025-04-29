@@ -4,6 +4,7 @@ import { DialogTitle } from "@headlessui/react";
 
 import MyModal from "../MyModal";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogAssignHours = ({ open, setOpen, taskId, userId }) => {
@@ -26,7 +27,7 @@ const DialogAssignHours = ({ open, setOpen, taskId, userId }) => {
       setLoading(false);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/normal-user/get-hours/${taskId}`
+        `${proxy}/backend/normal-user/get-hours/${taskId}`
       );
 
       if (!res) return;
@@ -68,7 +69,7 @@ const DialogAssignHours = ({ open, setOpen, taskId, userId }) => {
       setLoading(true);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/normal-user/assign-hours",
+        `${proxy}/backend/normal-user/assign-hours`,
         {
           method: "PUT",
           headers: {

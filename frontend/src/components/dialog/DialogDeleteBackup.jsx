@@ -5,6 +5,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogDeleteBackup = ({ open, setOpen, setFilenames, filenameData }) => {
@@ -19,16 +20,13 @@ const DialogDeleteBackup = ({ open, setOpen, setFilenames, filenameData }) => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        `http://localhost:8081/backend/utils/delete-backup`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filename: filenameData }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/utils/delete-backup`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ filename: filenameData }),
+      });
 
       if (!res) return;
 

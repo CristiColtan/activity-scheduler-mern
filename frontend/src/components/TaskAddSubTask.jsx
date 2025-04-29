@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import MyModal from "./MyModal";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const TaskAddSubTask = ({
@@ -32,16 +33,13 @@ const TaskAddSubTask = ({
       setLoading(true);
       e.preventDefault();
 
-      const res = await apiRequest(
-        `http://localhost:8081/backend/task/add-subtask/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/task/add-subtask/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (!res) return;
 

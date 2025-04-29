@@ -8,6 +8,8 @@ import MyModal from "../MyModal.jsx";
 
 import { signInCancel, signInSuccess } from "../../redux/user/userSlice.js";
 
+import { proxy } from "../../utils/deployment.js";
+
 const DialogLoginTOTPGoogle = ({ open, setOpen, formData }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -31,17 +33,14 @@ const DialogLoginTOTPGoogle = ({ open, setOpen, formData }) => {
   const handleLogin = async () => {
     try {
       setLoading(true);
-      const res = await fetch(
-        "http://localhost:8081/backend/auth/signingoogle-totp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ email: formData.email, code: code }),
-        }
-      );
+      const res = await fetch(`${proxy}/backend/auth/signingoogle-totp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email: formData.email, code: code }),
+      });
 
       const data = await res.json();
       if (data.success === false) {

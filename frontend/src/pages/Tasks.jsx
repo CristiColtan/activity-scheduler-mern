@@ -13,6 +13,7 @@ import { task_type } from "../utils/tableImports.js";
 import TaskTitle from "../components/TaskTitle.jsx";
 import BoardView from "../components/BoardView.jsx";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const Tasks = () => {
@@ -86,7 +87,7 @@ const Tasks = () => {
         const searchQuery = urlParams.toString();
 
         const res = await apiRequest(
-          `http://localhost:8081/backend/task/get-all-tasks?${searchQuery}`
+          `${proxy}/backend/task/get-all-tasks?${searchQuery}`
         );
 
         if (!res) return;
@@ -171,7 +172,7 @@ const Tasks = () => {
     const searchQuery = urlParams.toString();
 
     const res = await apiRequest(
-      `http://localhost:8081/backend/task/get-all-tasks?${searchQuery}`
+      `${proxy}/backend/task/get-all-tasks?${searchQuery}`
     );
 
     if (!res) return;

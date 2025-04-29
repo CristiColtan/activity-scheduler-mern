@@ -43,6 +43,7 @@ import {
 
 import CustomToolTipReportTM1 from "../recharts/CustomToolTipReportTM1.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminTeamManagers = () => {
@@ -81,9 +82,7 @@ const AdminTeamManagers = () => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/get/team-managers"
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/get/team-managers`);
 
       if (!res) return;
 
@@ -192,7 +191,7 @@ const AdminTeamManagers = () => {
         setLoadingReports(true);
 
         const res = await apiRequest(
-          `http://localhost:8081/backend/admin/get/reports-TM/${user._id}`,
+          `${proxy}/backend/admin/get/reports-TM/${user._id}`,
           {
             method: "PUT",
             headers: {

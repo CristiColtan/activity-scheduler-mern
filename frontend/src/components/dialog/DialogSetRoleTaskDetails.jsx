@@ -5,6 +5,7 @@ import { DialogTitle } from "@headlessui/react";
 import MyModal from "../MyModal";
 import TaskSelectList from "../TaskSelectList";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogSetRoleTaskDetails = ({
@@ -25,12 +26,9 @@ const DialogSetRoleTaskDetails = ({
     try {
       setLoading(false);
 
-      const res = await fetch(
-        "http://localhost:8081/backend/task/get-user-roles",
-        {
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`${proxy}/backend/task/get-user-roles`, {
+        credentials: "include",
+      });
 
       const data = await res.json();
       if (data.success === false) {
@@ -73,7 +71,7 @@ const DialogSetRoleTaskDetails = ({
       setLoading(false);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/task/edit-user-role-on-task",
+        `${proxy}/backend/task/edit-user-role-on-task`,
         {
           method: "PUT",
           headers: {

@@ -7,6 +7,7 @@ import { BsPersonSquare } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminRoles = () => {
@@ -21,16 +22,13 @@ const AdminRoles = () => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/delete/role",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ role: rolee }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/delete/role`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role: rolee }),
+      });
 
       if (!res) return;
 
@@ -57,9 +55,7 @@ const AdminRoles = () => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/get/roles"
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/get/roles`);
 
       if (!res) return;
 

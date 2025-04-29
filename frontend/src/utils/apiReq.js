@@ -1,14 +1,12 @@
 import { toast } from "react-toastify";
+import { proxy } from "./deployment.js";
 
 export const refreshAccessToken = async () => {
   try {
-    const res = await fetch(
-      "http://localhost:8081/backend/auth/refresh-token",
-      {
-        method: "POST",
-        credentials: "include",
-      }
-    );
+    const res = await fetch(`${proxy}/backend/auth/refresh-token`, {
+      method: "POST",
+      credentials: "include",
+    });
 
     const data = await res.json();
 

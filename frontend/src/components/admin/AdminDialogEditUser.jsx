@@ -4,6 +4,7 @@ import { DialogTitle } from "@headlessui/react";
 
 import MyModal from "../MyModal";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminDialogEditUser = ({
@@ -40,7 +41,7 @@ const AdminDialogEditUser = ({
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/admin/edit/user-fetch-users/${userData._id}`,
+        `${proxy}/backend/admin/edit/user-fetch-users/${userData._id}`,
         {
           method: "PUT",
           headers: {

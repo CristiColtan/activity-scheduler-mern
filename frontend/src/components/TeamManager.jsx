@@ -35,6 +35,7 @@ import CustomToolTipReport2 from "./recharts/CustomToolTipReport2.jsx";
 
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const TeamManager = () => {
@@ -72,9 +73,7 @@ const TeamManager = () => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/team-manager/get/my-team"
-      );
+      const res = await apiRequest(`${proxy}/backend/team-manager/get/my-team`);
 
       if (!res) return;
 
@@ -193,7 +192,7 @@ const TeamManager = () => {
         setLoadingReport1(true);
 
         const res = await apiRequest(
-          `http://localhost:8081/backend/team-manager/get/report-1/${user._id}`,
+          `${proxy}/backend/team-manager/get/report-1/${user._id}`,
           {
             method: "PUT",
             headers: {
@@ -244,7 +243,7 @@ const TeamManager = () => {
         setLoadingReport2(true);
 
         const res = await apiRequest(
-          `http://localhost:8081/backend/team-manager/get/report-2/${user._id}`,
+          `${proxy}/backend/team-manager/get/report-2/${user._id}`,
           {
             method: "PUT",
             headers: {

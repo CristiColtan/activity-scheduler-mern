@@ -24,6 +24,7 @@ import {
 } from "../redux/user/userSlice.js";
 import DialogResetPassword from "../components/dialog/DialogResetPassword.jsx";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const tabs = [
@@ -97,7 +98,7 @@ const Profile = () => {
       dispatch(updateUserStart());
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/normal-user/update-my-profile/${currentUser._id}`,
+        `${proxy}/backend/normal-user/update-my-profile/${currentUser._id}`,
         {
           method: "PUT",
           headers: {

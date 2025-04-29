@@ -20,6 +20,7 @@ import {
 } from "firebase/storage";
 import { app } from "../utils/firebase.js";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const EditTask = () => {
@@ -61,7 +62,7 @@ const EditTask = () => {
         setLoading(true);
 
         const res = await apiRequest(
-          `http://localhost:8081/backend/task/get-task-edit/${params.id}`,
+          `${proxy}/backend/task/get-task-edit/${params.id}`,
           {
             credentials: "include",
           }
@@ -99,13 +100,9 @@ const EditTask = () => {
 
         let res;
         if (currentUser.is_team_manager === "Yes") {
-          res = await apiRequest(
-            "http://localhost:8081/backend/team-manager/get/my-team"
-          );
+          res = await apiRequest(`${proxy}/backend/team-manager/get/my-team`);
         } else if (currentUser.is_admin === "Yes") {
-          res = await apiRequest(
-            "http://localhost:8081/backend/admin/get/all-users"
-          );
+          res = await apiRequest(`${proxy}/backend/admin/get/all-users`);
         }
 
         if (!res) return;
@@ -209,7 +206,7 @@ const EditTask = () => {
       formData.stage = stage.toLowerCase();
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/task/update/${params.id}`,
+        `${proxy}/backend/task/update/${params.id}`,
         {
           method: "PUT",
           headers: {

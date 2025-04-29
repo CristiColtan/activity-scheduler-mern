@@ -4,6 +4,7 @@ import { DialogTitle } from "@headlessui/react";
 
 import MyModal from "../MyModal";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogEditSubtask = ({
@@ -40,7 +41,7 @@ const DialogEditSubtask = ({
       setLoading(true);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/task/edit-task-details-subtask",
+        `${proxy}/backend/task/edit-task-details-subtask`,
         {
           method: "PUT",
           headers: {

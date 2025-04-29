@@ -11,6 +11,8 @@ import {
 import OAuth from "../components/OAuth.jsx";
 import DialogLoginTOTP from "../components/dialog/DialogLoginTOTP.jsx";
 
+import { proxy } from "../utils/deployment.js";
+
 import "../styles/Login.css";
 
 export default function Login() {
@@ -43,7 +45,7 @@ export default function Login() {
       try {
         dispatch(signInStart());
 
-        const res = await fetch("http://localhost:8081/backend/auth/signin", {
+        const res = await fetch(`${proxy}/backend/auth/signin`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

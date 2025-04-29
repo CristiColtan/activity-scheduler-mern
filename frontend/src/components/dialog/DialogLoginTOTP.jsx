@@ -8,6 +8,8 @@ import MyModal from "../MyModal.jsx";
 
 import { signInCancel, signInSuccess } from "../../redux/user/userSlice.js";
 
+import { proxy } from "../../utils/deployment.js";
+
 const DialogLoginTOTP = ({ open, setOpen, formData }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,17 +34,14 @@ const DialogLoginTOTP = ({ open, setOpen, formData }) => {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:8081/backend/auth/signin-totp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ username: formData.username, code: code }),
-        }
-      );
+      const res = await fetch(`${proxy}/backend/auth/signin-totp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ username: formData.username, code: code }),
+      });
 
       const data = await res.json();
       if (data.success === false) {

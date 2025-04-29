@@ -9,6 +9,8 @@ import { signInSuccess, signInFailure } from "../redux/user/userSlice.js";
 
 import DialogLoginTOTPGoogle from "./dialog/DialogLoginTOTPGoogle.jsx";
 
+import { proxy } from "../utils/deployment.js";
+
 const OAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ const OAuth = () => {
         email: result.user.email,
       });
 
-      const res = await fetch("http://localhost:8081/backend/auth/signgoogle", {
+      const res = await fetch(`${proxy}/backend/auth/signgoogle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

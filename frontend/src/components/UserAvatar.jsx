@@ -21,6 +21,8 @@ import {
   signOutUserSuccess,
 } from "../redux/user/userSlice.js";
 
+import { proxy } from "../utils/deployment.js";
+
 const UserAvatar = () => {
   const [open, setOpen] = useState(false);
 
@@ -33,7 +35,7 @@ const UserAvatar = () => {
     try {
       dispatch(signOutUserStart());
       const res = await fetch(
-        `http://localhost:8081/backend/auth/signout/${currentUser._id}`
+        `${proxy}/backend/auth/signout/${currentUser._id}`
       );
 
       const data = await res.json();

@@ -17,6 +17,7 @@ import { FaSort } from "react-icons/fa";
 
 import { getInitials } from "../../utils/FullnameInitials.js";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminNotificationsLog = () => {
@@ -73,7 +74,7 @@ const AdminNotificationsLog = () => {
       setLoading(true);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/admin/get/notifications-log"
+        `${proxy}/backend/admin/get/notifications-log`
       );
 
       if (!res) return;

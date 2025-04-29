@@ -9,6 +9,7 @@ import BoardView from "../components/BoardView.jsx";
 import { task_type } from "../utils/tableImports.js";
 
 import { apiRequest } from "../utils/apiReq.js";
+import { proxy } from "../utils/deployment.js";
 
 const ToDo = () => {
   const [loading, setLoading] = useState(false);
@@ -21,9 +22,7 @@ const ToDo = () => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/task/get-all-to-do-tasks"
-      );
+      const res = await apiRequest(`${proxy}/backend/task/get-all-to-do-tasks`);
 
       if (!res) return;
 

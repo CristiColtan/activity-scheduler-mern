@@ -19,6 +19,7 @@ import {
 } from "firebase/storage";
 import { app } from "../utils/firebase.js";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const CreateTask = () => {
@@ -62,13 +63,9 @@ const CreateTask = () => {
       let res;
 
       if (currentUser.is_team_manager === "Yes") {
-        res = await apiRequest(
-          "http://localhost:8081/backend/team-manager/get/my-team"
-        );
+        res = await apiRequest(`${proxy}/backend/team-manager/get/my-team`);
       } else if (currentUser.is_admin === "Yes") {
-        res = await apiRequest(
-          "http://localhost:8081/backend/admin/get/all-users"
-        );
+        res = await apiRequest(`${proxy}/backend/admin/get/all-users`);
       }
 
       if (!res) return;
@@ -172,16 +169,13 @@ const CreateTask = () => {
       formData.stage = stage.toLowerCase();
       formData.team = team;
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/task/create",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/task/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (!res) return;
 

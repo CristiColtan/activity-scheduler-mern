@@ -4,6 +4,7 @@ import { DialogTitle } from "@headlessui/react";
 
 import MyModal from "../MyModal";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminDialogAddRole = ({ open, setOpen, roles, setRoles }) => {
@@ -32,16 +33,13 @@ const AdminDialogAddRole = ({ open, setOpen, roles, setRoles }) => {
     try {
       setLoading(false);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/add/role",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ role: formData.role }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/add/role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role: formData.role }),
+      });
 
       if (!res) return;
 

@@ -5,6 +5,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const TaskDeleteAll = ({ open, setOpen, trashedTasks, setTrashedTasks }) => {
@@ -20,16 +21,13 @@ const TaskDeleteAll = ({ open, setOpen, trashedTasks, setTrashedTasks }) => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        `http://localhost:8081/backend/task/delete-all-tasks`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ tasks: trashedTasks }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/task/delete-all-tasks`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tasks: trashedTasks }),
+      });
 
       if (!res) return;
 

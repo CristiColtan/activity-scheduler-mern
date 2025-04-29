@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 import OAuth from "../components/OAuth.jsx";
 
+import { proxy } from "../utils/deployment.js";
+
 import "../styles/Register.css";
 
 export default function Register() {
@@ -59,7 +61,7 @@ export default function Register() {
         try {
           setLoading(true);
 
-          const res = await fetch("http://localhost:8081/backend/auth/signup", {
+          const res = await fetch(`${proxy}/backend/auth/signup`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

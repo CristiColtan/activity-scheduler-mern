@@ -13,6 +13,7 @@ import { BiSolidMessage } from "react-icons/bi";
 import DialogNotification from "./dialog/DialogNotification";
 
 import { apiRequest } from "../utils/apiReq.js";
+import { proxy } from "../utils/deployment.js";
 
 const icons = {
   alert: (
@@ -30,7 +31,7 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await apiRequest("http://localhost:8081/backend/notif/get");
+      const res = await apiRequest(`${proxy}/backend/notif/get`);
 
       if (!res) return;
 
@@ -56,15 +57,12 @@ const Notifications = () => {
 
   const readAllHandlerOnClick = async () => {
     try {
-      const res = await apiRequest(
-        `http://localhost:8081/backend/notif/mark-all-as-read`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/notif/mark-all-as-read`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!res) return;
 

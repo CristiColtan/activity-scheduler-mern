@@ -5,6 +5,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogDeleteConfirmTask = ({
@@ -26,7 +27,7 @@ const DialogDeleteConfirmTask = ({
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/task/trash-task/${taskID}`,
+        `${proxy}/backend/task/trash-task/${taskID}`,
         {
           method: "PUT",
           headers: {

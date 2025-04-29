@@ -8,6 +8,7 @@ import BoardView from "../components/BoardView.jsx";
 
 import { task_type } from "../utils/tableImports.js";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const InProgress = () => {
@@ -22,7 +23,7 @@ const InProgress = () => {
       setLoading(true);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/task/get-all-in-progress-tasks"
+        `${proxy}/backend/task/get-all-in-progress-tasks`
       );
 
       if (!res) return;

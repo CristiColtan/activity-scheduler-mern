@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import MyModal from "../MyModal.jsx";
 import Loading from "../Loading.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogResetPassword = ({ open, setOpen }) => {
@@ -51,19 +52,16 @@ const DialogResetPassword = ({ open, setOpen }) => {
         isValid = false;
         setError("Passwords not matching!");
 
-        await apiRequest(
-          `http://localhost:8081/backend/utils/log-client-event`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              level: "warn",
-              message: "User entered mismatching passwords in reset form",
-            }),
-          }
-        );
+        await apiRequest(`${proxy}/backend/utils/log-client-event`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            level: "warn",
+            message: "User entered mismatching passwords in reset form",
+          }),
+        });
       }
 
       //regex validation
@@ -79,7 +77,7 @@ const DialogResetPassword = ({ open, setOpen }) => {
               : formData;
 
           const res = await apiRequest(
-            `http://localhost:8081/backend/auth/reset-password/${currentUser._id}`,
+            `${proxy}/backend/auth/reset-password/${currentUser._id}`,
             {
               method: "POST",
               headers: {

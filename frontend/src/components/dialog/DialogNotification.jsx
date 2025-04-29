@@ -8,6 +8,7 @@ import MyModal from "../MyModal.jsx";
 import { HiBellAlert } from "react-icons/hi2";
 import { BiSolidMessage } from "react-icons/bi";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const icons = {
@@ -35,7 +36,7 @@ const DialogNotification = ({
   const markAsRead = async (NotifID) => {
     try {
       const res = await apiRequest(
-        `http://localhost:8081/backend/notif/mark-as-read/${NotifID}`,
+        `${proxy}/backend/notif/mark-as-read/${NotifID}`,
         {
           method: "PUT",
           headers: {

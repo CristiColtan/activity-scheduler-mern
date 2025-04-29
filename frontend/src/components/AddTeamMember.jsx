@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import MyModal from "./MyModal";
 import TaskAddUserList from "./TaskAddUserList";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const AddTeamMember = ({ open, setOpen }) => {
@@ -24,7 +25,7 @@ const AddTeamMember = ({ open, setOpen }) => {
 
       if (currentUser.is_team_manager === "Yes") {
         res = await apiRequest(
-          "http://localhost:8081/backend/team-manager/get/normal-users"
+          `${proxy}/backend/team-manager/get/normal-users`
         );
       }
 
@@ -54,7 +55,7 @@ const AddTeamMember = ({ open, setOpen }) => {
       setLoading(true);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/team-manager/add/team-member",
+        `${proxy}/backend/team-manager/add/team-member`,
         {
           method: "POST",
           headers: {

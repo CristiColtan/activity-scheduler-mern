@@ -6,6 +6,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogRestoreBackup = ({ open, setOpen, filenameData }) => {
@@ -22,16 +23,13 @@ const DialogRestoreBackup = ({ open, setOpen, filenameData }) => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        `http://localhost:8081/backend/utils/restore-backup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filename: filenameData }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/utils/restore-backup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ filename: filenameData }),
+      });
 
       if (!res) return;
 

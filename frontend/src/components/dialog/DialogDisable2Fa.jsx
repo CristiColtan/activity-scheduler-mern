@@ -9,6 +9,7 @@ import Loading from "../Loading.jsx";
 
 import { updateUserSuccess } from "../../redux/user/userSlice.js";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogDisable2Fa = ({ open, setOpen }) => {
@@ -34,7 +35,7 @@ const DialogDisable2Fa = ({ open, setOpen }) => {
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/mfa/disable-totp/${currentUser._id}`,
+        `${proxy}/backend/mfa/disable-totp/${currentUser._id}`,
         {
           method: "POST",
           headers: {

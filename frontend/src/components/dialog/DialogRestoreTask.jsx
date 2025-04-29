@@ -5,6 +5,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogRestoreTask = ({
@@ -26,7 +27,7 @@ const DialogRestoreTask = ({
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/task/restore-task/${taskID}`,
+        `${proxy}/backend/task/restore-task/${taskID}`,
         {
           method: "PUT",
           headers: {

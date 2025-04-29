@@ -6,6 +6,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogDeleteConfirmTeamMember = ({ open, setOpen, userData }) => {
@@ -22,7 +23,7 @@ const DialogDeleteConfirmTeamMember = ({ open, setOpen, userData }) => {
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/team-manager/remove/team-member/${userID}`,
+        `${proxy}/backend/team-manager/remove/team-member/${userID}`,
         {
           method: "DELETE",
         }

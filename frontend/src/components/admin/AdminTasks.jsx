@@ -6,6 +6,7 @@ import Loading from "../Loading.jsx";
 import AdminPagetitle from "./AdminPageTitle.jsx";
 import AdminTaskTable from "./AdminTaskTable.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminTasks = () => {
@@ -20,7 +21,7 @@ const AdminTasks = () => {
       setLoading(true);
 
       const res = await apiRequest(
-        "http://localhost:8081/backend/admin/get/all-tasks-populated"
+        `${proxy}/backend/admin/get/all-tasks-populated`
       );
 
       if (!res) return;

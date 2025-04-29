@@ -9,6 +9,7 @@ import Loading from "../Loading.jsx";
 
 import { updateUserSuccess } from "../../redux/user/userSlice.js";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogSetUp2Fa = ({ open, setOpen }) => {
@@ -41,7 +42,7 @@ const DialogSetUp2Fa = ({ open, setOpen }) => {
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/mfa/generate-qr/${currentUser._id}`,
+        `${proxy}/backend/mfa/generate-qr/${currentUser._id}`,
         {
           method: "POST",
           headers: {
@@ -78,7 +79,7 @@ const DialogSetUp2Fa = ({ open, setOpen }) => {
       setLoadingVerify(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/mfa/first-verify-totp/${currentUser._id}`,
+        `${proxy}/backend/mfa/first-verify-totp/${currentUser._id}`,
         {
           method: "POST",
           headers: {

@@ -37,6 +37,7 @@ import AdminTabs from "./AdminTabs.jsx";
 import AdminDialogEditActivity from "./AdminDialogEditActivity.jsx";
 import AdminDialogEditSubtask from "./AdminDialogEditSubtask.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const t_icons = {
@@ -131,16 +132,13 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
 
   const handleDeleteAssetOnClick = async (taskID, asseturlIndex) => {
     try {
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/delete/asset",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ taskID: taskID, assetIndex: asseturlIndex }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/delete/asset`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ taskID: taskID, assetIndex: asseturlIndex }),
+      });
 
       if (!res) return;
 
@@ -169,19 +167,16 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
 
   const handleDeleteActivityOnClick = async (taskID, activityIndex) => {
     try {
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/delete/activity",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            taskID: taskID,
-            activityIndex: activityIndex,
-          }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/delete/activity`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          taskID: taskID,
+          activityIndex: activityIndex,
+        }),
+      });
 
       if (!res) return;
 
@@ -210,16 +205,13 @@ const AdminTaskTable = ({ tasks, setTasks }) => {
 
   const handleDeleteSubtaskOnClick = async (taskID, subtaskIndex) => {
     try {
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/delete/subtask",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ taskID: taskID, subtaskIndex: subtaskIndex }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/delete/subtask`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ taskID: taskID, subtaskIndex: subtaskIndex }),
+      });
 
       if (!res) return;
 

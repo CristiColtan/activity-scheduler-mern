@@ -20,6 +20,7 @@ import { BsThreeDots } from "react-icons/bs";
 import DialogDeleteConfirmTask from "./dialog/DialogTrashConfirmTask";
 import DialogDuplicateTask from "./dialog/DialogDuplicateTask";
 
+import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
 
 const TaskDialog = ({ task, tasks, setTasks }) => {

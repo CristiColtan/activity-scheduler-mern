@@ -4,6 +4,7 @@ import { DialogTitle } from "@headlessui/react";
 
 import MyModal from "../MyModal";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminDialogEditSubtask = ({
@@ -44,20 +45,17 @@ const AdminDialogEditSubtask = ({
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/admin/edit/subtask",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            formData: formData,
-            taskID: taskID,
-            subtaskIndex: subtaskIndex,
-          }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/edit/subtask`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          formData: formData,
+          taskID: taskID,
+          subtaskIndex: subtaskIndex,
+        }),
+      });
 
       if (!res) return;
 

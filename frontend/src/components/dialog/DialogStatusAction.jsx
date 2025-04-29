@@ -6,6 +6,7 @@ import { FaExclamation } from "react-icons/fa";
 
 import MyModal from "../MyModal";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogStatusAction = ({ open, setOpen, userData }) => {
@@ -20,16 +21,13 @@ const DialogStatusAction = ({ open, setOpen, userData }) => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        `http://localhost:8081/backend/admin/switch-status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ memberID: userData._id }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/switch-status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ memberID: userData._id }),
+      });
 
       if (!res) return;
 

@@ -7,6 +7,7 @@ import TaskSelectList from "../TaskSelectList";
 
 import { task_activity_list_type } from "../../utils/tableImports";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const AdminDialogEditActivity = ({
@@ -50,20 +51,17 @@ const AdminDialogEditActivity = ({
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        `http://localhost:8081/backend/admin/edit/activity`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            formData: formData,
-            taskID: taskID,
-            activityIndex: activityIndex,
-          }),
-        }
-      );
+      const res = await apiRequest(`${proxy}/backend/admin/edit/activity`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          formData: formData,
+          taskID: taskID,
+          activityIndex: activityIndex,
+        }),
+      });
 
       if (!res) return;
 

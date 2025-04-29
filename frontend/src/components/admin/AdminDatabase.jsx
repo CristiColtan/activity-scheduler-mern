@@ -7,6 +7,7 @@ import AdminPageTitle from "./AdminPageTitle.jsx";
 import { LuDatabaseBackup } from "react-icons/lu";
 import { TbDatabaseX } from "react-icons/tb";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 import DialogDeleteBackup from "../dialog/DialogDeleteBackup.jsx";
 import DialogRestoreBackup from "../dialog/DialogRestoreBackup.jsx";
@@ -35,9 +36,7 @@ const AdminDatabase = () => {
     try {
       setLoading(true);
 
-      const res = await apiRequest(
-        "http://localhost:8081/backend/utils/get-backups"
-      );
+      const res = await apiRequest(`${proxy}/backend/utils/get-backups`);
 
       if (!res) return;
 

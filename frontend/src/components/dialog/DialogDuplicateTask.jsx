@@ -5,6 +5,7 @@ import { FaQuestion } from "react-icons/fa";
 
 import MyModal from "../MyModal.jsx";
 
+import { proxy } from "../../utils/deployment.js";
 import { apiRequest } from "../../utils/apiReq.js";
 
 const DialogDuplicateTask = ({ open, setOpen, tasks, setTasks, taskData }) => {
@@ -21,7 +22,7 @@ const DialogDuplicateTask = ({ open, setOpen, tasks, setTasks, taskData }) => {
       setLoading(true);
 
       const res = await apiRequest(
-        `http://localhost:8081/backend/task/duplicate-task/${taskID}`,
+        `${proxy}/backend/task/duplicate-task/${taskID}`,
         {
           method: "POST",
           headers: {
