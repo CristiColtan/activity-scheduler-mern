@@ -26,6 +26,8 @@ import {
   deleteSubtask,
   editActivity,
   deleteActivity,
+  switchStatusSubtask,
+  getTaskStatistics,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -33,6 +35,7 @@ const router = express.Router();
 router.post("/create", verifyToken, verifyAdminOrTeamManager, createTask);
 
 router.get("/get/:id", verifyToken, getTask);
+router.get("/get-statistics/:id", verifyToken, getTaskStatistics);
 router.get("/get-all-tasks", verifyToken, fetchAllTasks);
 router.get("/get-all-completed-tasks", verifyToken, fetchAllCompletedTasks);
 router.get("/get-all-in-progress-tasks", verifyToken, fetchAllInProgressTasks);
@@ -83,6 +86,12 @@ router.put(
   verifyToken,
   verifyAdminOrTeamManager,
   restoreAllTasks
+);
+router.put(
+  "/switch-subtask-status",
+  verifyToken,
+  verifyAdminOrTeamManager,
+  switchStatusSubtask
 );
 
 router.delete(

@@ -15,6 +15,7 @@ import BoardView from "../components/BoardView.jsx";
 
 import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
+import TaskTitle2 from "../components/TaskTitle2.jsx";
 
 const Tasks = () => {
   const [loading, setLoading] = useState(false);
@@ -324,7 +325,7 @@ const Tasks = () => {
           {tabs.map((tab, index) => (
             <div
               key={tab.title + index}
-              className="w-fit flex items-center outline-none gap-2 px-2 py-2.5 text-base font-medium
+              className="w-fit flex items-center outline-none gap-2 px-2 sm:py-2.5 py-0 text-base font-medium
                               leading-5 bg-gray-100 text-blue-700 border-b-2 border-l-2 border-l-black/20 border-blue-600 rounded
                               shadow-lg -ml-1 border-t-2 border-t-black/20 border-r-2 border-r-black/20 hover:text-blue-400
                               hover:border-b-blue-400"
@@ -333,6 +334,18 @@ const Tasks = () => {
               <span>{tab.title}</span>
             </div>
           ))}
+
+          <div className="w-fit py-0 mb-2 sm:block hidden">
+            <div className="rounded gap-4 flex justify-between translate-y-1">
+              <TaskTitle2 label="To Do" classes={task_type["to do"]} />
+              <TaskTitle2
+                label="In Progress"
+                classes={task_type["in progress"]}
+              />
+              <TaskTitle2 label="Completed" classes={task_type.completed} />
+            </div>
+          </div>
+
           {(currentUser.is_admin === "Yes" ||
             currentUser.is_team_manager === "Yes") && (
             <button
@@ -348,13 +361,13 @@ const Tasks = () => {
         </div>
       </div>
 
-      <div className="w-full py-0 mb-2">
+      {/*<div className="w-full py-0 mb-2">
         <div className=" rounded gap-4 flex justify-between">
           <TaskTitle label="To Do" classes={task_type["to do"]} />
           <TaskTitle label="In Progress" classes={task_type["in progress"]} />
           <TaskTitle label="Completed" classes={task_type.completed} />
         </div>
-      </div>
+      </div>*/}
 
       {Tasks && Tasks.length > 0 ? (
         <BoardView tasks={Tasks} setTasks={setTasks} />

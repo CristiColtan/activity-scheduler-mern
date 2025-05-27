@@ -182,6 +182,15 @@ export const addToTeam = async (req, res, next) => {
       return next(errorHandler(404, "User not found!"));
     }
 
+    if (currentUser.team.length + membersID.length > 8) {
+      tmadminLogger.error("Maximum team limit (8) exceded!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID: req.user.id,
+      });
+      return next(errorHandler(401, "Maximum team limit (8) exceded!"));
+    }
+
     let newMembers = [];
     for (let memberID of membersID) {
       const newMember = await User.findById(memberID);

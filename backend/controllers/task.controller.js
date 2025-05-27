@@ -4,6 +4,7 @@ import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import AppSettings from "../models/app-settings.model.js";
+import AssistantChat from "../models/assistant-chat.model.js";
 
 import { logger } from "../utils/logger.js";
 import { userLogger } from "../utils/logger.js";
@@ -12,7 +13,7 @@ import apm from "elastic-apm-node";
 export const createTask = async (req, res, next) => {
   const start = Date.now();
   const transaction = apm.startTransaction("Task-[Create]", "tasks");
-  const traceId = apm?.currentTraceIds?.["trace.id"];
+  const traceId = apm?.currentTraceIds?.["trace.id"] || "no-trace";
 
   try {
     const userID = req.user.id;
@@ -27,6 +28,7 @@ export const createTask = async (req, res, next) => {
       team,
       is_trashed,
       created_by,
+      estimated_time,
     } = req.body;
 
     transaction?.addLabels({
@@ -82,6 +84,7 @@ export const createTask = async (req, res, next) => {
       team,
       is_trashed,
       created_by,
+      estimated_time,
     });
 
     const notif = await Notification.create({
@@ -171,6 +174,15 @@ export const updateTask = async (req, res, next) => {
         taskID: req.params.id,
       });
       return next(errorHandler(404, "Task not found!"));
+    }
+
+    if (req.body.estimated_time === 0) {
+      logger.error("Estimated time cannot be 0!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "Estimated time must be higher than 0!"));
     }
 
     const isCreator = task.created_by._id.toString() === userID;
@@ -619,12 +631,222 @@ export const getTaskEdit = async (req, res, next) => {
   }
 };
 
-export const getTask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[GetTaskDetails]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+export const getTaskStatistics = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[GetTaskStatistics]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"] || "no-trace";
 
+  try {
+    const userID = req.user.id;
+
+    userLogger.info("Getting task statistics", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+    });
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/task/get-statistics/:id",
+      method: "GET",
+    });
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) {
+      userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    const task = await Task.findById(req.params.id)
+      .populate({
+        path: "team",
+        select: "-password",
+      })
+      .populate({
+        path: "activities.by",
+        select: "-password",
+      })
+      .populate({ path: "created_by", select: "-password" });
+
+    if (!task) {
+      userLogger.error("Task not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    const isCreator = task.created_by._id.toString() === userID;
+    const isTeamMember = task.team.some(
+      (member) => member._id.toString() === userID
+    );
+
+    console.log(isCreator, isTeamMember);
+
+    if (!isCreator && !isTeamMember && currentUser.is_admin === "No") {
+      userLogger.error("Not authorized!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(
+        errorHandler(403, "You are not allowed to see task's statistics!")
+      );
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const workData = await Promise.all(
+      task.team.map(async (user) => {
+        const fullUser = await User.findById(user._id);
+
+        // total hours
+        const totalHours = fullUser.work
+          .filter((entry) => entry.task.toString() === req.params.id)
+          .reduce((sum, entry) => sum + entry.hours, 0);
+
+        // hours worked today
+        const todayHours = fullUser.work
+          .filter(
+            (entry) =>
+              entry.task.toString() === req.params.id &&
+              new Date(entry.date).setHours(0, 0, 0, 0) === today.getTime()
+          )
+          .reduce((sum, entry) => sum + entry.hours, 0);
+
+        // users activities
+        const userActivities = task.activities.filter(
+          (act) => act.by && act.by._id.toString() === user._id.toString()
+        );
+
+        // each activity type
+        const activityCounts = {};
+        userActivities.forEach((act) => {
+          activityCounts[act.type] = (activityCounts[act.type] || 0) + 1;
+        });
+
+        // ai count
+        let aiInteractions = 0;
+        const chat = await AssistantChat.findOne({
+          taskId: task._id,
+          userId: user._id,
+        });
+
+        if (chat) {
+          aiInteractions = chat.messages.filter(
+            (msg) => msg.role === "user"
+          ).length;
+        }
+
+        return {
+          user_id: user._id,
+          name: `${user.first_name} ${user.last_name}`,
+          total_hours: totalHours,
+          hours_today: todayHours,
+          activities: activityCounts,
+          total_activities: userActivities.length,
+          ai_interactions: aiInteractions,
+        };
+      })
+    );
+
+    const totalTeamHours = workData.reduce(
+      (sum, member) => sum + member.total_hours,
+      0
+    );
+
+    const est =
+      task.team.length > 0 ? task.estimated_time / task.team.length : 0;
+
+    const teamEfficiency = workData.map((member) => {
+      const worked = member.total_hours;
+      const remaining = Math.max(est - worked, 0);
+
+      return {
+        name: member.name,
+        worked,
+        remaining,
+        estimated: est,
+      };
+    });
+
+    let activityRate = 0;
+    if (task.activities.length > 1) {
+      const sorted = [...task.activities].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+
+      const firstDate = new Date(sorted[0].date);
+      const lastDate = new Date(sorted[sorted.length - 1].date);
+
+      const daysBetween =
+        Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24)) || 1;
+
+      activityRate = (task.activities.length / daysBetween).toFixed(2);
+    }
+
+    const completedSubtasks = task.subtasks.filter((st) => st.completed).length;
+    const totalSubtasks = task.subtasks.length;
+    const completedSubtasksPercent = totalSubtasks
+      ? ((completedSubtasks / totalSubtasks) * 100).toFixed(1)
+      : "0.0";
+
+    const allTaskChats = await AssistantChat.find({ taskId: task._id });
+
+    const aiInteractionsTotal = allTaskChats.reduce((sum, chat) => {
+      const userMsgs = chat.messages.filter(
+        (msg) => msg.role === "user"
+      ).length;
+      return sum + userMsgs;
+    }, 0);
+
+    const taskStatistics = {
+      n_assets: task.asseturls.length,
+      n_subtasks: task.subtasks.length,
+      n_activities: task.activities.length,
+      work_by_user: workData,
+      estimated_work_volume: task.estimated_time,
+      work_by_team: totalTeamHours,
+      teamEfficiency,
+      completed_subtasks_percent: completedSubtasksPercent,
+      completed_subtasks: completedSubtasks,
+      activity_rate_per_day: activityRate,
+      ai_interactions_total: aiInteractionsTotal,
+    };
+
+    const duration = Date.now() - start;
+    userLogger.info("Task statistics received sucessfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      duration,
+    });
+    if (transaction) transaction.end();
+
+    res.status(200).json(taskStatistics);
+  } catch (error) {
+    userLogger.error("Error getting task statistics!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
+    if (transaction) transaction.end();
+    next(error);
+  }
+};
+
+export const getTask = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[GetTaskDetails]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"] || "no-trace";
+
+  try {
     const userID = req.user.id;
 
     userLogger.info("Getting task details", {
@@ -711,11 +933,11 @@ export const getTask = async (req, res, next) => {
 };
 
 export const addActivity = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[AddActivity]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[AddActivity]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
     const { type, description, date } = req.body;
 
@@ -816,11 +1038,11 @@ export const addActivity = async (req, res, next) => {
 };
 
 export const addSubTask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[AddSubtask]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[AddSubtask]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
     const { title, date, tag } = req.body;
 
@@ -848,6 +1070,7 @@ export const addSubTask = async (req, res, next) => {
     }
 
     const task = await Task.findById(req.params.id);
+
     if (!task) {
       userLogger.error("Task not found!", {
         traceId,
@@ -857,7 +1080,7 @@ export const addSubTask = async (req, res, next) => {
       return next(errorHandler(404, "Task not found!"));
     }
 
-    const isCreator = task.created_by.toString() === userID;
+    const isCreator = task.created_by._id.toString() === userID;
     if (!isCreator && currentUser.is_admin === "No") {
       userLogger.error("Not authorized!", {
         traceId,
@@ -891,6 +1114,19 @@ export const addSubTask = async (req, res, next) => {
     task.subtasks.push(data);
     await task.save();
 
+    const updatedTask = await Task.findById(req.params.id)
+      .populate({
+        path: "team",
+        select: "-password",
+      })
+      .populate({
+        path: "activities.by",
+        select: "-password",
+      })
+      .populate({ path: "created_by", select: "-password" });
+
+    updatedTask.activities.reverse();
+
     const duration = Date.now() - start;
     userLogger.info("User added subtask sucessfully!", {
       traceId,
@@ -902,9 +1138,9 @@ export const addSubTask = async (req, res, next) => {
     });
     if (transaction) transaction.end();
 
-    res.status(200).json(task);
+    res.status(200).json(updatedTask);
   } catch (error) {
-    userLogger.error("Error adding subtask!", {
+    userLogger.error(`Error adding subtask!, Error: ${error.message}`, {
       traceId,
       transactionId: transaction?.id,
       error: error.message,
@@ -915,11 +1151,11 @@ export const addSubTask = async (req, res, next) => {
 };
 
 export const fetchAllTasks = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[GetAllTasks]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[GetAllTasks]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     userLogger.info("Getting all tasks", {
@@ -1034,11 +1270,11 @@ export const fetchAllTasks = async (req, res, next) => {
 };
 
 export const trashTask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[Trash]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[Trash]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     logger.info("Trashing task", {
@@ -1110,11 +1346,11 @@ export const trashTask = async (req, res, next) => {
 };
 
 export const deleteTask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[Delete]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[Delete]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     logger.info("Deleting task", {
@@ -1237,11 +1473,11 @@ export const deleteTask = async (req, res, next) => {
 };
 
 export const deleteAllTasks = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[DeleteAll]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[DeleteAll]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
     const { tasks } = req.body;
 
@@ -1371,11 +1607,11 @@ export const deleteAllTasks = async (req, res, next) => {
 };
 
 export const restoreTask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[Restore]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[Restore]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     logger.info("Restoring task", {
@@ -1449,11 +1685,11 @@ export const restoreTask = async (req, res, next) => {
 };
 
 export const restoreAllTasks = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[RestoreAll]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[RestoreAll]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
     const { tasks } = req.body;
 
@@ -1532,14 +1768,14 @@ export const restoreAllTasks = async (req, res, next) => {
 };
 
 export const fetchAllCompletedTasks = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction(
-      "Task-[GetAllCompletedTasks]",
-      "tasks"
-    );
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "Task-[GetAllCompletedTasks]",
+    "tasks"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     userLogger.info("Getting all completed tasks", {
@@ -1618,14 +1854,14 @@ export const fetchAllCompletedTasks = async (req, res, next) => {
 };
 
 export const fetchAllInProgressTasks = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction(
-      "Task-[GetAllInProgressTasks]",
-      "tasks"
-    );
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "Task-[GetAllInProgressTasks]",
+    "tasks"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     userLogger.info("Getting all in progress tasks", {
@@ -1705,11 +1941,11 @@ export const fetchAllInProgressTasks = async (req, res, next) => {
 };
 
 export const fetchAllToDoTasks = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[GetAllToDoTasks]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[GetAllToDoTasks]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     userLogger.info("Getting all to do tasks", {
@@ -1789,11 +2025,11 @@ export const fetchAllToDoTasks = async (req, res, next) => {
 };
 
 export const duplicateTask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[Duplicate]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[Duplicate]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     const userID = req.user.id;
 
     logger.info("Duplicating task", {
@@ -1941,11 +2177,11 @@ export const duplicateTask = async (req, res, next) => {
 };
 
 export const editSubtask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[EditSubtask]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[EditSubtask]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     console.log(req.body);
     const { formData, taskID, subtaskIndex } = req.body;
 
@@ -2034,11 +2270,11 @@ export const editSubtask = async (req, res, next) => {
 };
 
 export const deleteSubtask = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[DeleteSubtask]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[DeleteSubtask]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     console.log(req.body);
     const { taskID, subtaskIndex } = req.body;
 
@@ -2124,12 +2360,165 @@ export const deleteSubtask = async (req, res, next) => {
   }
 };
 
-export const editActivity = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[EditActivity]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+export const switchStatusSubtask = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction(
+    "Task-[SwitchStatusSubtask]",
+    "tasks"
+  );
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
+    console.log(req.body);
+    const { taskID, subtaskIndex } = req.body;
+
+    const userID = req.user.id;
+
+    userLogger.info("Switching subtask's status", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      taskID,
+    });
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/task/switch-subtask-status",
+      method: "PUT",
+    });
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) {
+      userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    if (
+      currentUser.is_admin !== "Yes" &&
+      currentUser.is_team_manager !== "Yes"
+    ) {
+      userLogger.error("Not authorized!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(403, "You are not allowed to delete subtasks!"));
+    }
+
+    const task = await Task.findById(taskID);
+    if (!task) {
+      userLogger.error("Task not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    if (subtaskIndex < 0 || subtaskIndex >= task.subtasks.length) {
+      userLogger.error("Invalid index!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });
+      return next(errorHandler(400, "Invalid index!"));
+    }
+
+    if (task.subtasks[subtaskIndex].completed === true) {
+      task.subtasks[subtaskIndex].completed = false;
+
+      //notify
+      let text = `A subtask has been marked as to do by your Team Manager. Check it and act accordingly. Subtask title: ${task.subtasks[subtaskIndex].title}`;
+
+      const notif = await Notification.create({
+        text,
+        task: task._id,
+        sent_to: task.team,
+      });
+
+      //add to timeline
+      const activity_data = {
+        type: "commented",
+        description: `Marked subtask (${task.subtasks[subtaskIndex].title}) as to do.`,
+        date: new Date(),
+        by: userID,
+      };
+      task.activities.push(activity_data);
+
+      await task.save();
+    } else {
+      task.subtasks[subtaskIndex].completed = true;
+
+      //notify
+      let text = `A subtask has been marked as completed by your Team Manager. Check it and act accordingly. Subtask title: ${task.subtasks[subtaskIndex].title}`;
+
+      const notif = await Notification.create({
+        text,
+        task: task._id,
+        sent_to: task.team,
+      });
+
+      //add to timeline
+      const activity_data = {
+        type: "commented",
+        description: `Marked subtask (${task.subtasks[subtaskIndex].title}) as completed.`,
+        date: new Date(),
+        by: userID,
+      };
+      task.activities.push(activity_data);
+
+      await task.save();
+    }
+
+    const updatedTask = await Task.findById(taskID)
+      .populate({
+        path: "team",
+        select: "-password",
+      })
+      .populate({
+        path: "activities.by",
+        select: "-password",
+      })
+      .populate({ path: "created_by", select: "-password" });
+
+    updatedTask.activities.reverse();
+
+    const duration = Date.now() - start;
+    userLogger.info("User switched subtask's status sucessfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      taskID,
+      data_message: `Completed status is now: ${updatedTask.subtasks[subtaskIndex].completed}`,
+      duration,
+    });
+    if (transaction) transaction.end();
+
+    res.status(200).json(updatedTask);
+  } catch (error) {
+    userLogger.error(
+      `Error switching subtask's status!, Error: ${error.message}`,
+      {
+        traceId,
+        transactionId: transaction?.id,
+        error: error.message,
+      }
+    );
+    if (transaction) transaction.end();
+    next(error);
+  }
+};
+
+export const editActivity = async (req, res, next) => {
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[EditActivity]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
+  try {
     console.log(req.body);
     const { formData, taskID, activityIndex } = req.body;
 
@@ -2234,11 +2623,11 @@ export const editActivity = async (req, res, next) => {
 };
 
 export const deleteActivity = async (req, res, next) => {
-  try {
-    const start = Date.now();
-    const transaction = apm.startTransaction("Task-[DeleteActivity]", "tasks");
-    const traceId = apm?.currentTraceIds?.["trace.id"];
+  const start = Date.now();
+  const transaction = apm.startTransaction("Task-[DeleteActivity]", "tasks");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
 
+  try {
     console.log(req.body);
     const { taskID, activityIndex } = req.body;
 

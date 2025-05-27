@@ -117,7 +117,7 @@ const DialogAssignHours = ({ open, setOpen, taskId, userId }) => {
             <label htmlFor="hours" className="font-normal text-base">
               Logged hours:
               <span className="font-thin ml-2 mr-5">
-                {hours || "Nothing assigned today."}
+                {hours || "Nothing logged today."}
               </span>
               Total logged hours:{" "}
               <span className="font-thin ml-1">{totalHours || "0"}</span>
@@ -131,7 +131,7 @@ const DialogAssignHours = ({ open, setOpen, taskId, userId }) => {
                                     border border-gray-400 placeholder-gray-500
                                   text-gray-900 outline-none text-base w-full
                                     focus:ring-2 ring-blue-300 rounded"
-              placeholder={hours || "Nothing assigned today."}
+              placeholder={hours || "Nothing logged today."}
             ></input>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { errorHandler } from "../utils/error.js";
 
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
 
 import apm from "elastic-apm-node";
 import { userLogger, authLogger } from "../utils/logger.js";
@@ -141,7 +142,7 @@ export const fetchHours = async (req, res, next) => {
     if (!workEntry)
       return res
         .status(200)
-        .json({ hours: "Not assigned yet", total_hours: loggedHoursToday });
+        .json({ hours: "Not logged yet", total_hours: loggedHoursToday });
 
     return res.status(200).json({
       hours: workEntry.hours,
@@ -270,6 +271,10 @@ export const assignHoursToTask = async (req, res, next) => {
         new Date(entry.date).getTime() === today.getTime()
     );
 
+    const hasEverWorked = currentUser.work.some(
+      (entry) => entry.task.toString() === taskId
+    );
+
     if (workEntry) {
       if (hours === 0) {
         const index = currentUser.work.findIndex(
@@ -284,12 +289,55 @@ export const assignHoursToTask = async (req, res, next) => {
         workEntry.hours = hours;
       }
     } else {
-      if (hours !== 0)
+      if (hours !== 0) {
         currentUser.work.push({
           task: taskId,
           date: today,
           hours,
         });
+
+        if (hasEverWorked === true) {
+          //add to timeline
+          const activity_data = {
+            type: "in progress",
+            description: `Working at the project`,
+            date: new Date(),
+            by: userID,
+          };
+
+          //notify
+          let text = `New activity on task ${task.title}. Check it and act accordingly.`;
+
+          const notif = await Notification.create({
+            text,
+            task: task._id,
+            sent_to: task.created_by,
+          });
+
+          task.activities.push(activity_data);
+          await task.save();
+        } else {
+          //add to timeline
+          const activity_data = {
+            type: "started",
+            description: `Working at the project`,
+            date: new Date(),
+            by: userID,
+          };
+
+          //notify
+          let text = `New activity on task ${task.title}. Check it and act accordingly.`;
+
+          const notif = await Notification.create({
+            text,
+            task: task._id,
+            sent_to: task.created_by,
+          });
+
+          task.activities.push(activity_data);
+          await task.save();
+        }
+      }
     }
 
     await currentUser.save();

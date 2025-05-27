@@ -61,6 +61,10 @@ const TaskSchema = new mongoose.Schema(
         tag: {
           type: String,
         },
+        completed: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
     asseturls: {
@@ -75,6 +79,11 @@ const TaskSchema = new mongoose.Schema(
     created_by: {
       type: Schema.Types.ObjectId,
       ref: "User",
+    },
+    estimated_time: {
+      type: Number,
+      required: true,
+      min: 1,
     },
   },
   {

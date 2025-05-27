@@ -5,24 +5,51 @@ import moment from "moment";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
+import {
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  Cell,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ReferenceLine,
+} from "recharts";
+
+import { LiaCommentSolid } from "react-icons/lia";
 import { CgDetailsMore } from "react-icons/cg";
 import { GoDash } from "react-icons/go";
 import { FaBarsProgress } from "react-icons/fa6";
 import { FaBug, FaThumbsUp, FaUser, FaFlagCheckered } from "react-icons/fa";
 import { CiCircleRemove } from "react-icons/ci";
 import { GrInProgress } from "react-icons/gr";
+import { GrHelpBook } from "react-icons/gr";
+import { AiOutlineOpenAI } from "react-icons/ai";
 import {
+  MdOutlineTimeline,
   MdKeyboardArrowDown,
+  MdOutlineArrowDropDown,
   MdKeyboardArrowUp,
   MdKeyboardDoubleArrowUp,
   MdOutlineDoneAll,
   MdOutlineMessage,
   MdTaskAlt,
   MdAssignmentAdd,
+  MdOutlineRefresh,
+  MdOutlineEdit,
+  MdQueryStats,
+  MdRemoveDone,
 } from "react-icons/md";
 import { RxActivityLog } from "react-icons/rx";
 import { FaTrash } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
+import { TbClock, TbHours24 } from "react-icons/tb";
+import { TbClockHour8 } from "react-icons/tb";
+import { IoMdAttach } from "react-icons/io";
+import { FaTasks } from "react-icons/fa";
 
 import {
   priority_styles,
@@ -40,9 +67,12 @@ import DialogSetRoleTaskDetails from "../components/dialog/DialogSetRoleTaskDeta
 import DialogAssignHours from "../components/dialog/DialogAssignHours.jsx";
 import DialogEditSubtask from "../components/dialog/DialogEditSubtask.jsx";
 import DialogEditActivity from "../components/dialog/DialogEditActivity.jsx";
+import TaskAddSubTask from "../components/TaskAddSubTask.jsx";
 
 import { proxy } from "../utils/deployment.js";
 import { apiRequest } from "../utils/apiReq.js";
+import SubtaskProgress from "../components/task/SubtaskProgress.jsx";
+import AssistantChat from "../components/task/AssistantChat.jsx";
 
 const t_icons = {
   high: <MdKeyboardDoubleArrowUp />,
@@ -57,10 +87,56 @@ const tabs = [
     icon: <CgDetailsMore className="text-xl" size={24} />,
   },
   {
-    title: "Activities/Timeline",
+    title: "Timeline",
     icon: <RxActivityLog className="text-lg" size={20} />,
   },
+  {
+    title: "Statistics",
+    icon: <MdQueryStats className="text-lg" size={20} />,
+  },
+  {
+    title: "Assistant",
+    icon: <GrHelpBook className="text-lg" size={20} />,
+  },
 ];
+
+const small_activitiy_types = {
+  commented: (
+    <div className="w-6 h-6 rounded-full bg-gray-500 flex items-center justify-center text-white">
+      <MdOutlineMessage className="text-xl" />
+    </div>
+  ),
+  started: (
+    <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white">
+      <FaThumbsUp className="-translate-y-0.5" size={20} />
+    </div>
+  ),
+  assigned: (
+    <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-white">
+      <FaUser className="text-xl" />
+    </div>
+  ),
+  bug: (
+    <div className="w-6 h-6 rounded-full border border-red-600 flex items-center justify-center text-red-600">
+      <FaBug size={24} />
+    </div>
+  ),
+  completed: (
+    <div className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-white">
+      <MdOutlineDoneAll className="text-2xl" />
+    </div>
+  ),
+  "in progress": (
+    <div className="w-6 h-6 rounded-full bg-yellow-600 flex items-center justify-center text-white">
+      <GrInProgress className="text-xl" />
+    </div>
+  ),
+  "created task": (
+    <div className="w-6 h-6 rounded-full flex border border-gray-500 items-center justify-center text-black">
+      <FaFlagCheckered className="text-2xl" />
+    </div>
+  ),
+};
 
 const activitiy_types = {
   commented: (
@@ -111,15 +187,23 @@ const act_types = [
 
 const TaskDetails = () => {
   const params = useParams();
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(0);
+
+  const [taskStatistics, setTaskStatistics] = useState({});
+  const [loadingStatistics, setLoadingStatistics] = useState(false);
+  const [errorStatistics, setErrorStatistics] = useState(null);
 
   const [Task, setTask] = useState({});
   const [loading, setLoading] = useState(false);
   const [Error, setError] = useState(null);
+
   const [activities, setActivities] = useState([]);
   const [Subtasks, setSubtasks] = useState([]);
 
   const [TaskTeam, setTaskTeam] = useState([]);
+
+  const [openAddSubtask, setOpenAddSubtask] = useState(false);
 
   const [openEditRole, setOpenEditRole] = useState(false);
   const [editRoleData, setEditRoleData] = useState(null);
@@ -134,6 +218,9 @@ const TaskDetails = () => {
     setOpenEditRole(true);
   };
 
+  console.log("TASK DETAILS: ", Task);
+  console.log("TASK STATISTICS: ", taskStatistics);
+
   const handleEditUserHours = (uId) => {
     setUserHoursId(uId);
     setOpenEditHours(true);
@@ -141,43 +228,81 @@ const TaskDetails = () => {
 
   const { currentUser } = useSelector((state) => state.user);
 
+  const fetchTask = async () => {
+    try {
+      setLoading(true);
+
+      const res = await apiRequest(`${proxy}/backend/task/get/${params.id}`);
+
+      if (!res) return;
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        setError(data.message);
+        setLoading(false);
+        return;
+      }
+
+      setTask(data);
+      setSubtasks(data.subtasks);
+      setTaskTeam(data.team);
+      setActivities(data.activities);
+      setLoading(false);
+      setError(null);
+    } catch (error) {
+      console.log(error.message);
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+  };
+
+  const fetchTaskStatistics = async () => {
+    try {
+      setLoading(true);
+
+      const res = await apiRequest(
+        `${proxy}/backend/task/get-statistics/${params.id}`
+      );
+
+      if (!res) return;
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        setError(data.message);
+        setLoading(false);
+        return;
+      }
+
+      setTaskStatistics(data);
+      setLoadingStatistics(false);
+      setErrorStatistics(null);
+    } catch (error) {
+      console.log(error.message);
+      setErrorStatistics(error.message);
+      setLoadingStatistics(false);
+      return;
+    }
+  };
+
   useEffect(() => {
     if (!openEditHours) {
-      const fetchTask = async () => {
-        try {
-          setLoading(true);
-
-          const res = await apiRequest(
-            `${proxy}/backend/task/get/${params.id}`
-          );
-
-          if (!res) return;
-
-          const data = await res.json();
-
-          if (data.success === false) {
-            setError(data.message);
-            setLoading(false);
-            return;
-          }
-
-          setTask(data);
-          setSubtasks(data.subtasks);
-          setTaskTeam(data.team);
-          setActivities(data.activities);
-          setLoading(false);
-          setError(null);
-        } catch (error) {
-          console.log(error.message);
-          setError(error.message);
-          setLoading(false);
-          return;
-        }
-      };
-
       fetchTask();
+      fetchTaskStatistics();
     }
   }, [params.id, openEditHours]);
+
+  const handleRefreshButton = () => {
+    fetchTask();
+    fetchTaskStatistics();
+    setSelected(0);
+  };
+
+  const handleEditButton = () => {
+    navigate(`/edit-task/${Task._id}`);
+  };
 
   const [openEditSubtask, setOpenEditSubtask] = useState(false);
   const [subtaskData, setSubtaskData] = useState(null);
@@ -189,6 +314,35 @@ const TaskDetails = () => {
     settaskIdSubtask(taskid);
     setSubtaskIndex(sindex);
     setOpenEditSubtask(true);
+  };
+
+  const handleSwitchSubtaskStatus = async (taskID, subtaskIndex) => {
+    try {
+      const res = await apiRequest(
+        `${proxy}/backend/task/switch-subtask-status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ taskID: taskID, subtaskIndex: subtaskIndex }),
+        }
+      );
+
+      if (!res) return;
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+
+      setActivities(data.activities);
+      setSubtasks(data.subtasks);
+    } catch (error) {
+      console.error(error.message);
+      return;
+    }
   };
 
   const handleDeleteSubTaskOnClick = async (taskID, subtaskIndex) => {
@@ -223,7 +377,7 @@ const TaskDetails = () => {
 
   return (
     <div className="w-full flex flex-col gap-3 mb-4 overflow-y-hidden">
-      {loading ? (
+      {loading || loadingStatistics ? (
         <div>
           <Loading />
         </div>
@@ -235,11 +389,28 @@ const TaskDetails = () => {
             </p>
           ) : (
             <>
-              <div className="pl-1">
+              <div className="pl-1 flex gap-6">
                 <PageTitle title={Task?.title} />
+                <div className="flex gap-3">
+                  <button
+                    className="group"
+                    onClick={() => handleRefreshButton()}
+                  >
+                    <MdOutlineRefresh className="rounded-full h-7 w-7 text-black group-hover:text-gray-400 bg-white shadow-lg"></MdOutlineRefresh>
+                  </button>
+                  <button
+                    className={clsx(
+                      "group",
+                      currentUser.is_team_manager === "Yes" ? "block" : "hidden"
+                    )}
+                    onClick={() => handleEditButton()}
+                  >
+                    <MdOutlineEdit className="rounded-full h-7 w-7 p-0.5 text-black group-hover:text-gray-400 bg-white shadow-lg" />
+                  </button>
+                </div>
               </div>
               <Tabs tabs={tabs} setSelected={setSelected}>
-                {selected === 0 ? (
+                {selected === 0 && (
                   <>
                     <div className="w-full flex flex-col md:flex-row gap-5 2xl:gap-8 overflow-y-auto">
                       {/*left*/}
@@ -416,7 +587,7 @@ const TaskDetails = () => {
                                               "No" && (
                                               <>
                                                 <div className="flex items-center">
-                                                  <p className="font-thin">
+                                                  <p className="font-thin pr-4">
                                                     {userTaskRole}
                                                   </p>
                                                   {userTaskRole !==
@@ -459,7 +630,29 @@ const TaskDetails = () => {
                         </div>
 
                         <div>
-                          <p className="font-thin mb-1">SUB-TASKS</p>
+                          <div
+                            className={clsx(
+                              "flex justify-between",
+                              currentUser.is_team_manager === "Yes" ||
+                                currentUser.is_admin === "Yes"
+                                ? "-mb-2"
+                                : "mb-1"
+                            )}
+                          >
+                            <p className="font-thin">SUB-TASKS</p>
+                            <button
+                              onClick={() => setOpenAddSubtask(true)}
+                              className={clsx(
+                                "text-3xl -translate-y-1.5 hover:text-gray-500 font-thin px-2",
+                                currentUser.is_team_manager === "Yes" ||
+                                  currentUser.is_admin === "Yes"
+                                  ? "block"
+                                  : "hidden"
+                              )}
+                            >
+                              +
+                            </button>
+                          </div>
                           <div>
                             {Subtasks && Subtasks.length > 0 ? (
                               Subtasks.map((subtask, index) => (
@@ -468,9 +661,13 @@ const TaskDetails = () => {
                                   className="w-full justify-between inline-flex border-t border-gray-500"
                                 >
                                   <div className="flex gap-3 py-2">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-violet-100">
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200">
                                       <MdTaskAlt
-                                        className="text-violet-600"
+                                        className={clsx(
+                                          subtask.completed === true
+                                            ? "text-green-600"
+                                            : "text-red-600"
+                                        )}
                                         size={24}
                                       />
                                     </div>
@@ -482,19 +679,52 @@ const TaskDetails = () => {
                                             subtask?.date
                                           ).toDateString()}
                                         </span>
-                                        <span className="px-2 py-0.5 text-center text-sm rounded-full bg-violet-100 text-violet-700 font-semibold">
+                                        <span className="px-2 py-0.5 text-center text-sm rounded-full bg-gray-200 text-slate-700 font-semibold">
                                           {subtask?.tag}
                                         </span>
                                       </div>
-                                      <p className="font-serif">
-                                        {subtask?.title}
-                                      </p>
+                                      <div className="flex">
+                                        <p className="font-serif">
+                                          {subtask?.title}
+                                        </p>
+                                        <span className="font-thin whitespace-pre">
+                                          {subtask?.completed === true
+                                            ? " - completed"
+                                            : " - to do"}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
                                   {(currentUser.is_admin === "Yes" ||
                                     currentUser.is_team_manager === "Yes") && (
                                     <>
                                       <div className="flex items-center">
+                                        <button
+                                          className={clsx(
+                                            "px-2 py-2 rounded font-sans transition duration-200 font-medium",
+                                            subtask?.completed === true
+                                              ? " text-green-600  hover:text-green-300"
+                                              : "text-green-600 hover:text-green-300"
+                                          )}
+                                          onClick={() =>
+                                            handleSwitchSubtaskStatus(
+                                              Task._id,
+                                              index
+                                            )
+                                          }
+                                        >
+                                          {subtask?.completed === false ? (
+                                            <MdOutlineDoneAll
+                                              className="text-xl"
+                                              size={28}
+                                            />
+                                          ) : (
+                                            <MdRemoveDone
+                                              className="text-xl"
+                                              size={28}
+                                            />
+                                          )}
+                                        </button>
                                         <button
                                           className="px-2 py-2 rounded 
                                 text-red-500 font-sans
@@ -509,7 +739,7 @@ const TaskDetails = () => {
                                         >
                                           {
                                             <CiCircleRemove
-                                              className="text-xl mr-3"
+                                              className="text-xl"
                                               size={28}
                                             />
                                           }
@@ -569,7 +799,8 @@ const TaskDetails = () => {
                       </div>
                     </div>
                   </>
-                ) : (
+                )}
+                {selected === 1 && (
                   <>
                     <Activities
                       task={Task}
@@ -579,10 +810,45 @@ const TaskDetails = () => {
                     />
                   </>
                 )}
+                {selected === 2 && (
+                  <>
+                    {errorStatistics ? (
+                      <p className="text-red-500 text-4xl">
+                        Something went wrong! {errorStatistics}
+                      </p>
+                    ) : (
+                      <>
+                        <TStats
+                          task={Task}
+                          taskStatistics={taskStatistics}
+                          setTaskStatistics={setTaskStatistics}
+                          activities={activities}
+                          subtasks={Subtasks}
+                          id={params.id}
+                        />
+                      </>
+                    )}
+                  </>
+                )}
+                {selected === 3 && (
+                  <>
+                    <AssistantChat task={Task} />
+                  </>
+                )}
               </Tabs>
+
               {(currentUser.is_admin === "Yes" ||
                 currentUser.is_team_manager === "Yes") && (
                 <>
+                  <TaskAddSubTask
+                    open={openAddSubtask}
+                    setOpen={setOpenAddSubtask}
+                    id={Task._id}
+                    subTasks={Subtasks}
+                    setSubTasks={setSubtasks}
+                    activities={activities}
+                    setActivities={setActivities}
+                  />
                   <DialogSetRoleTaskDetails
                     open={openEditRole}
                     setOpen={setOpenEditRole}
@@ -616,6 +882,324 @@ const TaskDetails = () => {
           )}
         </>
       )}
+    </div>
+  );
+};
+
+const TStats = ({
+  taskStatistics,
+  setTaskStatistics,
+  activities,
+  subtasks,
+  task,
+  id,
+}) => {
+  const [showMoreMap, setShowMoreMap] = useState({});
+
+  const COLORSS = ["#1A8E01", "#008678", "#00437D", "#6B007D", "#7D0000"];
+
+  const toggleShowMore = (userId) => {
+    setShowMoreMap((prev) => ({
+      ...prev,
+      [userId]: !prev[userId],
+    }));
+  };
+
+  return (
+    <div className="w-full flex gap-10 2xl:gap-20 flex-col md:flex-row overflow-y-auto">
+      <div className="w-full pl-1 pr-3">
+        <div className="w-full mt-4">
+          <div className="space-y-1">
+            <p className="font-thin">OVERVIEW</p>
+            <div className="flex items-center justify-start gap-2 px-4 py-2 border-t border-gray-500">
+              <span className="font-serif flex items-center gap-1">
+                <IoMdAttach className="text-xl" />
+                Assets: <span> {taskStatistics?.n_assets}</span>
+              </span>
+              <span className="text-gray-500 pl-2 pr-2">|</span>
+              <span className="font-serif flex items-center gap-1">
+                <FaTasks className="text-lg" />
+                Sub-Tasks: <span>{subtasks?.length}</span>
+              </span>
+              <span className="text-gray-500 pl-2 pr-2">|</span>
+              <span className="font-serif flex items-center gap-1">
+                <LiaCommentSolid className="text-xl" />
+                Activities: <span>{activities?.length}</span>
+              </span>
+            </div>
+
+            <br></br>
+
+            <div className="space-y-1 ">
+              <p className="font-thin">TEAM</p>
+              <div className="flex items-center gap-8 px-4 py-2 border-t border-gray-500">
+                <div className="md:w-1/2 w-full">
+                  {task.team && task.team.length > 0 ? (
+                    task.team.map((m, index) => {
+                      const userTaskRole = m.roles?.find(
+                        (role) => role.task.toString() === task._id.toString()
+                      )?.role;
+                      const isWorking = m.work?.find(
+                        (work) => work.task.toString() === task._id.toString()
+                      );
+                      const workStats = taskStatistics?.work_by_user?.find(
+                        (entry) => entry.user_id === m._id
+                      );
+
+                      const showMore = showMoreMap[m._id] || false;
+
+                      return (
+                        <div
+                          key={m._id + index}
+                          className="gap-4 py-2 border-b border-gray-500"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full text-base -mr-1 bg-blue-600 flex items-center justify-center text-white">
+                                <span className="text-center">
+                                  {getInitials(m?.first_name, m?.last_name)}
+                                </span>
+                              </div>
+
+                              <div>
+                                <p className="text-lg font-serif flex items-center">
+                                  {m?.first_name + " " + m?.last_name}
+                                  {isWorking && (
+                                    <FaBarsProgress className="text-xl text-green-600 mx-2" />
+                                  )}
+                                </p>
+                                <span className="font-thin">{m?.title}</span>
+                                <span className="text-gray-500 pl-2 pr-2">
+                                  |
+                                </span>
+                                <span className="font-thin">
+                                  {userTaskRole || "Not assigned yet"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                className="px-2 py-2 rounded 
+                                              text-gray-900 font-sans
+                                              hover:text-gray-400 transition duration-200
+                                                font-medium"
+                              >
+                                <MdOutlineArrowDropDown
+                                  onClick={() => toggleShowMore(m._id)}
+                                  className="text-xl"
+                                  size={28}
+                                />
+                              </button>
+                            </div>
+                          </div>
+
+                          {showMore && (
+                            <div className="flex flex-col mt-2 gap-1">
+                              <div className="flex items-center">
+                                <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-white">
+                                  <TbClockHour8 className="text-xl" />
+                                </div>
+                                <p className="pl-1 font-serif">
+                                  Total worked hours: {workStats?.total_hours}
+                                </p>
+                                <span className="text-gray-500 pl-2 pr-2">
+                                  |
+                                </span>
+                                <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-white">
+                                  <TbHours24 className="text-xl" />
+                                </div>
+                                <p className="pl-1 font-serif">
+                                  Hours worked today: {workStats?.hours_today}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center">
+                                <div className="w-6 h-6 rounded-full bg-blue-200 text-blue-600 flex items-center justify-center">
+                                  <MdOutlineTimeline className="text-xl" />
+                                </div>
+                                <p className="pl-1 font-serif">
+                                  Total activities:{" "}
+                                  {workStats?.total_activities}
+                                </p>
+
+                                {workStats?.activities ? (
+                                  <>
+                                    {workStats?.total_activities !== 0 && (
+                                      <span className="text-gray-500 pl-2 pr-2">
+                                        |
+                                      </span>
+                                    )}
+                                    {Object.entries(workStats.activities).map(
+                                      ([type, count], index, array) => (
+                                        <div
+                                          key={type}
+                                          className="flex items-center gap-2"
+                                        >
+                                          {small_activitiy_types[type]}
+                                          <p className="font-serif">{count}</p>
+                                          {index !== array.length - 1 && (
+                                            <span className="text-gray-500 pl-1 pr-1">
+                                              |
+                                            </span>
+                                          )}
+                                        </div>
+                                      )
+                                    )}
+                                  </>
+                                ) : (
+                                  <span></span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center">
+                                <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center">
+                                  <AiOutlineOpenAI className="text-2xl" />
+                                </div>
+                                <p className="pl-1 font-serif">
+                                  AI Interactions: {workStats?.ai_interactions}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-lg font-serif border-t border-gray-500 py-2">
+                      No team members.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <br></br>
+
+            <div className="flex flex-col">
+              <div className="space-y-1 ">
+                <p className="font-thin">TEAM PROGRESS</p>
+                <div className="flex items-center gap-8 px-4 py-2 border-t border-gray-500">
+                  <div className="space-x-2">
+                    <span className="font-serif">
+                      Total hours worked:{" "}
+                      <span> {taskStatistics?.work_by_team}</span>
+                    </span>
+                    <span className="text-gray-500 pl-2 pr-2">|</span>
+                    <span className="font-serif">
+                      Estimated work volume:{" "}
+                      <span>{taskStatistics?.estimated_work_volume}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pr-5">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={taskStatistics.teamEfficiency}>
+                    <defs>
+                      <pattern
+                        id="hasure-remaining"
+                        patternUnits="userSpaceOnUse"
+                        width="6"
+                        height="6"
+                        patternTransform="rotate(45)"
+                      >
+                        <line
+                          x1="0"
+                          y="0"
+                          x2="0"
+                          y2="6"
+                          stroke="black"
+                          strokeWidth="2"
+                        />
+                      </pattern>
+                    </defs>
+
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+
+                    <ReferenceLine
+                      y={taskStatistics.teamEfficiency[0]?.estimated || 0}
+                      stroke="black"
+                      strokeDasharray="5 5"
+                      label={{
+                        position: "right",
+                        value: "Estimare",
+                        fontSize: 12,
+                        fill: "gray",
+                      }}
+                    />
+
+                    {/* worked */}
+                    <Bar dataKey="worked" stackId="a" fill="#6B007D">
+                      {taskStatistics.teamEfficiency.map((entry, index) => (
+                        <Cell
+                          key={`worked-${index}`}
+                          fill={COLORSS[index % COLORSS.length]}
+                        />
+                      ))}
+                    </Bar>
+
+                    {/* remaining*/}
+                    <Bar
+                      dataKey="remaining"
+                      stackId="a"
+                      fill="url(#hasure-remaining)"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-thin border-b border-gray-500 py-0.5">
+                  TEAM EFFICIENCY
+                </p>
+                <div className="flex gap-5 w-full flex-col sm:flex-row">
+                  <div className="flex-1">
+                    <SubtaskProgress
+                      completed={taskStatistics?.completed_subtasks}
+                      total={subtasks.length}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 p-4 rounded-xl shadow-sm max-w-md">
+                        <div className="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full">
+                          <MdOutlineTimeline size={24} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-serif text-gray-600">
+                            Activity rate:
+                          </p>
+                          <p className="text-lg font-semibold">
+                            {taskStatistics?.activity_rate_per_day}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 p-4 rounded-xl shadow-sm max-w-md">
+                        <div className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-800 rounded-full">
+                          <AiOutlineOpenAI size={32} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-serif text-gray-600">
+                            AI Interactions:
+                          </p>
+                          <p className="text-lg font-semibold">
+                            {taskStatistics?.ai_interactions_total}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -785,12 +1369,13 @@ const Activities = ({ activity, id, setActivities, task }) => {
 
         <div className="w-full md:w-1/3 pl-1">
           <PageTitle title="Add Activity" />
-          <div className="w-full flex flex-wrap gap-5 mt-5">
+          <div className="w-full flex flex-wrap gap-5 mt-5 ">
             {act_types.map((act, index) => (
               <div key={act + index} className="flex gap-2 items-center">
                 <input
+                  disabled={isDisabled}
                   type="checkbox"
-                  className="size-4"
+                  className="size-4 disabled:cursor-not-allowed"
                   checked={select === act ? true : false}
                   onChange={(e) => setSelect(act)}
                 ></input>
@@ -798,11 +1383,12 @@ const Activities = ({ activity, id, setActivities, task }) => {
               </div>
             ))}
             <textarea
+              disabled={isDisabled}
               rows={3}
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder=" Type here..."
-              className="border border-black w-full mr-4 mb-5 rounded py-2 px-4"
+              className="border border-black w-full mr-4 mb-5 rounded py-2 px-4 disabled:cursor-not-allowed"
             ></textarea>
             {isLoading ? (
               <Loading></Loading>

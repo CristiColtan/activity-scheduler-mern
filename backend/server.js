@@ -13,6 +13,8 @@ apm.start({
   transactionSampleRate: 1.0,
 });
 
+import "./utils/backupDatabase.js";
+
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";

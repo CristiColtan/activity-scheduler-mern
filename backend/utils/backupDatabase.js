@@ -18,6 +18,17 @@ const uri = process.env.MONGOB;
 const backupDir = path.join(__dirname, "..", "backups");
 const dbName = "booking";
 
+if (!fs.existsSync(backupDir)) {
+  console.log("Backup folder doesn't exist! It will be created.");
+  //systemLogger.warn("Backup folder doesn't exist! It will be created.", {
+  //traceId,
+  //transactionId: transaction?.id,
+  //backup_date: date,
+  //backup_path: zipPath,
+  //});
+  fs.mkdirSync(backupDir);
+}
+
 function performBackup() {
   //const transaction = apm.startTransaction("System-[log]", "system");
   //const traceId = apm?.currentTraceIds?.["trace.id"];
@@ -119,9 +130,12 @@ function performBackup() {
   //if (transaction) transaction.end();
 }
 
-performBackup();
+//performBackup();
+if (process.env.ENABLE_BACKUP_CRON === "true") {
+  console.log("Cron script started!");
 
-cron.schedule("0 2 * * *", () => {
-  console.log("Running scheduled backup: ", new Date().toLocaleDateString());
-  performBackup();
-});
+  cron.schedule("0 2 * * *", () => {
+    console.log("Running scheduled backup: ", new Date().toLocaleDateString());
+    performBackup();
+  });
+}

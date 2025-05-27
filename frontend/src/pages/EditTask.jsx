@@ -54,6 +54,7 @@ const EditTask = () => {
     team: [],
     is_trashed: "No",
     created_by: null,
+    estimated_time: 1,
   });
 
   useEffect(() => {
@@ -246,16 +247,42 @@ const EditTask = () => {
       <br></br>
       <div className="w-full flex flex-col md:flex-row gap-12 2xl:gap-8 overflow-y-auto px-2 py-2">
         <div className="w-full md:w-1/2 flex flex-col justify-center md:justify-start">
-          <input
-            type="text"
-            placeholder="Task Title"
-            required
-            id="title"
-            onChange={handleChange}
-            value={formData.title}
-            className="border py-1 px-2 placeholder-black focus:ring-2 ring-blue-300 outline-none
-                    border-black focus:placeholder-gray-500 rounded min-w-[300px] md:min-w-[250px] mb-5"
-          ></input>
+          <div className="w-full grid grid-cols-2 gap-4">
+            <div className="w-full flex flex-col mb-5">
+              <label htmlFor="title" className="font-thin text-base mb-2">
+                Task Title:
+              </label>
+              <input
+                type="text"
+                placeholder="Type here..."
+                required
+                id="title"
+                onChange={handleChange}
+                value={formData.title}
+                className="border py-1 px-2 placeholder-black focus:ring-2 ring-blue-300 outline-none
+                    border-black focus:placeholder-gray-500 rounded"
+              ></input>
+            </div>
+            <div className="w-full flex flex-col mb-5">
+              <label
+                htmlFor="title"
+                className="font-thin text-base mb-2 text-nowrap"
+              >
+                Estimated time: (hours)
+              </label>
+              <input
+                min="1"
+                type="number"
+                placeholder="Type here..."
+                required
+                id="estimated_time"
+                onChange={handleChange}
+                value={formData.estimated_time}
+                className="border py-1 px-2 placeholder-black focus:ring-2 ring-blue-300 outline-none
+                    border-black focus:placeholder-gray-500 rounded"
+              ></input>
+            </div>
+          </div>
 
           <label htmlFor="username" className="font-thin text-base mb-2">
             Assign Task to:

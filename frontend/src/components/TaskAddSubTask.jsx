@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { DialogTitle } from "@headlessui/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 import MyModal from "./MyModal";
 
@@ -20,6 +20,8 @@ const TaskAddSubTask = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const params = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -57,7 +59,7 @@ const TaskAddSubTask = ({
       setLoading(false);
       setError(null);
       setOpen(false);
-      navigate("/tasks");
+      navigate(location.pathname + location.search);
     } catch (error) {
       console.log(error.message);
       setError(error.message);

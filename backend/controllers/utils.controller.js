@@ -1,7 +1,10 @@
 import { errorHandler } from "../utils/error.js";
 
 import User from "../models/user.model.js";
+import AssistantChat from "../models/assistant-chat.model.js";
+import Task from "../models/task.model.js";
 
+import { OpenAI } from "openai";
 import { exec } from "child_process";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -18,6 +21,191 @@ import {
 } from "../utils/logger.js";
 
 dotenv.config();
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export const fetchChatHistory = async (req, res, next) => {
+  const { tid, uid } = req.params;
+  const userID = req.user.id;
+
+  const start = Date.now();
+  const transaction = apm.startTransaction("User-[fetchChatHistory]", "users");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
+  try {
+    {
+      /*
+    userLogger.info("Fetching chat history", {
+          traceId,
+          transactionId: transaction?.id,
+          userID,
+        });
+    */
+    }
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/utils/get-chat-history/:tid/:uid",
+      method: "POST",
+    });
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) {
+      {
+        /*userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });*/
+      }
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    if (userID !== req.params.uid) {
+      {
+        /*userLogger.error("Tried to fetch chat history for another account!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });*/
+      }
+      return next(
+        errorHandler(401, "You can only fetch your own chat history!")
+      );
+    }
+
+    const chat = await AssistantChat.findOne({ taskId: tid, userId: uid });
+
+    if (!chat) {
+      console.log("Couldn't find any history!");
+      return res.json({ messages: [] });
+    }
+
+    const duration = Date.now() - start;
+    {
+      /*userLogger.info("User fetch chat history successfully!", {
+          traceId,
+          transactionId: transaction?.id,
+          userID,
+          duration,
+        });*/
+    }
+    if (transaction) transaction.end();
+
+    res.json({ messages: chat.messages });
+  } catch (error) {
+    console.error("History fetch error:", error);
+    {
+      /*userLogger.error("Error fetching chat history!", {
+          traceId,
+          transactionId: transaction?.id,
+          error: error.message,
+        });*/
+    }
+    if (transaction) transaction.end();
+    next(error);
+  }
+};
+
+export const chatWithAi = async (req, res, next) => {
+  const { taskId, userId, messages } = req.body;
+  const userID = req.user.id;
+
+  const start = Date.now();
+  const transaction = apm.startTransaction("User-[talkWithAI]", "users");
+  const traceId = apm?.currentTraceIds?.["trace.id"];
+
+  try {
+    {
+      /*
+    userLogger.info("Chatting with AI", {
+          traceId,
+          transactionId: transaction?.id,
+          userID,
+        });
+    */
+    }
+
+    transaction?.addLabels({
+      userID,
+      endpoint: "/backend/utils/chat",
+      method: "POST",
+    });
+
+    const currentUser = await User.findById(userID);
+    if (!currentUser) {
+      {
+        /*userLogger.error("User not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+      });*/
+      }
+      return next(errorHandler(404, "User not found!"));
+    }
+
+    const currentTask = await Task.findById(taskId);
+    if (!currentTask) {
+      {
+        /*userLogger.error("Task not found!", {
+        traceId,
+        transactionId: transaction?.id,
+        userID,
+        taskID: taskId,
+      });*/
+      }
+      return next(errorHandler(404, "Task not found!"));
+    }
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-nano",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Ești un asistent AI care oferă ajutor legat de managementul sarcinilor. Oferă sugestii, clarificări și recomandări utile.",
+        },
+        ...messages,
+      ],
+      temperature: 0.7,
+    });
+
+    const reply = response.choices[0].message.content;
+
+    //save conv
+    let chat = await AssistantChat.findOne({ taskId, userId });
+    if (!chat) {
+      chat = new AssistantChat({ taskId, userId, messages: [] });
+    }
+    chat.messages.push({ role: "user", content: messages.at(-1).content });
+    chat.messages.push({ role: "assistant", content: reply });
+    await chat.save();
+
+    const duration = Date.now() - start;
+    {
+      /*userLogger.info("Chat with AI successfully!", {
+          traceId,
+          transactionId: transaction?.id,
+          userID,
+          duration,
+        });*/
+    }
+    if (transaction) transaction.end();
+
+    res.json({ reply });
+  } catch (error) {
+    console.error("OpenAI ERROR:", error);
+    {
+      /*userLogger.error("Error chatting with AI!", {
+          traceId,
+          transactionId: transaction?.id,
+          error: error.message,
+        });*/
+    }
+    if (transaction) transaction.end();
+    next(error);
+  }
+};
 
 export const logClientEvent = async (req, res, next) => {
   const { level = "info", message } = req.body;

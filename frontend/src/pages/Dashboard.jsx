@@ -289,7 +289,9 @@ export default function Dashboard() {
           <tr className="text-black text-left">
             <th className="py-2">Name</th>
             <th className="py-2">Status</th>
-            <th className="py-2 px-2">Created</th>
+            <th className="py-2 px-2 table-cell md:hidden xl:table-cell">
+              Created
+            </th>
           </tr>
         </thead>
       );
@@ -325,7 +327,7 @@ export default function Dashboard() {
             </p>
           </td>
 
-          <td className="py-2 font-thin px-2">
+          <td className="py-2 font-thin px-2 table-cell md:hidden xl:table-cell">
             {moment(user?.createdAt).fromNow()}
           </td>
         </tr>

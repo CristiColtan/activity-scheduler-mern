@@ -9,6 +9,7 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { IoIosNotifications } from "react-icons/io";
 import { HiBellAlert } from "react-icons/hi2";
 import { BiSolidMessage } from "react-icons/bi";
+import { MdOutlineRefresh } from "react-icons/md";
 
 import DialogNotification from "./dialog/DialogNotification";
 
@@ -81,6 +82,10 @@ const Notifications = () => {
 
   const [notifData, setNotifData] = useState(null);
   const [openDialogNotify, setOpenDialogNotify] = useState(false);
+
+  const handleRefreshButton = () => {
+    fetchNotifications();
+  };
 
   const viewHandlerOnClick = (item) => {
     setNotifData(item);
@@ -185,8 +190,14 @@ const Notifications = () => {
                   className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl 
                 bg-white text-sm leading-6 shadow-2xl ring-1 ring-gray-900/5"
                 >
-                  <div className="p-4">
+                  <div className="p-4 flex justify-between">
                     <p>No notifications.</p>
+                    <button
+                      className="group"
+                      onClick={() => handleRefreshButton()}
+                    >
+                      <MdOutlineRefresh className="h-5 w-5 text-black group-hover:text-gray-400"></MdOutlineRefresh>
+                    </button>
                   </div>
                 </div>
               </>

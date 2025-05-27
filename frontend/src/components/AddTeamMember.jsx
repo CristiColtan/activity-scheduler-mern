@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { DialogTitle } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import MyModal from "./MyModal";
 import TaskAddUserList from "./TaskAddUserList";
@@ -13,6 +14,8 @@ const AddTeamMember = ({ open, setOpen }) => {
   const [loading, setLoading] = useState(false);
   const [normalUsers, setNormalUsers] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
+
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -68,13 +71,44 @@ const AddTeamMember = ({ open, setOpen }) => {
       if (!res) return;
 
       const data = await res.json();
-      setLoading(false);
 
-      navigate("/team");
+      if (data.success === false) {
+        console.log(data.message);
+        setError(data.message);
+
+        toast.error("Maximum team limit exceded!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      setError(false);
+
       handleCancel();
     } catch (error) {
-      console.error("Eroare adding team-member(s)!");
+      console.error(`Eroare adding team-member(s)!, ${error.message}`);
       setLoading(false);
+      setError(error.message);
+
+      toast.error("Maximum team limit exceded!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+
       return;
     }
   };
