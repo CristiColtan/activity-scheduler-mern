@@ -1,28 +1,39 @@
-import React from 'react'
+import React from "react";
 
 import { MdOutlineDevicesOther } from "react-icons/md";
 
 const Banner2 = () => {
   return (
-    <div className='text-black pb-12 pl-8 pr-8 relative lg:-translate-y-24 lg:translate-x-6'>
-      <div className='container bg-gray-100/85 px-4 py-2 rounded-xl banner-container pt-6 pb-4'>
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 items-center'>
-          <div className='space-y-3 xl:pr-36 p-4 border-r-2 border-b-2 border-b-sky-900 border-r-sky-900'>
-            <p className='font-medium font-sans text-2xl' data-aos="fade-up" data-aos-delay="300">
-              Cross-Platform Compatibility!
-            </p>
-            <p className='font-thin text-base' data-aos="fade-up" data-aos-delay="500" >
-              The interface ensures optimal usability and readability
-              across all devices.
-            </p>
-          </div>
-          <div data-aos="zoom-in" className='flex justify-center'>
-            <MdOutlineDevicesOther className='text-9xl' />
+    <section className="py-16 px-8">
+      <div className="container mx-auto max-w-6xl">
+        <div className="overflow-hidden shadow-2xl border-0 bg-gradient-to-l from-gray-50 to-gray-100 rounded-xl">
+          <div className="p-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center">
+              <div className="p-12 border-r-4 border-b-4 border-sky-900">
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-6 font-serif">
+                  Cross-Platform Compatibility!
+                </h3>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  The interface ensures optimal usability and readability across
+                  all devices. Work seamlessly anywhere, anytime.
+                </p>
+              </div>
+              <div className="p-12">
+                <div className="flex justify-center mb-8">
+                  <div
+                    className="p-6 bg-gradient-to-br 
+                                from-sky-900 to-sky-600 text-white rounded-full shadow-xl"
+                  >
+                    <MdOutlineDevicesOther className="h-20 w-20 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )
-}
+    </section>
+  );
+};
 
-export default Banner2
+export default Banner2;

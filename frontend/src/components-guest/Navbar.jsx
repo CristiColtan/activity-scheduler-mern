@@ -1,59 +1,90 @@
-import React from 'react'
-
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleRegisterClick = () => {
-        navigate("/register");
-    };
+  const handleRegisterClick = () => {
+    navigate("/register");
+  };
 
-    const handleLoginClick = () => {
-        navigate("/login");
-    }
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
 
-    return (
-        <section id="1">
-            <div data-aos="fade-down" className='fixed top-0 right-0 w-full z-50 
-                bg-blue/10 backdrop-blur-md py-8 pl-8 pr-4'>
-                <div className='container'>
-                    <div className='flex items-center justify-between'>
-                        <div className='flex'>
-                            <p className='flex flex-col gap-0 md:gap-4 text-5xl md:text-7xl
-                        transition-transform duration-500 transform px-6
-                        py-2 hover:scale-125 font-bold text-gray-800 font-serif
-                        shadow-outer text-shadoww pr-16'>
-                                <span>CCTask</span>
-                            </p>
-                        </div>
-                        <div className=' text-black-600 hidden md:block'>
-                            <ul className='flex gap-6 text-xl md:text-2xl items-center py-5
-                       md:py-8 font-medium font-sans pr-8'>
-                                <li>
-                                    <a href="#1">About</a>
-                                </li>
-                                <li>
-                                    <a href="#2">Features</a>
-                                </li>
-                                <li>
-                                    <a href="#4">Testimonials</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className='flex gap-6 pl-4'>
-                            <button className='border-2 bg-sky-900/90 text-white border-sky-900 px-3 py-1 rounded-lg
-                      text-xl font-medium  hover:bg-sky-600 transition duration-200
-                      font-sans' onClick={handleLoginClick}>Login</button>
-                            <button className='border-2 bg-sky-900/90 text-white border-sky-900 px-3 py-1 rounded-lg
-                      text-xl font-medium  hover:bg-sky-600 transition duration-200
-                      font-sans' onClick={handleRegisterClick}>Register</button>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <section id="1">
+      <div
+        className="fixed top-0 right-0 w-full z-50 
+                bg-white/95 backdrop-blur-lg border-b
+                border-gray-200 py-4 px-8"
+      >
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 font-serif hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <a href="/guest">CCTask</a>
+              </h1>
             </div>
-        </section>
-    )
-}
+            <div className="hidden md:block">
+              <ul className="flex gap-8 text-base font-medium text-gray-700 items-center">
+                <li className="hover:text-sky-900 transition-colors duration-200 cursor-pointer">
+                  <button
+                    onClick={() => {
+                      const section = document.getElementById("1");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    href="#1"
+                  >
+                    About
+                  </button>
+                </li>
+                <li className="hover:text-sky-900 transition-colors duration-200 cursor-pointer">
+                  <button
+                    onClick={() => {
+                      const section = document.getElementById("2");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    Features
+                  </button>
+                </li>
+                <li className="hover:text-sky-900 transition-colors duration-200 cursor-pointer">
+                  <button
+                    onClick={() => {
+                      const section = document.getElementById("4");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    Testimonials
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <div className="flex gap-3">
+              <button
+                className="text-sky-900 hover:bg-sky-50 font-medium px-4 py-2 rounded-md transition-colors"
+                onClick={handleLoginClick}
+              >
+                Login
+              </button>
+              <button
+                className="bg-sky-900 hover:bg-sky-700 text-white font-medium shadow-lg px-4 py-2 rounded-md transition-colors"
+                onClick={handleRegisterClick}
+              >
+                Register
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
-export default Navbar
+export default Navbar;

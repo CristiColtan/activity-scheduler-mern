@@ -1,32 +1,40 @@
-import React from 'react'
+import React from "react";
+import { RefreshCw } from "lucide-react";
 
-import { FaSyncAlt } from "react-icons/fa";
-
-import "../styles/Banner.css"
+import "../styles/Banner.css";
 
 const Banner = () => {
   return (
-    <section>
-      <div className='text-black pb-12 pl-8 pr-8 relative lg:-translate-y-24 lg:translate-x-6'>
-        <div className='container bg-gray-100/85 pt-6 pb-4 px-4 py-2 rounded-xl banner-container'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 items-center '>
-            <div data-aos="zoom-in" className='flex justify-center'>
-              <FaSyncAlt className='text-9xl' />
-            </div>
-            <div className='space-y-3 xl:pr-36 p-4 border-r-2 border-b-2 border-b-sky-900 border-r-sky-900'>
-              <p className='font-medium font-sans text-2xl' data-aos="fade-up" data-aos-delay="300">
-                Real time syncronization!
-              </p>
-              <p data-aos="fade-up" data-aos-delay="500" className='font-thin text-base'>
-                Any changes made by a user are instantly reflected
-                across all connected devices and users.
-              </p>
+    <section className="py-16 px-8">
+      <div className="container mx-auto max-w-6xl">
+        <div className="overflow-hidden shadow-2xl border-0 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
+          <div className="p-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center">
+              <div className="p-12 lg:order-2">
+                <div className="flex justify-center mb-8">
+                  <div
+                    className="p-6 bg-gradient-to-br 
+                                from-sky-900 to-sky-600 text-white rounded-full shadow-xl"
+                  >
+                    <RefreshCw className="h-20 w-20 text-white animate-spin-slow" />
+                  </div>
+                </div>
+              </div>
+              <div className="p-12 border-r-4 border-b-4 border-sky-900">
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-6 font-serif">
+                  Real-time Synchronization!
+                </h3>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Any changes made by a user are instantly reflected across all
+                  connected devices and users. Stay in sync, always.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Banner
+export default Banner;

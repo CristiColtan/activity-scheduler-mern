@@ -166,8 +166,8 @@ const Profile = () => {
                         <div className="mt-2 w-16 h-16 rounded-full font-semibold text-2xl bg-blue-600 flex items-center justify-center text-white">
                           <span className="text-center -mt-1">
                             {getInitials(
-                              currentUser?.first_name,
-                              currentUser?.last_name
+                              currentUser?.last_name,
+                              currentUser?.first_name
                             )}
                           </span>
                         </div>
