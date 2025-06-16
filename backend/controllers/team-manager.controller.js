@@ -217,6 +217,14 @@ export const addToTeam = async (req, res, next) => {
         );
       }
 
+      //notify
+      let text = `${currentUser.last_name} ${currentUser.first_name} (${currentUser.title}) added you to his team!`;
+      const notif = await Notification.create({
+        text,
+        task: null,
+        sent_to: memberID,
+      });
+
       newMembers.push(memberID);
     }
 

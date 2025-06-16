@@ -81,16 +81,18 @@ const DialogNotification = ({
           </p>
 
           <div className="py-3 flex justify-between gap-4 bg-white w-auto">
-            <button
-              className="px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
+            {notifData?.task && (
+              <button
+                className="px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
             hover:bg-gray-300 font-semibold"
-              onClick={() => {
-                markAsRead(notifData._id);
-                navigate(`/task/${notifData.task}`);
-              }}
-            >
-              View
-            </button>
+                onClick={() => {
+                  markAsRead(notifData._id);
+                  navigate(`/task/${notifData.task}`);
+                }}
+              >
+                View
+              </button>
+            )}
 
             <button
               className="px-6 py-2 rounded font-sans border-2 border-gray-400 bg-white ml-5
