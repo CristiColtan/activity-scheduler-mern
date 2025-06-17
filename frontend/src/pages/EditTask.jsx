@@ -331,7 +331,7 @@ const EditTask = () => {
           </div>
           <div className="flex gap-4 mt-5">
             <div className="w-full">
-              <label className="font-thin text-base mb-2">Task Date:</label>
+              <label className="font-thin text-base mb-2">Due to:</label>
               <input
                 type="date"
                 required

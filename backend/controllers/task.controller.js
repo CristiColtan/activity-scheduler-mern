@@ -2435,6 +2435,7 @@ export const switchStatusSubtask = async (req, res, next) => {
       let text = `A subtask has been marked as to do by your Team Manager. Check it and act accordingly. Subtask title: ${task.subtasks[subtaskIndex].title}`;
 
       const notif = await Notification.create({
+        type: "message",
         text,
         task: task._id,
         sent_to: task.team,
@@ -2457,6 +2458,7 @@ export const switchStatusSubtask = async (req, res, next) => {
       let text = `A subtask has been marked as completed by your Team Manager. Check it and act accordingly. Subtask title: ${task.subtasks[subtaskIndex].title}`;
 
       const notif = await Notification.create({
+        type: "message",
         text,
         task: task._id,
         sent_to: task.team,
@@ -2464,7 +2466,7 @@ export const switchStatusSubtask = async (req, res, next) => {
 
       //add to timeline
       const activity_data = {
-        type: "commented",
+        type: "completed",
         description: `Marked subtask (${task.subtasks[subtaskIndex].title}) as completed.`,
         date: new Date(),
         by: userID,
