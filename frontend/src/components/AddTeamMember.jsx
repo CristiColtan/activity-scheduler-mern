@@ -131,8 +131,12 @@ const AddTeamMember = ({ open, setOpen }) => {
         {normalUsers && normalUsers.length > 0 ? (
           normalUsers.map((_, index) => (
             <div key={index}>
-              <br></br>
-              <br></br>
+              {index < 6 && (
+                <>
+                  <br />
+                  <br />
+                </>
+              )}
             </div>
           ))
         ) : (
