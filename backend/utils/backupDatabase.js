@@ -63,7 +63,7 @@ function performBackup() {
     fs.mkdirSync(backupDir);
   }
 
-  const cmd = `mongodump --uri=${uri} --out="${backupPath}"`;
+  const cmd = `mongodump --uri='${uri}' --out=${backupPath}`;
 
   exec(cmd, (err, stdout, stderr) => {
     if (err) {
