@@ -13,12 +13,7 @@ import archiver from "archiver";
 import unzipper from "unzipper";
 import apm from "elastic-apm-node";
 import dotenv from "dotenv";
-import {
-  userLogger,
-  clientLogger,
-  systemLogger,
-  tmadminLogger,
-} from "../utils/logger.js";
+import { userLogger, clientLogger, tmadminLogger } from "../utils/logger.js";
 
 dotenv.config();
 
