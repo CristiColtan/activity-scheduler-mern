@@ -1,3 +1,6 @@
+[build]
+dir = "backend"
+
 [phases.setup]
 nixPkgs = ["mongodb-tools-bin"]
 
