@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["mongodb-tools"]
+nixPkgs = ["mongodb-tools-bin"]
 
 [phases.build]
 cmds = ["npm install"]
