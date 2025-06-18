@@ -277,7 +277,9 @@ export const restoreFromBackup = async (req, res, next) => {
         const restoreFolder = path.join(extractPath, dbName);
         console.log("Restoring...");
 
-        const cmd = `mongorestore --uri=${uri} --drop --nsInclude="${dbName}.*" "${restoreFolder}"`;
+        //const cmd = `mongorestore --uri=${uri} --drop --nsInclude="${dbName}.*" "${restoreFolder}"`;
+        const cmd = `mongorestore "${restoreFolder}" --uri="${uri}" --drop --nsInclude="${dbName}.*"`;
+
         console.log("Command used: ", cmd);
 
         exec(cmd, (err, stdout, stderr) => {
