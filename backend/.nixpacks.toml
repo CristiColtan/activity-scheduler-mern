@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["mongodb-tools"]
+
+[phases.build]
+cmds = ["npm install"]
+
+[phases.start]
+cmd = "npm run go"
