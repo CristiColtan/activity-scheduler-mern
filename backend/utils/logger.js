@@ -20,6 +20,7 @@ const esTransport = new ElasticsearchTransport({
   level: "info",
   client: elasticClient,
   indexPrefix: "winston-logs",
+  ensureIndexTemplate: true,
 });
 esTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [tasks]:", err);
@@ -29,6 +30,7 @@ const esAuthTransport = new ElasticsearchTransport({
   level: "info",
   client: elasticClient,
   indexPrefix: "winston-logs-auth",
+  ensureIndexTemplate: true,
 });
 esAuthTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [auth]:", err);
@@ -38,6 +40,7 @@ const esUserTransport = new ElasticsearchTransport({
   level: "info",
   client: elasticClient,
   indexPrefix: "winston-logs-users",
+  ensureIndexTemplate: true,
 });
 esUserTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [users]:", err);
@@ -47,6 +50,7 @@ const esTMorAdminTransport = new ElasticsearchTransport({
   level: "info",
   client: elasticClient,
   indexPrefix: "winston-logs-tmadmin",
+  ensureIndexTemplate: true,
 });
 esTMorAdminTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [tmadmin]:", err);
@@ -56,6 +60,7 @@ const esNotifTransport = new ElasticsearchTransport({
   level: "info",
   client: elasticClient,
   indexPrefix: "winston-logs-notifs",
+  ensureIndexTemplate: true,
 });
 esNotifTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [notifs]:", err);
@@ -65,6 +70,7 @@ const esSystemTransport = new ElasticsearchTransport({
   level: "info",
   client: elasticClient,
   indexPrefix: "winston-logs-system",
+  ensureIndexTemplate: true,
 });
 esSystemTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [system]:", err);
@@ -74,6 +80,7 @@ const esClientTransport = new ElasticsearchTransport({
   level: "info",
   client: elasticClient,
   indexPrefix: "winston-logs-client",
+  ensureIndexTemplate: true,
 });
 esClientTransport.on("error", (err) => {
   console.error("Elasticsearch transport error [client]:", err);

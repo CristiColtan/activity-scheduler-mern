@@ -33,15 +33,11 @@ export const fetchChatHistory = async (req, res, next) => {
   const traceId = apm?.currentTraceIds?.["trace.id"];
 
   try {
-    {
-      /*
     userLogger.info("Fetching chat history", {
-          traceId,
-          transactionId: transaction?.id,
-          userID,
-        });
-    */
-    }
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+    });
 
     transaction?.addLabels({
       userID,
@@ -51,24 +47,20 @@ export const fetchChatHistory = async (req, res, next) => {
 
     const currentUser = await User.findById(userID);
     if (!currentUser) {
-      {
-        /*userLogger.error("User not found!", {
+      userLogger.error("User not found!", {
         traceId,
         transactionId: transaction?.id,
         userID,
-      });*/
-      }
+      });
       return next(errorHandler(404, "User not found!"));
     }
 
     if (userID !== req.params.uid) {
-      {
-        /*userLogger.error("Tried to fetch chat history for another account!", {
+      userLogger.error("Tried to fetch chat history for another account!", {
         traceId,
         transactionId: transaction?.id,
         userID,
-      });*/
-      }
+      });
       return next(
         errorHandler(401, "You can only fetch your own chat history!")
       );
@@ -82,26 +74,22 @@ export const fetchChatHistory = async (req, res, next) => {
     }
 
     const duration = Date.now() - start;
-    {
-      /*userLogger.info("User fetch chat history successfully!", {
-          traceId,
-          transactionId: transaction?.id,
-          userID,
-          duration,
-        });*/
-    }
+    userLogger.info("User fetch chat history successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      duration,
+    });
     if (transaction) transaction.end();
 
     res.json({ messages: chat.messages });
   } catch (error) {
     console.error("History fetch error:", error);
-    {
-      /*userLogger.error("Error fetching chat history!", {
-          traceId,
-          transactionId: transaction?.id,
-          error: error.message,
-        });*/
-    }
+    userLogger.error("Error fetching chat history!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
     if (transaction) transaction.end();
     next(error);
   }
@@ -116,15 +104,11 @@ export const chatWithAi = async (req, res, next) => {
   const traceId = apm?.currentTraceIds?.["trace.id"];
 
   try {
-    {
-      /*
     userLogger.info("Chatting with AI", {
-          traceId,
-          transactionId: transaction?.id,
-          userID,
-        });
-    */
-    }
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+    });
 
     transaction?.addLabels({
       userID,
@@ -134,26 +118,22 @@ export const chatWithAi = async (req, res, next) => {
 
     const currentUser = await User.findById(userID);
     if (!currentUser) {
-      {
-        /*userLogger.error("User not found!", {
+      userLogger.error("User not found!", {
         traceId,
         transactionId: transaction?.id,
         userID,
-      });*/
-      }
+      });
       return next(errorHandler(404, "User not found!"));
     }
 
     const currentTask = await Task.findById(taskId);
     if (!currentTask) {
-      {
-        /*userLogger.error("Task not found!", {
+      userLogger.error("Task not found!", {
         traceId,
         transactionId: transaction?.id,
         userID,
         taskID: taskId,
-      });*/
-      }
+      });
       return next(errorHandler(404, "Task not found!"));
     }
 
@@ -182,26 +162,22 @@ export const chatWithAi = async (req, res, next) => {
     await chat.save();
 
     const duration = Date.now() - start;
-    {
-      /*userLogger.info("Chat with AI successfully!", {
-          traceId,
-          transactionId: transaction?.id,
-          userID,
-          duration,
-        });*/
-    }
+    userLogger.info("Chat with AI successfully!", {
+      traceId,
+      transactionId: transaction?.id,
+      userID,
+      duration,
+    });
     if (transaction) transaction.end();
 
     res.json({ reply });
   } catch (error) {
     console.error("OpenAI ERROR:", error);
-    {
-      /*userLogger.error("Error chatting with AI!", {
-          traceId,
-          transactionId: transaction?.id,
-          error: error.message,
-        });*/
-    }
+    userLogger.error("Error chatting with AI!", {
+      traceId,
+      transactionId: transaction?.id,
+      error: error.message,
+    });
     if (transaction) transaction.end();
     next(error);
   }

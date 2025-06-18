@@ -401,7 +401,10 @@ const TaskDetails = () => {
                   <button
                     className={clsx(
                       "group",
-                      currentUser.is_team_manager === "Yes" ? "block" : "hidden"
+                      currentUser.is_team_manager === "Yes" ||
+                        currentUser.is_admin === "Yes"
+                        ? "block"
+                        : "hidden"
                     )}
                     onClick={() => handleEditButton()}
                   >
@@ -683,11 +686,11 @@ const TaskDetails = () => {
                                           {subtask?.tag}
                                         </span>
                                       </div>
-                                      <div className="flex">
-                                        <p className="font-serif">
+                                      <div className="flex justify-between items-start gap-2 pr-4">
+                                        <div className="font-serif max-w-[70%] break-words">
                                           {subtask?.title}
-                                        </p>
-                                        <span className="font-thin whitespace-pre">
+                                        </div>
+                                        <span className="font-thin whitespace-nowrap">
                                           {subtask?.completed === true
                                             ? " - completed"
                                             : " - to do"}

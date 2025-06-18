@@ -70,10 +70,7 @@ const Settings = () => {
 
   useEffect(() => {
     if (selected === 5) {
-      window.open(
-        "https://cctask-observability2.kb.us-central1.gcp.cloud.es.io/app/dashboards#/view/aec3dffc-0d50-4892-94f0-128357978d7d?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))",
-        "_blank"
-      );
+      window.open("https://www.elastic.co/", "_blank");
     }
   }, [selected]);
 

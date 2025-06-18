@@ -130,7 +130,8 @@ function performBackup() {
   //if (transaction) transaction.end();
 }
 
-//performBackup();
+performBackup();
+
 if (process.env.ENABLE_BACKUP_CRON === "true") {
   console.log("Cron script started!");
 
