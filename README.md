@@ -22,9 +22,9 @@
 - Sistem de logare și trasabilitate a evenimentelor
 
 ## 📁 Structură generală
-├── client/ # Codul sursă front-end (React)
-├── server/ # Codul sursă back-end (Express, MongoDB)
-├── README.md
+├── client/ # Codul sursă front-end (React)  
+├── server/ # Codul sursă back-end (Express, MongoDB)  
+├── README.md  
 
 
 ## 📄 Licență
