@@ -66,10 +66,11 @@ MongoDB and off the application server.
 
 ## Project structure
 
-├── frontend/ # React application
-├── backend/ # Express API, MongoDB models, business logic
-├── README.md  
-
+```text
+- frontend/ (React application)
+- backend/ (Express API, MongoDB models, business logic)
+- README.md
+```
 
 ## Running locally
 
